@@ -1,11 +1,28 @@
 #include "Maize/Core/Application.h"
+
 #include "Maize/Core/Macros/Log.h"
+#include "Maize/Event/EventHandler.h"
+#include "Maize/Event/EventDispatcher.h"
+#include "Maize/Event/EventTypes/WindowEvent.h"
 
 namespace Maize {
 
 	void Application::Quit()
 	{
 		m_Window.close();
+	}
+
+	void Application::OnEvent(Event& event)
+	{
+		auto dispatcher = EventDispatcher(event);
+		dispatcher.Dispatch<WindowCloseEvent>(std::bind(&Application::OnWindowClose, this, std::placeholders::_1));
+	}
+
+	bool Application::OnWindowClose(const WindowCloseEvent&)
+	{
+		m_Window.close();
+
+		return false;
 	}
 
 	bool Application::Initialise(std::string_view title, uint32_t width, uint32_t height)
@@ -31,20 +48,13 @@ namespace Maize {
 	bool Application::Run()
 	{
 		sf::Clock clock;
+		const auto pollEvent = EventHandler(std::bind(&Application::OnEvent, this, std::placeholders::_1));
 
 		while (m_Window.isOpen())
 		{
-			for (auto event = sf::Event(); m_Window.pollEvent(event); )
-			{
-				if (event.type == sf::Event::Closed)
-				{
-					m_Window.close();
-				}
-			}
+			pollEvent.Poll(m_Window);
 
 			const float deltaTime = clock.restart().asSeconds();
-
-
 		}
 
 		return true;

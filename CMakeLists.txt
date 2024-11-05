@@ -25,12 +25,23 @@ FetchContent_MakeAvailable(sfml spdlog)
 
 add_library(MaizeEngine
         src/Maize.h
+
         src/Maize/Core/Application.h
         src/Maize/Core/Application.cpp
+        src/Maize/Core/KeyCodes.h
+
         src/Maize/Core/Macros/PlatformDetection.h
         src/Maize/Core/Macros/Log.cpp
         src/Maize/Core/Macros/Log.h
         src/Maize/Core/Macros/Assert.h
+
+        src/Maize/Event/Event.h
+        src/Maize/Event/EventDispatcher.h
+        src/Maize/Event/EventTypes/KeyEvent.h
+        src/Maize/Event/EventTypes/MouseEvent.h
+        src/Maize/Event/EventTypes/WindowEvent.h
+        src/Maize/Event/EventHandler.cpp
+        src/Maize/Event/EventHandler.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

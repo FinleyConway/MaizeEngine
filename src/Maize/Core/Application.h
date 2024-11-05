@@ -4,9 +4,10 @@
 
 #include <memory>
 
-int main();
-
 namespace Maize {
+
+	struct Event;
+	class WindowCloseEvent;
 
 	class Application
 	{
@@ -14,12 +15,12 @@ namespace Maize {
 		virtual ~Application() = default;
 
 		bool Initialise(std::string_view title, uint32_t width, uint32_t height);
+		bool Run();
 		void Quit();
 
 	private:
-		friend int ::main();
-
-		bool Run();
+		void OnEvent(Event& event);
+		bool OnWindowClose(const WindowCloseEvent&);
 
 	private:
 		std::string m_Title = "MaizeEngine";

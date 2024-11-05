@@ -7,6 +7,7 @@ enable_testing()
 
 add_executable(test
         Application.test.cpp
+        Event.test.cpp
 )
 
 target_include_directories(test PRIVATE ${CMAKE_SOURCE_DIR}/src)
