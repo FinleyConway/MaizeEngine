@@ -42,6 +42,8 @@ add_library(MaizeEngine
         src/Maize/Event/EventTypes/WindowEvent.h
         src/Maize/Event/EventHandler.cpp
         src/Maize/Event/EventHandler.h
+        src/Maize/Math/Vec2.h
+        src/Maize/Math/Rect.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

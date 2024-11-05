@@ -6,8 +6,10 @@ FetchContent_MakeAvailable(Catch2)
 enable_testing()
 
 add_executable(test
-        Application.test.cpp
-        Event.test.cpp
+        src/Application.test.cpp
+        src/Event.test.cpp
+        src/Vec2.test.cpp
+        src/Rect.test.cpp
 )
 
 target_include_directories(test PRIVATE ${CMAKE_SOURCE_DIR}/src)

@@ -10,3 +10,6 @@
 #include "Maize/Event/EventTypes/KeyEvent.h"
 #include "Maize/Event/EventTypes/MouseEvent.h"
 #include "Maize/Event/EventTypes/WindowEvent.h"
+
+#include "Maize/Math/Vec2.h"
+#include "Maize/Math/Rect.h"
