@@ -33,5 +33,6 @@ MaizeEngine is under the [MIT license](https://github.com/FinleyConway/MaizeEngi
 
 ## External libraries used by MaizeEngine
 - [SFML](https://github.com/SFML/SFML) is under the [zLib license](https://github.com/SFML/SFML/blob/master/license.md).
+- [spdlog](https://github.com/gabime/spdlog) is under the [MIT license](https://github.com/gabime/spdlog/blob/v1.x/LICENSE).
 - [flecs](https://github.com/SanderMertens/flecs) is under the [MIT license](https://github.com/SanderMertens/flecs/blob/master/LICENSE).
 - [Catch2](https://github.com/catchorg/Catch2/tree/devel) is under the [BSL-1.0 license](https://github.com/catchorg/Catch2/blob/devel/LICENSE.txt).

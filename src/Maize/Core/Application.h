@@ -11,9 +11,9 @@ namespace Maize {
 	class Application
 	{
 	public:
-		Application(std::string_view title, uint32_t windowWidth, uint32_t windowHeight);
 		virtual ~Application() = default;
 
+		bool Initialise(std::string_view title, uint32_t width, uint32_t height);
 		void Quit();
 
 	private:
@@ -25,14 +25,5 @@ namespace Maize {
 		std::string m_Title = "MaizeEngine";
 		sf::RenderWindow m_Window;
 	};
-
-	// create engine from front end
-	std::unique_ptr<Application> CreateApplication();
-
-	#define MAIZE_ENGINE(type, name, width, height)					\
-	std::unique_ptr<Maize::Application> Maize::CreateApplication()	\
-	{																\
-		return std::make_unique<type>(name, width, height);			\
-	}
 
 } // Maize
