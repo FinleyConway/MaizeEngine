@@ -3,10 +3,10 @@
 class SandBox final : public Maize::Application
 {
 public:
-	bool Initialise() override
+	SandBox(std::string_view title, uint32_t windowWidth, uint32_t windowHeight)
+		: Application(title, windowWidth, windowHeight)
 	{
-		return true;
 	}
 };
 
-MAIZE_ENGINE(SandBox);
+MAIZE_ENGINE(SandBox, "Sandbox", 1280, 720);

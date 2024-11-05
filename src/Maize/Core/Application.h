@@ -1,6 +1,7 @@
 #pragma once
 
-#include <iostream>
+#include <SFML/Graphics.hpp>
+
 #include <memory>
 
 int main();
@@ -10,26 +11,28 @@ namespace Maize {
 	class Application
 	{
 	public:
+		Application(std::string_view title, uint32_t windowWidth, uint32_t windowHeight);
 		virtual ~Application() = default;
 
-		virtual bool Initialise() = 0;
+		void Quit();
 
 	private:
 		friend int ::main();
 
-		bool Run()
-		{
-			std::cout << "hello world\n";
-			return true;
-		}
+		bool Run();
+
+	private:
+		std::string m_Title = "MaizeEngine";
+		sf::RenderWindow m_Window;
 	};
 
+	// create engine from front end
 	std::unique_ptr<Application> CreateApplication();
 
-	#define MAIZE_ENGINE(type)										\
+	#define MAIZE_ENGINE(type, name, width, height)					\
 	std::unique_ptr<Maize::Application> Maize::CreateApplication()	\
 	{																\
-		return std::make_unique<type>();							\
+		return std::make_unique<type>(name, width, height);			\
 	}
 
 } // Maize
