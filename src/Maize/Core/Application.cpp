@@ -44,15 +44,6 @@ namespace Maize {
 
 		m_Renderer.Initialise(m_Window);
 
-		std::vector<uint8_t> map;
-		map.resize(100*100*4, 255);
-
-		m_Texture = std::make_shared<sf::Texture>();
-		m_Texture->create(100, 100);
-		m_Texture->update(map.data(), 100, 100, 0, 0);
-
-		m_Sprite = Sprite(m_Texture, { 0, 0, 100, 100 });
-
 		return true;
 	}
 
@@ -68,10 +59,6 @@ namespace Maize {
 			const float deltaTime = clock.restart().asSeconds();
 
 			m_Renderer.BeginDrawing();
-
-			sf::RenderStates states;
-			states.texture = m_Texture.get();
-			m_Renderer.Draw(m_Sprite.GetVertices(), states);
 
 			m_Renderer.EndDrawing();
 		}
