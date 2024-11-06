@@ -34,3 +34,16 @@ TEST_CASE("Rect construction and type conversion", "[Rect]")
 		REQUIRE(rectInt.height == 40);
 	}
 }
+
+TEST_CASE("Rect operator overloading", "[Rect]")
+{
+	SECTION("Equal operator works correctly")
+	{
+		auto rect1 = Maize::IntRect(10, 20, 30, 40);
+		auto rect2 = Maize::FloatRect(10.0f, 20.0f, 30.0f, 40.0f);
+		auto rect3 = Maize::IntRect(10, 20, 30, 50);
+
+		REQUIRE(rect1 == rect2);
+		REQUIRE(rect2 != rect3);
+	}
+}

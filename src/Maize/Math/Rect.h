@@ -14,6 +14,18 @@ namespace Maize {
 		constexpr Rect(T x, T y, T width, T height) : x(x), y(y), width(width), height(height) { }
 		template<typename U> constexpr explicit Rect(const Rect<U>& other)
 			: x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), width(static_cast<T>(other.width)), height(static_cast<T>(other.height)) { }
+
+		template<typename U>
+		bool operator==(const Rect<U>& other) const
+		{
+			return x == other.x && y == other.y && width == other.width && height == other.height;
+		}
+
+		template<typename U>
+		bool operator!=(const Rect<U>& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	typedef Rect<float> FloatRect;

@@ -11,6 +11,18 @@ namespace Maize {
 		constexpr Vec2() = default;
 		constexpr Vec2(T x, T y) : x(x), y(y) { }
 		template<typename U> constexpr explicit Vec2(const Vec2<U>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) { }
+
+		template<typename U>
+		bool operator==(const Vec2<U>& other) const
+		{
+			return x == other.x && y == other.y;
+		}
+
+		template<typename U>
+		bool operator!=(const Vec2<U>& other) const
+		{
+			return !(*this == other);
+		}
 	};
 
 	typedef Vec2<int32_t> Vec2i;

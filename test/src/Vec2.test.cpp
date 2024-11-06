@@ -28,3 +28,16 @@ TEST_CASE("Vec2 initialization and conversion", "[Vec2]")
 		REQUIRE(intVec.y == 2);
 	}
 }
+
+TEST_CASE("Vec2 operator overloading", "[Vec2]")
+{
+	SECTION("Equal operator works correctly")
+	{
+		auto vec1 = Maize::Vec2i(10, 20);
+		auto vec2 = Maize::Vec2f(10.0f, 20.0f);
+		auto vec3 = Maize::Vec2i(10, 30);
+
+		REQUIRE(vec1 == vec2);
+		REQUIRE(vec2 != vec3);
+	}
+}

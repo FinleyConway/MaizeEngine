@@ -4,6 +4,9 @@
 
 #include <memory>
 
+#include "Maize/Rendering/Renderer.h"
+#include "Maize/Rendering/Sprite.h"
+
 namespace Maize {
 
 	struct Event;
@@ -25,6 +28,10 @@ namespace Maize {
 	private:
 		std::string m_Title = "MaizeEngine";
 		sf::RenderWindow m_Window;
+		Renderer m_Renderer;
+
+		std::shared_ptr<sf::Texture> m_Texture;
+		Sprite m_Sprite;
 	};
 
 } // Maize

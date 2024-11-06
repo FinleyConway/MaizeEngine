@@ -10,6 +10,8 @@ add_executable(test
         src/Event.test.cpp
         src/Vec2.test.cpp
         src/Rect.test.cpp
+        src/Mesh.test.cpp
+        src/Sprite.test.cpp
 )
 
 target_include_directories(test PRIVATE ${CMAKE_SOURCE_DIR}/src)

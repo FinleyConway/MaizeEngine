@@ -13,3 +13,6 @@
 
 #include "Maize/Math/Vec2.h"
 #include "Maize/Math/Rect.h"
+
+#include "Maize/Rendering/Mesh.h"
+#include "Maize/Rendering/Sprite.h"

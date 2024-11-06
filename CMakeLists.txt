@@ -44,11 +44,17 @@ add_library(MaizeEngine
         src/Maize/Event/EventHandler.h
         src/Maize/Math/Vec2.h
         src/Maize/Math/Rect.h
+        src/Maize/Rendering/Mesh.cpp
+        src/Maize/Rendering/Mesh.h
+        src/Maize/Rendering/Sprite.cpp
+        src/Maize/Rendering/Sprite.h
+        src/Maize/Rendering/Renderer.cpp
+        src/Maize/Rendering/Renderer.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)
 target_link_libraries(MaizeEngine PUBLIC sfml-graphics spdlog::spdlog)
-target_compile_features(MaizeEngine PRIVATE cxx_std_20)
+target_compile_features(MaizeEngine PUBLIC cxx_std_20)
 
 # add unit test
 if (NOT BUILD_SHARED_LIBS AND MAIZE_UNIT_TESTS)
