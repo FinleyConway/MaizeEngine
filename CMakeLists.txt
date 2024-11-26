@@ -21,7 +21,8 @@ endif ()
 include(FetchContent)
 FetchContent_Declare(sfml GIT_REPOSITORY https://github.com/SFML/SFML.git GIT_TAG 2.6.1)
 FetchContent_Declare(spdlog GIT_REPOSITORY https://github.com/gabime/spdlog.git GIT_TAG v1.13.0)
-FetchContent_MakeAvailable(sfml spdlog)
+FetchContent_Declare(flecs GIT_REPOSITORY https://github.com/SanderMertens/flecs.git GIT_TAG v4.0.3)
+FetchContent_MakeAvailable(sfml spdlog flecs)
 
 add_library(MaizeEngine
         src/Maize.h
@@ -42,18 +43,23 @@ add_library(MaizeEngine
         src/Maize/Event/EventTypes/WindowEvent.h
         src/Maize/Event/EventHandler.cpp
         src/Maize/Event/EventHandler.h
+
         src/Maize/Math/Vec2.h
         src/Maize/Math/Rect.h
+
         src/Maize/Rendering/Mesh.cpp
         src/Maize/Rendering/Mesh.h
         src/Maize/Rendering/Sprite.cpp
         src/Maize/Rendering/Sprite.h
         src/Maize/Rendering/Renderer.cpp
         src/Maize/Rendering/Renderer.h
+
+        src/Maize/Scene/Entity.h
+        src/Maize/Scene/Components/Position.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)
-target_link_libraries(MaizeEngine PUBLIC sfml-graphics spdlog::spdlog)
+target_link_libraries(MaizeEngine PUBLIC sfml-graphics spdlog::spdlog flecs::flecs_static)
 target_compile_features(MaizeEngine PUBLIC cxx_std_20)
 
 # add unit test

@@ -6,14 +6,12 @@ namespace Maize {
 
 	void Mesh::AddVertices(std::span<sf::Vertex> mesh)
 	{
-		m_Mesh.reserve(mesh.size());
 		m_Mesh.assign(mesh.begin(), mesh.end()); // copy mesh
 		m_Bounds = GetMeshBounds(); // generate rectangular bounds
 	}
 
 	void Mesh::AddVertices(std::span<sf::Vertex> mesh, const FloatRect& bounds)
 	{
-		m_Mesh.reserve(mesh.size());
 		m_Mesh.assign(mesh.begin(), mesh.end()); // copy mesh
 		m_Bounds = bounds; // assign pre-defined bounds
 	}

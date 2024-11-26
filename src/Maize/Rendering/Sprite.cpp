@@ -57,6 +57,7 @@ namespace Maize {
 
 	void Sprite::UpdateTextureRect(const IntRect& rect)
 	{
+		// construct the new sprite mesh
 		const auto bounds = FloatRect(rect);
 		std::array<sf::Vertex, 6> vertices;
 
@@ -79,6 +80,7 @@ namespace Maize {
 		vertices[4].texCoords = sf::Vector2f(right, bottom);
 		vertices[5].texCoords = sf::Vector2f(right, top);
 
+		// construct mesh and its bounds
 		m_Mesh.AddVertices(vertices, bounds);
 	}
 
