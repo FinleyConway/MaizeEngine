@@ -12,6 +12,7 @@ add_executable(test
         src/Rect.test.cpp
         src/Mesh.test.cpp
         src/Sprite.test.cpp
+        src/Renderer.test.cpp
 )
 
 target_include_directories(test PRIVATE ${CMAKE_SOURCE_DIR}/src)
