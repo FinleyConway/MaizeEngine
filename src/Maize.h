@@ -16,3 +16,9 @@
 
 #include "Maize/Rendering/Mesh.h"
 #include "Maize/Rendering/Sprite.h"
+
+#include "Maize/Scene/Components/Position.h"
+
+#include "Maize/Scene/Scene.h"
+#include "Maize/Scene/Entity.h"
+#include "Maize/Scene/SystemState.h"

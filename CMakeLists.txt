@@ -56,6 +56,11 @@ add_library(MaizeEngine
 
         src/Maize/Scene/Entity.h
         src/Maize/Scene/Components/Position.h
+        src/Maize/Scene/Components/SceneComponents.h
+        src/Maize/Scene/Scene.h
+        src/Maize/Scene/SystemState.h
+        src/Maize/Scene/SceneManager.cpp
+        src/Maize/Scene/SceneManager.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)
