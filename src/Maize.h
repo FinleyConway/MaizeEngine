@@ -5,11 +5,6 @@
 #include "Maize/Core/Macros/Log.h"
 #include "Maize/Core/Macros/Assert.h"
 
-#include "Maize/Event/Event.h"
-#include "Maize/Event/EventHandler.h"
-#include "Maize/Event/EventTypes/KeyEvent.h"
-#include "Maize/Event/EventTypes/MouseEvent.h"
-#include "Maize/Event/EventTypes/WindowEvent.h"
 
 #include "Maize/Math/Vec2.h"
 #include "Maize/Math/Rect.h"

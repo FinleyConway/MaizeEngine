@@ -3,13 +3,14 @@
 class SandBox final : public Maize::Application
 {
 public:
-	SandBox()
+	SandBox(std::string_view title, uint32_t width, uint32_t height) :
+		Application(title, width, height)
 	{
 	}
 };
 
 int main()
 {
-	SandBox sandBox;
-	if (sandBox.Initialise("Sandbox", 500, 500)) sandBox.Run();
+	auto sandBox = SandBox("Sandbox", 800, 600);
+	sandBox.Run();
 }

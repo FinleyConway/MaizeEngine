@@ -8,6 +8,7 @@
 TEST_CASE("Null Entity Class Test", "[Null Entity]")
 {
 	Maize::Entity e;
+	Maize::Log::Initialise();
 
 	SECTION("Adding components")
 	{

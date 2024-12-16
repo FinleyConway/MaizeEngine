@@ -36,14 +36,6 @@ add_library(MaizeEngine
         src/Maize/Core/Macros/Log.h
         src/Maize/Core/Macros/Assert.h
 
-        src/Maize/Event/Event.h
-        src/Maize/Event/EventDispatcher.h
-        src/Maize/Event/EventTypes/KeyEvent.h
-        src/Maize/Event/EventTypes/MouseEvent.h
-        src/Maize/Event/EventTypes/WindowEvent.h
-        src/Maize/Event/EventHandler.cpp
-        src/Maize/Event/EventHandler.h
-
         src/Maize/Math/Vec2.h
         src/Maize/Math/Rect.h
 

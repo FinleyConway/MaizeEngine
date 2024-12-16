@@ -2,8 +2,7 @@
 
 #include "Maize/Math/Vec2.h"
 
-namespace Maize {
-
-	using Position = Vec2f;
-
+namespace Maize
+{
+    using Position = Vec2f;
 } // Maize

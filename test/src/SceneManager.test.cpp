@@ -45,9 +45,7 @@ public:
 TEST_CASE("Test scene management")
 {
 	sf::RenderWindow window;
-	Maize::Renderer renderer;
-	Maize::WindowCloseEvent event;
-
+	auto renderer = Maize::Renderer(window);
 	auto sceneManager = Maize::SceneManager(window, renderer);
 
 	auto firstScene = std::make_unique<TestScene>();
@@ -62,5 +60,5 @@ TEST_CASE("Test scene management")
 	REQUIRE(sceneManager.LoadScene(std::move(secondScene)) == true);
 	REQUIRE(firstScenePtr->onEndCalled == true);
 
-	sceneManager.OnEvent(event);
+	sceneManager.ForceQuit();
 }

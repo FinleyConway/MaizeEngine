@@ -5,142 +5,144 @@
 #include "Maize/Scene/Entity.h"
 #include "Maize/Math/Vec2.h"
 
-namespace Maize {
+namespace Maize
+{
+    /**
+     * A world where all the entities and game data lives.
+     */
+    class Scene
+    {
+    public:
+        Scene() = default;
 
-	/**
-	 * A world where all the entities and game data lives.
-	 */
-	class Scene
-	{
-	public:
-		Scene() = default;
-		virtual ~Scene() = default;
+        virtual ~Scene() = default;
 
-		/**
-		 * A function that is called when the scene starts which is where all systems and entities are created.
-		 */
-		virtual void OnStart() = 0;
+        /**
+         * A function that is called when the scene starts which is where all systems and entities are created.
+         */
+        virtual void OnStart() = 0;
 
-		/**
-		 * A function that is called when the scene ends which where all necessary clean up happens.
-		 */
-		virtual void OnEnd() = 0;
+        /**
+         * A function that is called when the scene ends which where all necessary clean up happens.
+         */
+        virtual void OnEnd() = 0;
 
-		/**
-		 * Create an entity.
-		 * @tparam Args Various components that can be added.
-		 * @param position World location.
-		 * @param isStatic Is the entity not movable?
-		 * @param isPersistent Want to exist across scenes?
-		 * @param args Various components parameters.
-		 * @return The entity.
-		 */
-		template<typename... Args>
-		Entity CreateEntity(Vec2f position, bool isStatic, bool isPersistent, Args&&... args) const
-		{
-			CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
+        /**
+         * Create an entity.
+         * @tparam Args Various components that can be added.
+         * @param position World location.
+         * @param isStatic Is the entity not movable?
+         * @param isPersistent Want to exist across scenes?
+         * @param args Various components parameters.
+         * @return The entity.
+         */
+        template<typename... Args>
+        Entity CreateEntity(Vec2f position, bool isStatic, bool isPersistent, Args&&... args) const
+        {
+            CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
 
-			return Entity::CreateEntity(*m_World, position, isStatic, isPersistent, args...);
-		}
+            return Entity::CreateEntity(*m_World, position, isStatic, isPersistent, args...);
+        }
 
-		/**
-		 * Add a system that will provide entities logic.
-		 * @tparam Components What components the system will work on.
-		 * @tparam Func The function that provides the logic with the components as the parameters.
-		 * @param systemName The name of the system.
-		 * @param updateOrder When will the system be updated.
-		 * @param systemFunc The function that provides the logic with the components as the parameters.
-		 * @return The system handle.
-		 */
-		template<typename... Components, typename Func>
-		flecs::system AddSystem(const std::string& systemName, flecs::entity_t updateOrder, Func&& systemFunc)
-		{
-			CORE_ASSERT(m_World != nullptr, "World has not been assigned!");
+        /**
+         * Add a system that will provide entities logic.
+         * @tparam Components What components the system will work on.
+         * @tparam Func The function that provides the logic with the components as the parameters.
+         * @param systemName The name of the system.
+         * @param updateOrder When will the system be updated.
+         * @param systemFunc The function that provides the logic with the components as the parameters.
+         * @return The system handle.
+         */
+        template<typename... Components, typename Func>
+        flecs::system AddSystem(const std::string& systemName, flecs::entity_t updateOrder, Func&& systemFunc)
+        {
+            CORE_ASSERT(m_World != nullptr, "World has not been assigned!");
 
-			// Create system
-			const auto system = m_World->system<Components...>(systemName.c_str()).kind(updateOrder).each([&](flecs::entity e, Components&... components)
-			{
-				systemFunc(SystemState(*m_World), Entity(e), components...);
-			});
-			system.disable();
+            // Create system
+            const auto system = m_World->system<Components...>(systemName.c_str()).kind(updateOrder).each(
+                [&](flecs::entity e, Components&... components)
+                {
+                    systemFunc(SystemState(*m_World), Entity(e), components...);
+                });
+            system.disable();
 
-			m_Systems.emplace_back(system);
+            m_Systems.emplace_back(system);
 
-			return system;
-		}
+            return system;
+        }
 
-		/**
-		 * Add a system that will provide the ability for entities to react to.
-		 * @tparam Components What components the system will work on.
-		 * @tparam Func The function that provides the logic with the components as the parameters.
-		 * @param systemName The name of the system.
-		 * @param triggerType How will the system react.
-		 * @param observerFunc The function that provides the logic with the components as the parameters.
-		 * @return The observer handle.
-		 */
-		template<typename... Components, typename Func>
-		flecs::observer AddObserver(const std::string& systemName, flecs::entity_t triggerType, Func&& observerFunc)
-		{
-			CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
+        /**
+         * Add a system that will provide the ability for entities to react to.
+         * @tparam Components What components the system will work on.
+         * @tparam Func The function that provides the logic with the components as the parameters.
+         * @param systemName The name of the system.
+         * @param triggerType How will the system react.
+         * @param observerFunc The function that provides the logic with the components as the parameters.
+         * @return The observer handle.
+         */
+        template<typename... Components, typename Func>
+        flecs::observer AddObserver(const std::string& systemName, flecs::entity_t triggerType, Func&& observerFunc)
+        {
+            CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
 
-			// create system
-			const auto observer = m_World->observer<Components...>(systemName.c_str()).event(triggerType).each([&](flecs::entity e, Components... components)
-			{
-				observerFunc(SystemState(*m_World), Entity(e), components...);
-			});
-			observer.disable();
+            // create system
+            const auto observer = m_World->observer<Components...>(systemName.c_str()).event(triggerType).each(
+                [&](flecs::entity e, Components... components)
+                {
+                    observerFunc(SystemState(*m_World), Entity(e), components...);
+                });
+            observer.disable();
 
-			m_Observers.emplace_back(observer);
+            m_Observers.emplace_back(observer);
 
-			return observer;
-		}
+            return observer;
+        }
 
-	private:
-		void Initialise(flecs::world& world)
-		{
-			m_World = &world;
+    private:
+        void Initialise(flecs::world& world)
+        {
+            m_World = &world;
 
-			OnStart();
+            OnStart();
 
-			// enable all systems for this scene
-			for (const auto system : m_Systems)
-			{
-				system.enable();
-			}
+            // enable all systems for this scene
+            for (const auto system : m_Systems)
+            {
+                system.enable();
+            }
 
-			// enable all observers for this scene
-			for (const auto observer : m_Observers)
-			{
-				observer.enable();
-			}
-		}
+            // enable all observers for this scene
+            for (const auto observer : m_Observers)
+            {
+                observer.enable();
+            }
+        }
 
-		void Shutdown()
-		{
-			OnEnd();
+        void Shutdown()
+        {
+            OnEnd();
 
-			// remove all non-persistent entities from the scene
-			m_World->delete_with<Active>();
+            // remove all non-persistent entities from the scene
+            m_World->delete_with<Active>();
 
-			// disable all systems for this scene
-			for (const auto system : m_Systems)
-			{
-				system.disable();
-			}
+            // disable all systems for this scene
+            for (const auto system : m_Systems)
+            {
+                system.disable();
+            }
 
-			// disable all observers for this scene
-			for (const auto observer : m_Observers)
-			{
-				observer.disable();
-			}
-		}
+            // disable all observers for this scene
+            for (const auto observer : m_Observers)
+            {
+                observer.disable();
+            }
+        }
 
-	private:
-		friend class SceneManager;
+    private:
+        friend class SceneManager;
 
-		flecs::world* m_World = nullptr;
-		std::vector<flecs::system> m_Systems;
-		std::vector<flecs::observer> m_Observers;
-	};
-
+        flecs::world* m_World = nullptr;
+        std::vector<flecs::system> m_Systems;
+        std::vector<flecs::observer> m_Observers;
+    };
 } // Maize

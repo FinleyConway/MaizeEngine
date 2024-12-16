@@ -4,26 +4,29 @@
 
 #include <span>
 
-namespace Maize {
+namespace Maize
+{
+    class Renderer
+    {
+    public:
+        explicit Renderer(sf::RenderWindow& window);
 
-	class Renderer
-	{
-	public:
-		void Initialise(sf::RenderWindow& window);
+        const sf::View& GetCurrentView() const;
 
-		const sf::View& GetCurrentView() const;
-		void SetCurrentView(const sf::View& view) const;
+        void SetCurrentView(const sf::View& view) const;
 
-		void BeginDrawing();
-		void Draw(std::span<const sf::Vertex> mesh, const sf::RenderStates& state);
-		void EndDrawing();
+        void BeginDrawing();
 
-		uint32_t GetDrawCalls() const;
-		sf::Vector2u GetWindowSize() const;
+        void Draw(std::span<const sf::Vertex> mesh, const sf::RenderStates& state);
 
-	private:
-		sf::RenderWindow* m_RenderWindow = nullptr;
-		uint32_t m_DrawCalls = 0;
-	};
+        void EndDrawing();
 
+        uint32_t GetDrawCalls() const;
+
+        sf::Vector2u GetWindowSize() const;
+
+    private:
+        sf::RenderWindow& m_RenderWindow;
+        uint32_t m_DrawCalls = 0;
+    };
 } // Maize

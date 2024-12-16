@@ -1,69 +1,54 @@
 #include "Maize/Core/Application.h"
 
 #include "Maize/Core/Macros/Log.h"
-#include "Maize/Event/EventHandler.h"
-#include "Maize/Event/EventDispatcher.h"
-#include "Maize/Event/EventTypes/WindowEvent.h"
 
-namespace Maize {
+namespace Maize
+{
+    Application::Application(std::string_view title, uint32_t width, uint32_t height) :
+        m_Title(title),
+        m_Window(sf::VideoMode(width, height), m_Title),
+        m_Renderer(m_Window),
+        m_SceneManager(m_Window, m_Renderer)
+    {
+        Log::Initialise();
 
-	void Application::Quit()
-	{
-		m_Window.close();
-	}
+        m_Window.setKeyRepeatEnabled(false); // disable text editor hold key like functionality
+        m_Window.setVerticalSyncEnabled(true); // turn on v-sync by default
+    }
 
-	void Application::OnEvent(Event& event)
-	{
-		auto dispatcher = EventDispatcher(event);
-		dispatcher.Dispatch<WindowCloseEvent>(std::bind(&Application::OnWindowClose, this, std::placeholders::_1));
-	}
+    void Application::Quit()
+    {
+        m_Window.close();
+    }
 
-	bool Application::OnWindowClose(const WindowCloseEvent&)
-	{
-		m_Window.close();
+    bool Application::Run()
+    {
+        sf::Clock clock;
 
-		return false;
-	}
+        while (m_Window.isOpen())
+        {
+            OnEvent();
 
-	bool Application::Initialise(std::string_view title, uint32_t width, uint32_t height)
-	{
-		Log::Initialise();
+            const float deltaTime = clock.restart().asSeconds();
 
-		// make sure that the size of the screen is not a stupid size
-		if (!(width > 0 && height > 0))
-		{
-			CORE_LOG_WARN("Screen size must be larger then 0 in both axes!");
-			return false;
-		}
+            m_Renderer.BeginDrawing();
 
-		m_Title = title;
+            m_Renderer.EndDrawing();
+        }
 
-		m_Window.create(sf::VideoMode(width, height), m_Title); // create window
-		m_Window.setKeyRepeatEnabled(false); // disable text editor hold key like functionality
-		m_Window.setVerticalSyncEnabled(true); // turn on v-sync by default
+        return true;
+    }
 
-		m_Renderer.Initialise(m_Window);
+    void Application::OnEvent()
+    {
+        auto event = sf::Event();
 
-		return true;
-	}
-
-	bool Application::Run()
-	{
-		sf::Clock clock;
-		const auto pollEvent = EventHandler(std::bind(&Application::OnEvent, this, std::placeholders::_1));
-
-		while (m_Window.isOpen())
-		{
-			pollEvent.Poll(m_Window);
-
-			const float deltaTime = clock.restart().asSeconds();
-
-			m_Renderer.BeginDrawing();
-
-			m_Renderer.EndDrawing();
-		}
-
-		return true;
-	}
-
+        while (m_Window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                m_Window.close();
+            }
+        }
+    }
 } // Maize

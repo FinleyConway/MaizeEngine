@@ -6,8 +6,6 @@ FetchContent_MakeAvailable(Catch2)
 enable_testing()
 
 add_executable(test
-        src/Application.test.cpp
-        src/Event.test.cpp
         src/Vec2.test.cpp
         src/Rect.test.cpp
         src/Mesh.test.cpp

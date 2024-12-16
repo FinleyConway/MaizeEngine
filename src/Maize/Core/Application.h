@@ -2,32 +2,30 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <memory>
-
 #include "Maize/Rendering/Renderer.h"
+#include "Maize/Scene/SceneManager.h"
 
-namespace Maize {
+namespace Maize
+{
+    class Application
+    {
+    public:
+        Application(std::string_view title, uint32_t width, uint32_t height);
 
-	struct Event;
-	class WindowCloseEvent;
+        virtual ~Application() = default;
 
-	class Application
-	{
-	public:
-		virtual ~Application() = default;
+        bool Run();
 
-		bool Initialise(std::string_view title, uint32_t width, uint32_t height);
-		bool Run();
-		void Quit();
+        void Quit();
 
-	private:
-		void OnEvent(Event& event);
-		bool OnWindowClose(const WindowCloseEvent&);
+    private:
+        void OnEvent();
 
-	private:
-		std::string m_Title = "MaizeEngine";
-		sf::RenderWindow m_Window;
-		Renderer m_Renderer;
-	};
+    private:
+        std::string m_Title = "MaizeEngine";
+        sf::RenderWindow m_Window;
+        Renderer m_Renderer;
 
+        SceneManager m_SceneManager;
+    };
 } // Maize

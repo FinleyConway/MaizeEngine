@@ -2,19 +2,24 @@
 
 #include <memory>
 
-namespace Maize {
+namespace Maize
+{
+    class Scene;
 
-	class Scene;
+    struct Active
+    {
+    };
 
-	struct Active { };
+    struct Persistent
+    {
+    };
 
-	struct Persistent { };
+    struct Static
+    {
+    };
 
-	struct Static { };
-
-	struct ChangeScene
-	{
-		std::unique_ptr<Scene> newScene;
-	};
-
+    struct ChangeScene
+    {
+        std::unique_ptr<Scene> newScene;
+    };
 } // Maize
