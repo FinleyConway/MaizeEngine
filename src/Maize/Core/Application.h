@@ -16,6 +16,8 @@ namespace Maize
 
         bool Run();
 
+        bool LoadScene(std::unique_ptr<Scene> scene);
+
         void Quit();
 
     private:

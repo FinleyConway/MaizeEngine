@@ -60,5 +60,5 @@ TEST_CASE("Test scene management")
 	REQUIRE(sceneManager.LoadScene(std::move(secondScene)) == true);
 	REQUIRE(firstScenePtr->onEndCalled == true);
 
-	sceneManager.ForceQuit();
+	sceneManager.Quit();
 }

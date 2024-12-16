@@ -33,10 +33,17 @@ namespace Maize
 
             m_Renderer.BeginDrawing();
 
+            m_SceneManager.OnUpdate(deltaTime);
+
             m_Renderer.EndDrawing();
         }
 
         return true;
+    }
+
+    bool Application::LoadScene(std::unique_ptr<Scene> scene)
+    {
+        return m_SceneManager.LoadScene(std::move(scene));
     }
 
     void Application::OnEvent()
@@ -48,6 +55,7 @@ namespace Maize
             if (event.type == sf::Event::Closed)
             {
                 m_Window.close();
+                m_SceneManager.Quit();
             }
         }
     }

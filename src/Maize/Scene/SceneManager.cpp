@@ -51,20 +51,12 @@ namespace Maize
         return false;
     }
 
-    void SceneManager::ForceQuit() const
+    void SceneManager::Quit() const
     {
         m_World.quit();
     }
 
-    void SceneManager::OnEvent(sf::Event& event)
-    {
-        if (event.type == sf::Event::Closed)
-        {
-            m_World.quit();
-        }
-    }
-
-    void SceneManager::OnUpdate(float deltaTime)
+    void SceneManager::OnUpdate(float deltaTime) const
     {
         m_World.progress(deltaTime);
     }

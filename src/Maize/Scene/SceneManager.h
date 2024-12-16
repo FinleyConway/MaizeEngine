@@ -24,11 +24,9 @@ namespace Maize
 
         const std::unique_ptr<Scene>& GetActiveScene() const { return m_ActiveScene; }
 
-        void ForceQuit() const;
+        void Quit() const;
 
-        void OnEvent(sf::Event& event);
-
-        void OnUpdate(float deltaTime);
+        void OnUpdate(float deltaTime) const;
 
     private:
         void ChangeSceneObserver();
