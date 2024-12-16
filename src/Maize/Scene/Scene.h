@@ -27,6 +27,7 @@ namespace Maize
          */
         virtual void OnEnd() = 0;
 
+    protected:
         /**
          * Create an entity.
          * @tparam Args Various components that can be added.

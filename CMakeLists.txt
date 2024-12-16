@@ -53,6 +53,11 @@ add_library(MaizeEngine
         src/Maize/Scene/SystemState.h
         src/Maize/Scene/SceneManager.cpp
         src/Maize/Scene/SceneManager.h
+        src/Maize/Scene/Components/Rendering/Camera.h
+        src/Maize/Scene/Components/Rendering/SpriteRenderer.h
+        src/Maize/Scene/Components/Rendering/RenderingContext.h
+        src/Maize/Scene/Systems/Rendering/RenderingSystem.cpp
+        src/Maize/Scene/Systems/Rendering/RenderingSystem.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

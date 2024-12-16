@@ -1,12 +1,19 @@
 #include "Maize/Scene/SceneManager.h"
 
 #include "Maize/Core/Macros/Log.h"
+#include "Maize/Scene/Components/Rendering/RenderingContext.h"
+#include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
+#include "Maize/Scene/Systems/Rendering/RenderingSystem.h"
 
 namespace Maize
 {
     SceneManager::SceneManager(sf::RenderWindow& window, Renderer& renderer)
     {
         ChangeSceneObserver(); // add scene changer observer to world.
+
+        m_World.set(Internal::RenderingContext(&renderer));
+        m_World.system<Position, SpriteRenderer>("RenderingSystem")
+            .kind(flecs::OnStore).each(RenderingSystem::Render);
 
 #if ENABLE_FLECS_EXPLORER
 		m_World.set<flecs::Rest>({});
