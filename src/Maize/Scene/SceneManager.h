@@ -1,20 +1,20 @@
 #pragma once
 
+#include <memory>
+
 #include <SFML/Graphics.hpp>
 #include <flecs.h>
-
-#include <memory>
 
 #include "Maize/Scene/Scene.h"
 #include "Maize/Utils/SpatialHashGrid.h"
 
-namespace Maize
+namespace Maize::Internal
 {
     class Renderer;
 
     /**
-     * Manages the entire game and all the entities within and between the scenes.
-     */
+    * Manages the entire game and all the entities within and between the scenes.
+    */
     class SceneManager
     {
     public:
@@ -39,4 +39,4 @@ namespace Maize
 
         SpatialHashGrid m_SpatialHashGrid;
     };
-} // Maize
+} // Maize::Internal

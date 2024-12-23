@@ -4,33 +4,34 @@
 #include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
+#include "Maize/Scene/Components/Rendering/Camera.h"
 #include "Maize/Scene/Systems/Rendering/RenderComponentChange.h"
 #include "Maize/Scene/Systems/Rendering/RenderingSystem.h"
 #include "Maize/Utils/SpatialHashGrid.h"
 
-namespace Maize
+namespace Maize::Internal
 {
     SceneManager::SceneManager(sf::RenderWindow& window, Renderer& renderer) :
         m_SpatialHashGrid(512)
     {
         ChangeSceneObserver(); // add scene changer observer to world.
 
-        m_World.set(Internal::RenderingContext(&renderer, &m_SpatialHashGrid));
+        m_World.set(RenderingContext(&renderer, &m_SpatialHashGrid));
         m_World.component<SpriteRenderer>().on_add([](flecs::entity entity, SpriteRenderer&)
         {
-            entity.add<Internal::DeferredRenderable>();
+            entity.add<DeferredRenderable>();
         });
         m_World.observer<const SpriteRenderer>("OnSpriteRendererRemove")
             .event(flecs::OnRemove)
-            .each(Internal::RenderComponentChange::OnSpriteRendererRemove);
+            .each(RenderComponentChange::OnSpriteRendererRemove);
 
         m_World.system<const Position, const SpriteRenderer>("HandleSpriteRendererDefer")
-            .with<Internal::DeferredRenderable>() // only triggers when having this component
+            .with<DeferredRenderable>() // only triggers when having this component
             .immediate().kind(flecs::PreStore)
-            .each(Internal::RenderComponentChange::HandleSpriteRendererDefer);
+            .each(RenderComponentChange::HandleSpriteRendererDefer);
 
         m_World.system<const Position, const SpriteRenderer>("UpdateSpriteRendererPosition")
-            .without<Static>().without<Internal::DeferredRenderable>()
+            .without<Static>().without<DeferredRenderable>()
             .kind(flecs::PreStore)
             .each(RenderingSystem::UpdateSpriteRendererPosition);
 

@@ -4,7 +4,7 @@
 TEST_CASE("Renderer Class Test", "[Renderer]")
 {
 	sf::RenderWindow window;
-	auto renderer = Maize::Renderer(window);
+	auto renderer = Maize::Internal::Renderer(window);
 
 	SECTION("Current View matching")
 	{

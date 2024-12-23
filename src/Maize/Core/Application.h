@@ -26,8 +26,7 @@ namespace Maize
     private:
         std::string m_Title = "MaizeEngine";
         sf::RenderWindow m_Window;
-        Renderer m_Renderer;
-
-        SceneManager m_SceneManager;
+        Internal::Renderer m_Renderer;
+        Internal::SceneManager m_SceneManager;
     };
 } // Maize

@@ -4,6 +4,7 @@
 #include "Maize/Core/Macros/Log.h"
 #include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
+#include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
 #include "Maize/Utils/SpatialHashGrid.h"
 
 namespace Maize::Internal

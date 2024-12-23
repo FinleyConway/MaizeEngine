@@ -2,11 +2,12 @@
 
 namespace Maize
 {
-    class Renderer;
     class SpatialHashGrid;
 
     namespace Internal
     {
+        class Renderer;
+
         struct RenderingContext
         {
             Renderer* renderer = nullptr;

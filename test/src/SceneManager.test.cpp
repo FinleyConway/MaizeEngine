@@ -45,8 +45,8 @@ public:
 TEST_CASE("Test scene management")
 {
 	sf::RenderWindow window;
-	auto renderer = Maize::Renderer(window);
-	auto sceneManager = Maize::SceneManager(window, renderer);
+	auto renderer = Maize::Internal::Renderer(window);
+	auto sceneManager = Maize::Internal::SceneManager(window, renderer);
 
 	auto firstScene = std::make_unique<TestScene>();
 	TestScene* firstScenePtr = firstScene.get();

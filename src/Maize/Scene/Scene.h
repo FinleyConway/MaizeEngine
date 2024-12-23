@@ -7,6 +7,11 @@
 
 namespace Maize
 {
+    namespace Internal
+    {
+        class SceneManager;
+    } // Internal
+
     /**
      * A world where all the entities and game data lives.
      */
@@ -140,7 +145,7 @@ namespace Maize
         }
 
     private:
-        friend class SceneManager;
+        friend class Internal::SceneManager;
 
         flecs::world* m_World = nullptr;
         std::vector<flecs::system> m_Systems;

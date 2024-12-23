@@ -2,7 +2,7 @@
 
 #include "Maize/Core/Macros/Log.h"
 
-namespace Maize
+namespace Maize::Internal
 {
     Renderer::Renderer(sf::RenderWindow& window) : m_RenderWindow(window)
     {
@@ -48,4 +48,4 @@ namespace Maize
     {
         return m_RenderWindow.getSize();
     }
-} // Maize
+} // Maize::Internal
