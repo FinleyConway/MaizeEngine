@@ -6,7 +6,7 @@ namespace Maize
 {
     Application::Application(std::string_view title, uint32_t width, uint32_t height) :
         m_Title(title),
-        m_Window(sf::VideoMode(width, height), m_Title),
+        m_Window(sf::VideoMode({ width, height }), m_Title),
         m_Renderer(m_Window),
         m_SceneManager(m_Window, m_Renderer)
     {
@@ -48,11 +48,9 @@ namespace Maize
 
     void Application::OnEvent()
     {
-        auto event = sf::Event();
-
-        while (m_Window.pollEvent(event))
+        while (const std::optional event = m_Window.pollEvent())
         {
-            if (event.type == sf::Event::Closed)
+            if (event->is<sf::Event::Closed>())
             {
                 m_Window.close();
                 m_SceneManager.Quit();

@@ -14,11 +14,10 @@ sudo apt install \
     libxcursor-dev \
     libudev-dev \
     libfreetype-dev \
-    libopenal-dev \
     libflac-dev \
     libvorbis-dev \
     libgl1-mesa-dev \
-    libegl1-mesa-dev
+    libegl1-mesa-dev 
 ```
 4. Using CMake from the command line; making sure you are in the root directory of the project, use the following commands:
 ```

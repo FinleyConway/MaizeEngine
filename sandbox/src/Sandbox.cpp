@@ -8,10 +8,9 @@ class TestScene final : public Maize::Scene
 public:
 	virtual void OnStart() override
 	{
-		m_Texture = std::make_shared<sf::Texture>();
-		m_Texture->create(64, 64);
+		m_Texture = std::make_shared<sf::Texture>(sf::Vector2u(64, 64));
 
-		std::vector<uint8_t> data(64 * 64 * 4);
+		std::vector<uint8_t> data;
 		data.assign(64 * 64 * 4, 255);
 
 		m_Texture->update(data.data());

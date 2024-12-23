@@ -30,7 +30,7 @@ namespace Maize
         // nothing to draw
         if (mesh.empty()) return;
 
-        m_RenderWindow.draw(mesh.data(), mesh.size(), sf::Triangles, state);
+        m_RenderWindow.draw(mesh.data(), mesh.size(), sf::PrimitiveType::Triangles, state);
         m_DrawCalls++;
     }
 
