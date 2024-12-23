@@ -15,6 +15,7 @@ add_executable(test
         src/Renderer.test.cpp
         src/Entity.test.cpp
         src/SceneManager.test.cpp
+        src/SpatialHashGrid.test.cpp
 )
 
 target_include_directories(test PRIVATE ${CMAKE_SOURCE_DIR}/src)

@@ -36,3 +36,16 @@ namespace Maize
     typedef Vec2<uint32_t> Vec2u;
     typedef Vec2<float> Vec2f;
 } // Maize
+
+template<typename T>
+struct std::hash<Maize::Vec2<T>>
+{
+    size_t operator()(Maize::Vec2<T> v) const
+    {
+        // https://stackoverflow.com/a/55083395
+        size_t hash = std::hash<int32_t>()(v.x);
+        hash <<= sizeof(size_t) * 4;
+        hash ^= std::hash<int32_t>()(v.y);
+        return std::hash<size_t>()(hash);
+    }
+};
