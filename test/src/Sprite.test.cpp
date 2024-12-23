@@ -3,8 +3,7 @@
 
 TEST_CASE("Sprite Class Tests", "[Sprite]")
 {
-	auto texture = std::make_shared<sf::Texture>();
-	texture->create(100, 100);
+	auto texture = std::make_shared<sf::Texture>(sf::Vector2u(100, 100));
 
 	auto pivot = Maize::Vec2f(40, 40);
 	auto textureRect = Maize::IntRect(10, 10, 80, 80);
