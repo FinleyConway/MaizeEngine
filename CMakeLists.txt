@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 project(MaizeEngine LANGUAGES CXX)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 # build flags
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(MAIZE_UNIT_TESTS "Build unit-test" OFF)
