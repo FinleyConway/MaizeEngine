@@ -17,15 +17,17 @@ public:
 
 		auto sprite = Maize::Sprite(m_Texture, { 0, 0, 64, 64 });
 
+
+		CreateEntity(Maize::Vec2f(0, 0), false, false, Maize::Camera());
 		CreateEntity(Maize::Vec2f(0, 0), false, false, Maize::SpriteRenderer(sprite));
 
-		AddSystem<Maize::Position>("Move Entity", flecs::OnUpdate, OnMove);
+		AddSystem<Maize::Position, Maize::SpriteRenderer>("Move Entity", flecs::OnUpdate, OnMove);
 	}
 
 	virtual void OnEnd() override {}
 
 private:
-	static void OnMove(Maize::SystemState state, Maize::Entity e, Maize::Position& p)
+	static void OnMove(Maize::SystemState state, Maize::Entity e, Maize::Position& p, Maize::SpriteRenderer&)
 	{
 		float speed = 64.0f;
 

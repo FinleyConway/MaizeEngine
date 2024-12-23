@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 namespace Maize
 {
     template<typename T>
@@ -40,7 +42,7 @@ namespace Maize
 template<typename T>
 struct std::hash<Maize::Vec2<T>>
 {
-    size_t operator()(Maize::Vec2<T> v) const
+    size_t operator()(Maize::Vec2<T> v) const noexcept
     {
         // https://stackoverflow.com/a/55083395
         size_t hash = std::hash<int32_t>()(v.x);

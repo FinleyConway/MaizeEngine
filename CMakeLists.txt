@@ -57,6 +57,9 @@ add_library(MaizeEngine
         src/Maize/Scene/Systems/Rendering/RenderingSystem.h
         src/Maize/Utils/SpatialHashGrid.cpp
         src/Maize/Utils/SpatialHashGrid.h
+        src/Maize/Scene/Systems/Rendering/RenderComponentChange.cpp
+        src/Maize/Scene/Systems/Rendering/RenderComponentChange.h
+        src/Maize/Scene/Components/Rendering/DeferredRenderable.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

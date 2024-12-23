@@ -5,11 +5,13 @@
 
 #include <memory>
 
-#include "Maize/Rendering/Renderer.h"
 #include "Maize/Scene/Scene.h"
+#include "Maize/Utils/SpatialHashGrid.h"
 
 namespace Maize
 {
+    class Renderer;
+
     /**
      * Manages the entire game and all the entities within and between the scenes.
      */
@@ -34,5 +36,7 @@ namespace Maize
     private:
         flecs::world m_World;
         std::unique_ptr<Scene> m_ActiveScene = nullptr;
+
+        SpatialHashGrid m_SpatialHashGrid;
     };
 } // Maize

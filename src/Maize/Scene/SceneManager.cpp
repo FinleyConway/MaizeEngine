@@ -1,19 +1,42 @@
 #include "Maize/Scene/SceneManager.h"
 
 #include "Maize/Core/Macros/Log.h"
+#include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
+#include "Maize/Scene/Systems/Rendering/RenderComponentChange.h"
 #include "Maize/Scene/Systems/Rendering/RenderingSystem.h"
+#include "Maize/Utils/SpatialHashGrid.h"
 
 namespace Maize
 {
-    SceneManager::SceneManager(sf::RenderWindow& window, Renderer& renderer)
+    SceneManager::SceneManager(sf::RenderWindow& window, Renderer& renderer) :
+        m_SpatialHashGrid(512)
     {
         ChangeSceneObserver(); // add scene changer observer to world.
 
-        m_World.set(Internal::RenderingContext(&renderer));
-        m_World.system<Position, SpriteRenderer>("RenderingSystem")
-            .kind(flecs::OnStore).each(RenderingSystem::Render);
+        m_World.set(Internal::RenderingContext(&renderer, &m_SpatialHashGrid));
+        m_World.component<SpriteRenderer>().on_add([](flecs::entity entity, SpriteRenderer&)
+        {
+            entity.add<Internal::DeferredRenderable>();
+        });
+        m_World.observer<const SpriteRenderer>("OnSpriteRendererRemove")
+            .event(flecs::OnRemove)
+            .each(Internal::RenderComponentChange::OnSpriteRendererRemove);
+
+        m_World.system<const Position, const SpriteRenderer>("HandleSpriteRendererDefer")
+            .with<Internal::DeferredRenderable>() // only triggers when having this component
+            .immediate().kind(flecs::PreStore)
+            .each(Internal::RenderComponentChange::HandleSpriteRendererDefer);
+
+        m_World.system<const Position, const SpriteRenderer>("UpdateSpriteRendererPosition")
+            .without<Static>().without<Internal::DeferredRenderable>()
+            .kind(flecs::PreStore)
+            .each(RenderingSystem::UpdateSpriteRendererPosition);
+
+        m_World.system<const Position, Camera>("RenderingSystem")
+            .kind(flecs::OnStore)
+            .each(RenderingSystem::Render);
 
 #if ENABLE_FLECS_EXPLORER
 		m_World.set<flecs::Rest>({});
