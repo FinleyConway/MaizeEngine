@@ -85,7 +85,7 @@ namespace Maize::Internal
         const auto& vertices = sprite.GetVertices();
 
         sf::Transform transform = sf::Transform::Identity;
-        transform.translate({ position.x - pivot.x, position.y - pivot.y }); // set position, based on pivot
+        transform.translate({ position.x - pivot.x, -position.y - pivot.y }); // set position, based on pivot
 
         sf::RenderStates state;
         state.transform *= transform;

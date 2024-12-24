@@ -1,5 +1,3 @@
-#include <numeric>
-
 #include "Maize.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
 
@@ -36,11 +34,11 @@ private:
 
 		if (input->GetButtonHeld(Maize::KeyCode::W))
 		{
-			dir.y = -1.0f;
+			dir.y = 1.0f;
 		}
 		else if (input->GetButtonHeld(Maize::KeyCode::S))
 		{
-			dir.y = 1.0f;
+			dir.y = -1.0f;
 		}
 
 		if (input->GetButtonHeld(Maize::KeyCode::A))
@@ -54,6 +52,8 @@ private:
 
 		p.x += dir.x * speed * state.DeltaTime();
 		p.y += dir.y * speed * state.DeltaTime();
+
+		GAME_LOG_INFO("Position: [{}, {}]", p.x, p.y);
 	}
 
 private:
