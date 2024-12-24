@@ -2,8 +2,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <span>
-
 #include "Maize/Math/Rect.h"
 
 namespace Maize

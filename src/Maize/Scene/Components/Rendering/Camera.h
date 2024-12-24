@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Maize/Math/Rect.h"
 
 namespace Maize

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 namespace Maize
 {
     template<typename T>

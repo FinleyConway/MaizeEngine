@@ -1,6 +1,5 @@
+#include "PrecompiledHeader.h"
 #include "Maize/Rendering/Mesh.h"
-
-#include <limits>
 
 namespace Maize
 {

@@ -2,8 +2,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <span>
-
 namespace Maize::Internal
 {
     class Renderer

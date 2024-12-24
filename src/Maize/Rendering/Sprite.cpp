@@ -1,3 +1,4 @@
+#include "PrecompiledHeader.h"
 #include "Maize/Rendering/Sprite.h"
 
 namespace Maize

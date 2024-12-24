@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Maize/Core/Macros/Assert.h"
 #include "Maize/Scene/SystemState.h"
 #include "Maize/Scene/Entity.h"
 #include "Maize/Math/Vec2.h"

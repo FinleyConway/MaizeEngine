@@ -2,7 +2,6 @@
 
 #include <flecs.h>
 
-#include "Maize/Core/Macros/Log.h"
 #include "Maize/Scene/Components/Position.h"
 #include "Maize/Scene/Components/SceneComponents.h"
 
@@ -25,26 +24,19 @@ namespace Maize
          * @return Returns true if it was added.
          */
         template<typename TComponent>
-        bool AddOrReplaceComponent(TComponent&& component)
+        bool AddOrReplaceComponent(TComponent&& component = TComponent{})
         {
             if (IsNull()) return false;
 
-            m_Handle.set<TComponent>(std::forward<TComponent>(component));
-
-            return true;
-        }
-
-        /**
-         * Add or replace a component.
-         * @tparam TComponent Component type, it must have a constructor!
-         * @return Returns true if it was added.
-         */
-        template<typename TComponent>
-        bool AddOrReplaceComponent() const
-        {
-            if (IsNull()) return false;
-
-            m_Handle.add<TComponent>();
+            // if TComponent is an empty type or has a default constructor
+            if constexpr (std::is_empty_v<TComponent> && std::is_trivially_constructible_v<TComponent>)
+            {
+                m_Handle.add<TComponent>();
+            }
+            else
+            {
+                m_Handle.set<TComponent>(std::forward<TComponent>(component));
+            }
 
             return true;
         }

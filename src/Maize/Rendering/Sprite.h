@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Maize/Math/Vec2.h"
 #include "Maize/Math/Rect.h"
 #include "Maize/Rendering/Mesh.h"

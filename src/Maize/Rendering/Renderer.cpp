@@ -1,6 +1,5 @@
+#include "PrecompiledHeader.h"
 #include "Maize/Rendering/Renderer.h"
-
-#include "Maize/Core/Macros/Log.h"
 
 namespace Maize::Internal
 {

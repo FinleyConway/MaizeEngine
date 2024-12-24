@@ -29,12 +29,17 @@ public:
 private:
 	static void OnMove(Maize::SystemState state, Maize::Entity e, Maize::Position& p, Maize::SpriteRenderer&)
 	{
-		float speed = 64.0f;
+		float speed = 10000.0f;
 
 		p.x += speed * state.DeltaTime();
 		p.y += speed * state.DeltaTime();
 
-		GAME_LOG_INFO("X: {}, Y: {}", p.x, p.y);
+		if (p.x >= 230 && p.y >= 230)
+		{
+			//p.x = 0;
+			//p.y = 0;
+			e.AddOrReplaceComponent(Maize::Position(0, 0));
+		}
 	}
 
 private:

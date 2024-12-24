@@ -1,7 +1,6 @@
+#include "PrecompiledHeader.h"
 #include "Maize/Scene/Systems/Rendering/RenderingSystem.h"
 
-#include "Maize/Core/Macros/Assert.h"
-#include "Maize/Core/Macros/Log.h"
 #include "Maize/Rendering/Renderer.h"
 #include "Maize/Scene/Components/Rendering/Camera.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"

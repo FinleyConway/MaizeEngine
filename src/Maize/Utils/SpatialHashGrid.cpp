@@ -1,9 +1,5 @@
+#include "PrecompiledHeader.h"
 #include "Maize/Utils/SpatialHashGrid.h"
-
-#include <unordered_set>
-
-#include "Maize/Core/Macros/Assert.h"
-#include "Maize/Core/Macros/Log.h"
 
 namespace Maize
 {

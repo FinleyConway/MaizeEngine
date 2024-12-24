@@ -1,6 +1,5 @@
+#include "PrecompiledHeader.h"
 #include "Maize/Core/Application.h"
-
-#include "Maize/Core/Macros/Log.h"
 
 namespace Maize
 {

@@ -65,6 +65,7 @@ add_library(MaizeEngine
 target_include_directories(MaizeEngine PRIVATE src)
 target_link_libraries(MaizeEngine PUBLIC SFML::Graphics spdlog::spdlog flecs::flecs_static)
 target_compile_features(MaizeEngine PUBLIC cxx_std_20)
+target_precompile_headers(MaizeEngine PUBLIC src/PrecompiledHeader.h)
 
 # add unit test
 if (NOT BUILD_SHARED_LIBS AND MAIZE_UNIT_TESTS)
