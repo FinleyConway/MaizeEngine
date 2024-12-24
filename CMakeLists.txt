@@ -60,6 +60,9 @@ add_library(MaizeEngine
         src/Maize/Scene/Systems/Rendering/RenderComponentChange.cpp
         src/Maize/Scene/Systems/Rendering/RenderComponentChange.h
         src/Maize/Scene/Components/Rendering/DeferredRenderable.h
+        src/Maize/Scene/Components/Input.h
+        src/Maize/Scene/Systems/InputSystem.cpp
+        src/Maize/Scene/Systems/InputSystem.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

@@ -33,7 +33,7 @@ namespace Maize
         template<typename TSingleton>
         TSingleton* GetSingleton()
         {
-            return m_World.get<TSingleton>();
+            return m_World.get_mut<TSingleton>();
         }
 
         /**

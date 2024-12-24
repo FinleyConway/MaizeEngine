@@ -11,8 +11,8 @@
 
 namespace Maize::Internal
 {
-    SceneManager::SceneManager(sf::RenderWindow& window, Renderer& renderer) :
-        m_SpatialHashGrid(512)
+    SceneManager::SceneManager(Renderer& renderer) :
+        m_SpatialHashGrid(512), m_InputHandler(m_World)
     {
         ChangeSceneObserver(); // add scene changer observer to world.
 
@@ -85,6 +85,11 @@ namespace Maize::Internal
     void SceneManager::Quit() const
     {
         m_World.quit();
+    }
+
+    void SceneManager::OnEvent(const std::optional<sf::Event>& event) const
+    {
+        m_InputHandler.OnEvent(event);
     }
 
     void SceneManager::OnUpdate(float deltaTime) const

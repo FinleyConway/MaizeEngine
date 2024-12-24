@@ -5,6 +5,7 @@
 
 #include "Maize/Scene/Scene.h"
 #include "Maize/Utils/SpatialHashGrid.h"
+#include "Maize/Scene/Systems/InputSystem.h"
 
 namespace Maize::Internal
 {
@@ -16,7 +17,7 @@ namespace Maize::Internal
     class SceneManager
     {
     public:
-        SceneManager(sf::RenderWindow& window, Renderer& renderer);
+        explicit SceneManager(Renderer& renderer);
 
         ~SceneManager();
 
@@ -26,6 +27,7 @@ namespace Maize::Internal
 
         void Quit() const;
 
+        void OnEvent(const std::optional<sf::Event>& event) const;
         void OnUpdate(float deltaTime) const;
 
     private:
@@ -36,5 +38,6 @@ namespace Maize::Internal
         std::unique_ptr<Scene> m_ActiveScene = nullptr;
 
         SpatialHashGrid m_SpatialHashGrid;
+        InputSystem m_InputHandler;
     };
 } // Maize::Internal

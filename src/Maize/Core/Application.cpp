@@ -7,7 +7,7 @@ namespace Maize
         m_Title(title),
         m_Window(sf::VideoMode({ width, height }), m_Title),
         m_Renderer(m_Window),
-        m_SceneManager(m_Window, m_Renderer)
+        m_SceneManager(m_Renderer)
     {
         Log::Initialise();
 
@@ -49,6 +49,8 @@ namespace Maize
     {
         while (const std::optional event = m_Window.pollEvent())
         {
+            m_SceneManager.OnEvent(event);
+
             if (event->is<sf::Event::Closed>())
             {
                 m_Window.close();

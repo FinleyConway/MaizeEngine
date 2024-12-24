@@ -29,17 +29,31 @@ public:
 private:
 	static void OnMove(Maize::SystemState state, Maize::Entity e, Maize::Position& p, Maize::SpriteRenderer&)
 	{
-		float speed = 10000.0f;
+		auto* input = state.GetSingleton<Maize::Input>();
 
-		p.x += speed * state.DeltaTime();
-		p.y += speed * state.DeltaTime();
+		Maize::Vec2f dir;
+		float speed = 512.0f;
 
-		if (p.x >= 230 && p.y >= 230)
+		if (input->GetButtonHeld(Maize::KeyCode::W))
 		{
-			//p.x = 0;
-			//p.y = 0;
-			e.AddOrReplaceComponent(Maize::Position(0, 0));
+			dir.y = -1.0f;
 		}
+		else if (input->GetButtonHeld(Maize::KeyCode::S))
+		{
+			dir.y = 1.0f;
+		}
+
+		if (input->GetButtonHeld(Maize::KeyCode::A))
+		{
+			dir.x = -1.0f;
+		}
+		else if (input->GetButtonHeld(Maize::KeyCode::D))
+		{
+			dir.x = 1.0f;
+		}
+
+		p.x += dir.x * speed * state.DeltaTime();
+		p.y += dir.y * speed * state.DeltaTime();
 	}
 
 private:
