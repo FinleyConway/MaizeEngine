@@ -61,12 +61,16 @@ namespace Maize
         template<typename... Components, typename Func>
         flecs::system AddSystem(const std::string& systemName, flecs::entity_t updateOrder, Func&& systemFunc)
         {
+            PROFILE_FUNCTION();
+
             CORE_ASSERT(m_World != nullptr, "World has not been assigned!");
 
             // Create system
-            const auto system = m_World->system<Components...>(systemName.c_str()).kind(updateOrder).each(
-                [&](flecs::entity e, Components&... components)
+            const flecs::system system = m_World->system<Components...>(systemName.c_str()).kind(updateOrder).each(
+                [&, systemName](flecs::entity e, Components&... components)
                 {
+                    PROFILE_SCOPE(systemName);
+
                     systemFunc(SystemState(*m_World), Entity(e), components...);
                 });
             system.disable();
@@ -88,12 +92,16 @@ namespace Maize
         template<typename... Components, typename Func>
         flecs::observer AddObserver(const std::string& systemName, flecs::entity_t triggerType, Func&& observerFunc)
         {
+            PROFILE_FUNCTION();
+
             CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
 
             // create system
             const auto observer = m_World->observer<Components...>(systemName.c_str()).event(triggerType).each(
-                [&](flecs::entity e, Components... components)
+                [&, systemName](flecs::entity e, Components... components)
                 {
+                    PROFILE_SCOPE(systemName);
+
                     observerFunc(SystemState(*m_World), Entity(e), components...);
                 });
             observer.disable();
@@ -106,6 +114,8 @@ namespace Maize
     private:
         void Initialise(flecs::world& world)
         {
+            PROFILE_FUNCTION();
+
             m_World = &world;
 
             OnStart();
@@ -125,6 +135,8 @@ namespace Maize
 
         void Shutdown()
         {
+            PROFILE_FUNCTION();
+
             OnEnd();
 
             // remove all non-persistent entities from the scene

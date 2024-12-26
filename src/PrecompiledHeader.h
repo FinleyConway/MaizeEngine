@@ -24,3 +24,4 @@
 
 #include "Maize/Core/Macros/Log.h"
 #include "Maize/Core/Macros/Assert.h"
+#include "Maize/Core/Instrumentor.h"

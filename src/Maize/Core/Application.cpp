@@ -11,8 +11,14 @@ namespace Maize
     {
         Log::Initialise();
 
+        PROFILE_BEGIN_SESSION("Maize", "Maize-Benchmark.json", 512);
+
         m_Window.setKeyRepeatEnabled(false); // disable text editor hold key like functionality
-        m_Window.setVerticalSyncEnabled(true); // turn on v-sync by default
+    }
+
+    Application::~Application()
+    {
+        PROFILE_END_SESSION();
     }
 
     void Application::Quit()
@@ -22,10 +28,14 @@ namespace Maize
 
     bool Application::Run()
     {
+        //PROFILE_FUNCTION();
+
         sf::Clock clock;
 
         while (m_Window.isOpen())
         {
+            PROFILE_SCOPE("Run Loop");
+
             OnEvent();
 
             const float deltaTime = clock.restart().asSeconds();

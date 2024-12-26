@@ -14,6 +14,8 @@ namespace Maize::Internal
     SceneManager::SceneManager(Renderer& renderer) :
         m_SpatialHashGrid(512), m_InputHandler(m_World)
     {
+        PROFILE_FUNCTION();
+
         ChangeSceneObserver(); // add scene changer observer to world.
 
         m_World.set(RenderingContext(&renderer, &m_SpatialHashGrid));
@@ -48,6 +50,8 @@ namespace Maize::Internal
 
     SceneManager::~SceneManager()
     {
+        PROFILE_FUNCTION();
+
         // shutdown any active scenes
         if (m_ActiveScene)
         {
@@ -64,6 +68,8 @@ namespace Maize::Internal
 
     bool SceneManager::LoadScene(std::unique_ptr<Scene> newScene)
     {
+        PROFILE_FUNCTION();
+
         if (newScene != nullptr)
         {
             if (m_ActiveScene != nullptr)
@@ -94,6 +100,8 @@ namespace Maize::Internal
 
     void SceneManager::OnUpdate(float deltaTime) const
     {
+        PROFILE_FUNCTION();
+
         m_World.progress(deltaTime);
     }
 
@@ -102,6 +110,8 @@ namespace Maize::Internal
         m_World.observer<ChangeScene>("OnChangeScene").event(flecs::OnSet).each(
             [&](flecs::entity e, ChangeScene& sceneChanger)
         {
+            PROFILE_FUNCTION();
+
             LoadScene(std::move(sceneChanger.newScene));
             e.remove<ChangeScene>();
         });

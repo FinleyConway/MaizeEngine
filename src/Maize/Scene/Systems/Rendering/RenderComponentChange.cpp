@@ -10,6 +10,8 @@ namespace Maize::Internal
 {
     void RenderComponentChange::OnSpriteRendererRemove(flecs::entity entity, const SpriteRenderer&)
     {
+        PROFILE_FUNCTION();
+
         const auto* ctx = entity.world().get<RenderingContext>();
 
         CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
@@ -21,6 +23,8 @@ namespace Maize::Internal
     void RenderComponentChange::HandleSpriteRendererDefer(flecs::entity entity, const Position& position,
         const SpriteRenderer& spriteRenderer)
     {
+        PROFILE_FUNCTION();
+
         const auto* ctx = entity.world().get<RenderingContext>();
 
         CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")

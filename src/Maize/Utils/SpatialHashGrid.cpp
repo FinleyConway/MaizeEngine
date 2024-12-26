@@ -10,6 +10,8 @@ namespace Maize
 
     void SpatialHashGrid::Insert(flecs::entity_t e, const FloatRect& size)
     {
+        PROFILE_FUNCTION();
+
         // convert entity bounds to grid bounds
         const auto top = Vec2f(size.x, size.y);
         const auto bottom = Vec2f(size.x + size.width, size.y + size.height);
@@ -31,6 +33,8 @@ namespace Maize
 
     void SpatialHashGrid::Remove(flecs::entity_t e)
     {
+        PROFILE_FUNCTION();
+
         if (!m_EntityPositions.contains(e)) return;
 
         for (auto index : m_EntityPositions.at(e))
@@ -58,6 +62,8 @@ namespace Maize
 
     void SpatialHashGrid::Relocate(flecs::entity_t e, const FloatRect& size)
     {
+        PROFILE_FUNCTION();
+
         // remove entity from the grid
         Remove(e);
 
@@ -67,6 +73,8 @@ namespace Maize
 
     std::vector<flecs::entity_t> SpatialHashGrid::Query(const FloatRect& region)
     {
+        PROFILE_FUNCTION();
+
         // convert entity bounds to grid bounds
         const auto top = Vec2f(region.x, region.y);
         const auto bottom = Vec2f(region.x + region.width, region.y + region.height);
@@ -104,6 +112,8 @@ namespace Maize
 
     void SpatialHashGrid::SetCellSize(uint16_t cellSize)
     {
+        PROFILE_FUNCTION();
+
         CORE_ASSERT(cellSize != 0, "Spatial hash grid cell size must be larger then 0!")
 
         m_CellSize = cellSize;
@@ -111,6 +121,8 @@ namespace Maize
 
     Vec2i SpatialHashGrid::PixelToGrid(Vec2f pixel) const
     {
+        PROFILE_FUNCTION();
+
         const int32_t gridX = std::floor(pixel.x / m_CellSize);
         const int32_t gridY = std::floor(pixel.y / m_CellSize);
 

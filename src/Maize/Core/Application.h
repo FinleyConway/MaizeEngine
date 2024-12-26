@@ -12,7 +12,7 @@ namespace Maize
     public:
         Application(std::string_view title, uint32_t width, uint32_t height);
 
-        virtual ~Application() = default;
+        virtual ~Application();
 
         bool Run();
 

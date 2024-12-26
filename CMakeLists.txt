@@ -7,6 +7,7 @@ option(MAIZE_UNIT_TESTS "Build unit-test" OFF)
 option(MAIZE_SANDBOX "Build sandbox" OFF)
 option(MAIZE_ENABLE_LOGGING "Enable logging" ON)
 option(MAIZE_ENABLE_ASSERTS "Enable asserts" ON)
+option(MAIZE_ENABLE_BENCHMARK "Enable benchmarking" OFF)
 
 if (MAIZE_ENABLE_LOGGING)
     add_definitions(-DENABLE_LOGGING)
@@ -14,6 +15,9 @@ endif ()
 if (MAIZE_ENABLE_ASSERTS)
     add_definitions(-DENABLE_ASSERTS)
 endif ()
+if (MAIZE_ENABLE_BENCHMARK)
+    add_definitions(-DENABLE_PROFILING)
+endif()
 
 include(FetchContent)
 FetchContent_Declare(sfml GIT_REPOSITORY https://github.com/SFML/SFML.git GIT_TAG 3.0.0)
@@ -63,6 +67,8 @@ add_library(MaizeEngine
         src/Maize/Scene/Components/Input.h
         src/Maize/Scene/Systems/InputSystem.cpp
         src/Maize/Scene/Systems/InputSystem.h
+        src/Maize/Core/Instrumentor.h
+        src/PrecompiledHeader.cpp
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

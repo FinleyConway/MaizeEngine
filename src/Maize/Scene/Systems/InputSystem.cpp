@@ -13,6 +13,8 @@ namespace Maize::Internal
 
     void InputSystem::OnEvent(const std::optional<sf::Event>& event) const
     {
+        PROFILE_FUNCTION();
+
         if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             OnKeyPressed(*keyPressed);
 

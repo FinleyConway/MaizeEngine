@@ -12,6 +12,8 @@ namespace Maize::Internal
     void RenderingSystem::UpdateSpriteRendererPosition(flecs::entity entity, const Position& position,
         const SpriteRenderer& spriteRenderer)
     {
+        PROFILE_FUNCTION();
+
         const auto* ctx = entity.world().get<RenderingContext>();
 
         CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
@@ -24,6 +26,8 @@ namespace Maize::Internal
 
     void RenderingSystem::Render(flecs::entity entity, const Position& position, Camera& camera)
     {
+        PROFILE_FUNCTION();
+
         const auto* ctx = entity.world().get<RenderingContext>();
 
         CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
@@ -53,6 +57,8 @@ namespace Maize::Internal
 
     sf::View RenderingSystem::SetupCurrentCamera(const Renderer* renderer, const Position& position, Camera& camera)
     {
+        PROFILE_FUNCTION();
+
         // set up the current sfml view using camera component
         const auto windowSize = renderer->GetWindowSize();
         auto view = sf::View({ position.x, position.y }, sf::Vector2f(windowSize));
@@ -79,6 +85,8 @@ namespace Maize::Internal
     void RenderingSystem::RenderSprite(Renderer* renderer, const SpriteRenderer& spriteRenderer,
         const Position& position)
     {
+        PROFILE_FUNCTION();
+
         const auto& sprite = spriteRenderer.sprite;
         const auto pivot = sprite.GetPivot();
         const auto& texture = sprite.GetTexture().lock();
