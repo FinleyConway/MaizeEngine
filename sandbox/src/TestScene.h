@@ -9,16 +9,25 @@ namespace RailDir
 {
     enum
     {
-        None = 0,	// 00000000
-        N    = 1,   // 00000001
-        NE   = 2,   // 00000010
-        E    = 4,   // 00000100
-        SE   = 8,   // 00001000
-        S    = 16,  // 00010000
-        SW   = 32,  // 00100000
-        W    = 64,  // 01000000
-        NW   = 128  // 10000000
+        None = 0, // 00000000
+        N    = 1, // 00000001
+        E    = 2, // 00000010
+        S    = 4, // 00000100
+        W    = 8, // 00001000
     };
+
+    inline std::string_view RailDirToStr(uint8_t dir)
+    {
+        switch (dir)
+        {
+            case None: return "None";
+            case N:    return "N";
+            case E:    return "E";
+            case S:    return "S";
+            case W:    return "W";
+            default:   return "Unknown";
+        }
+    }
 } // RailDir
 
 /**
@@ -28,20 +37,32 @@ namespace RailType
 {
     enum
     {
-        None  = RailDir::None, // no direction
+        None       = RailDir::None,            // No direction (00000000)
 
-        StraightNS = RailDir::N | RailDir::S, // vertical rail ↕
-        StraightWE = RailDir::W | RailDir::E, // horizontal rail ↔
+        Vertical   = RailDir::N  | RailDir::S, // (i: north, o: south) | (i: south, o: north) (00000101)
+        Horizontal = RailDir::W  | RailDir::E, // (i: west,  o: east)  | (i: east,  o: west)  (00001010)
 
-        LeftSW = RailDir::S | RailDir::W, // South to west turn ↰
-        LeftNW = RailDir::N | RailDir::W, // North to west turn ↲
+        NorthRight = RailDir::N  | RailDir::E, // (i: north, o: east)  | (i: east,  o: south) (00000011)
+        NorthLeft  = RailDir::N  | RailDir::W, // (i: north, o: west)  | (i: west,  o: south) (00001001)
 
-        RightSE = RailDir::S | RailDir::E, // South to east turn ↱
-        RightNE = RailDir::N | RailDir::E, // North to east turn ↳
-
-        DiagonalNESW = RailDir::NE | RailDir::SW, // Diagonal left ⤢
-        DiagonalNWSE = RailDir::NW | RailDir::SE, // Diagonal right ⤡
+        SouthRight = RailDir::S  | RailDir::E, // (i: south, o: east)  | (i: east,  o: north) (00000110)
+        SouthLeft  = RailDir::S  | RailDir::W, // (i: south, o: west)  | (i: west,  o: north) (00001100)
     };
+
+    inline std::string_view RailTypeToStr(uint8_t type)
+    {
+        switch (type)
+        {
+            case None:       return "None";
+            case Vertical:   return "Vertical";
+            case Horizontal: return "Horizontal";
+            case NorthRight: return "North Right";
+            case NorthLeft:  return "North Left";
+            case SouthRight: return "South Right";
+            case SouthLeft:  return "South Left";
+            default:         return "Unknown";
+        }
+    }
 } // RailType
 
 struct RailTile
@@ -103,11 +124,12 @@ struct Grid
 
 struct RailController
 {
-    float speed = 8.0f;
+    float speed = 50.0f;
 
     Maize::Vec2f lastPos;
     Maize::Vec2f nextPos;
     float currentTime = 0.0f;
+    uint8_t currentDir = RailDir::N;
 
     Maize::Entity grid;
 
@@ -135,26 +157,6 @@ static Maize::Vec2i PixelToCartesian(float x, float y, int32_t cellSizeX, int32_
     return Maize::Vec2i(gridX, gridY);
 }
 
-inline void RotateRailClockWise(std::bitset<8>& direction)
-{
-    // StraightNS   * 2 = DiagonalNESW
-    // DiagonalNESW * 2 = StraightWE
-    // StraightWE   * 2 = DiagonalNWSE
-
-    const uint64_t dir = direction.to_ulong();
-
-    if (dir & RailType::StraightNS || dir & RailType::DiagonalNESW || dir & RailType::StraightWE)
-    {
-        // shift the direction to the next direction
-        direction = dir * 2;
-    }
-    else if (direction == RailType::DiagonalNWSE)
-    {
-        // reset direction
-        direction = RailType::StraightNS;
-    }
-}
-
 static float Lerp(float a, float b, float t) { t = std::clamp(t, 0.0f, 1.0f); return a + (b - a) * t; }
 
 static Maize::Vec2f Lerp(Maize::Vec2f from, Maize::Vec2f to, float time)
@@ -165,108 +167,129 @@ static Maize::Vec2f Lerp(Maize::Vec2f from, Maize::Vec2f to, float time)
     return Maize::Vec2f(newX, newY);
 }
 
-static Maize::Vec2i GetDirectionOffset(uint8_t direction, Maize::Vec2i offset, bool forward)
+static Maize::Vec2i CalculateOffsetForDirection(uint8_t& controllerDirection, Maize::Vec2i offset, int deltaX, int deltaY, uint8_t newControllerDirection = 0)
 {
-    auto newOffset = offset;
+    offset.x += deltaX;
+    offset.y += deltaY;
 
-    switch (direction)
+    if (newControllerDirection != 0)
     {
-        case RailType::StraightNS: // up or down
-        {
-            if (forward) newOffset.y += 1;
-            else newOffset.y -= 1;
-            break;
-        }
-        case RailType::StraightWE: // left or right
-        {
-            if (forward) newOffset.x += 1;
-            else newOffset.x -= 1;
-            break;
-        }
-        case RailType::LeftSW: // up and left
-        {
-            if (forward) newOffset.x -= 1;
-            else newOffset.y -= 1;
-            break;
-        }
-        case RailType::RightSE: // up and right
-        {
-            if (forward) newOffset.x += 1;
-            else newOffset.y -= 1;
-            break;
-        }
-        case RailType::LeftNW: // down and left
-        {
-            if (forward) newOffset.x -= 1;
-            else newOffset.y += 1;
-            break;
-        }
-        case RailType::RightNE: // up and right
-        {
-            if (forward) newOffset.x += 1;
-            else newOffset.y += 1;
-            break;
-        }
-        default:
-            GAME_ASSERT(false, "Unknown direction");
-            break;
+        controllerDirection = newControllerDirection;
     }
 
-    return newOffset;
+    return offset;
 }
 
-static void HandleDirection(Grid& grid, Maize::Vec2f& nextPosition, Maize::Vec2f& lastPosition, float& currentTime, bool forward)
+static Maize::Vec2i GetVerticalOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
 {
-    const auto gridPos = PixelToCartesian(nextPosition.x, nextPosition.y, 32, 32);
-    const auto& tile = grid.Get(gridPos.x, gridPos.y);
-    const auto gridPosOffset = GetDirectionOffset(tile.direction, gridPos, forward);
-    const auto direction = grid.Get(gridPosOffset.x, gridPosOffset.y).direction;
+    if (controllerDirection == RailDir::N) return CalculateOffsetForDirection(controllerDirection, offset, 0, 1);
+    if (controllerDirection == RailDir::S) return CalculateOffsetForDirection(controllerDirection, offset, 0, -1);
 
-    if (direction != RailType::None)
+    return offset;
+}
+
+static Maize::Vec2i GetHorizontalOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
+{
+    if (controllerDirection == RailDir::E) return CalculateOffsetForDirection(controllerDirection, offset, 1, 0);
+    if (controllerDirection == RailDir::W) return CalculateOffsetForDirection(controllerDirection, offset, -1, 0);
+
+    return offset;
+}
+
+static Maize::Vec2i GetNorthRightOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
+{
+    if (controllerDirection == RailDir::N) return CalculateOffsetForDirection(controllerDirection, offset, 1, 0, RailDir::E);
+    if (controllerDirection == RailDir::E) return CalculateOffsetForDirection(controllerDirection, offset, 0, -1, RailDir::S);
+
+    return offset;
+}
+
+static Maize::Vec2i GetNorthLeftOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
+{
+    if (controllerDirection == RailDir::N) return CalculateOffsetForDirection(controllerDirection, offset, -1, 0, RailDir::W);
+    if (controllerDirection == RailDir::W) return CalculateOffsetForDirection(controllerDirection, offset, 0, -1, RailDir::S);
+
+    return offset;
+}
+
+static Maize::Vec2i GetSouthRightOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
+{
+    if (controllerDirection == RailDir::S) return CalculateOffsetForDirection(controllerDirection, offset, 1, 0, RailDir::E);
+    if (controllerDirection == RailDir::E) return CalculateOffsetForDirection(controllerDirection, offset, 0, 1, RailDir::N);
+
+    return offset;
+}
+
+static Maize::Vec2i GetSouthLeftOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
+{
+    if (controllerDirection == RailDir::S) return CalculateOffsetForDirection(controllerDirection, offset, -1, 0, RailDir::W);
+    if (controllerDirection == RailDir::W) return CalculateOffsetForDirection(controllerDirection, offset, 0, 1, RailDir::N);
+
+    return offset;
+}
+
+static Maize::Vec2i GetDirectionOffset(uint8_t direction, uint8_t& controllerDirection, Maize::Vec2i offset)
+{
+    switch (direction)
     {
-        if (forward)
-        {
-            lastPosition = nextPosition;
-            nextPosition = CartesianToPixel(gridPosOffset.x, gridPosOffset.y, 32, 32);
-            currentTime = 0.0f;
-        }
-        else
-        {
-            nextPosition = lastPosition;
-            lastPosition = CartesianToPixel(gridPosOffset.x, gridPosOffset.y, 32, 32);
-            currentTime = 1.0f;
-        }
+        case RailType::Vertical:   return GetVerticalOffset(controllerDirection, offset);
+        case RailType::Horizontal: return GetHorizontalOffset(controllerDirection, offset);
+        case RailType::NorthRight: return GetNorthRightOffset(controllerDirection, offset);
+        case RailType::NorthLeft:  return GetNorthLeftOffset(controllerDirection, offset);
+        case RailType::SouthRight: return GetSouthRightOffset(controllerDirection, offset);
+        case RailType::SouthLeft:  return GetSouthLeftOffset(controllerDirection, offset);
+        case RailType::None:       return Maize::Vec2i{-1, -1};
+        default:                   GAME_ASSERT(false, "Unknown direction");
     }
+
+    return offset;
+}
+
+static void HandleDirection(Grid& grid, RailController& controller, Maize::Vec2f& nextPosition, Maize::Vec2f& lastPosition)
+{
+    const Maize::Vec2i gridPos = PixelToCartesian(nextPosition.x, nextPosition.y, 32, 32);
+    const auto& tile = grid.Get(gridPos.x, gridPos.y);
+    const Maize::Vec2i gridPosOffset = GetDirectionOffset(tile.direction, controller.currentDir, gridPos);
+
+    if (gridPosOffset == Maize::Vec2i(-1, -1)) return;
+
+    const uint8_t nextDirection = grid.Get(gridPosOffset.x, gridPosOffset.y).direction;
+
+    if ((controller.currentDir & nextDirection) == 0) return;
+
+    if (nextDirection != RailType::None)
+    {
+        lastPosition = nextPosition;
+        nextPosition = CartesianToPixel(gridPosOffset.x, gridPosOffset.y, 32, 32);
+        controller.currentTime = 0.0f;
+    }
+}
+
+static bool Approx(float a, float b)
+{
+    return std::abs(a - b) < std::numeric_limits<float>::epsilon();
+}
+
+static bool Approx(Maize::Vec2f a, Maize::Vec2f b)
+{
+    return Approx(a.x, b.x) && Approx(a.y, b.y);
 }
 
 static void Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller)
 {
     auto* input = s.GetSingleton<Maize::Input>();
 
-    // handle directional input
-    float inputValue = 0.0f;
-    if (input->GetButtonHeld(Maize::KeyCode::W)) inputValue = 1.0f;
-    else if (input->GetButtonHeld(Maize::KeyCode::S)) inputValue = -1.0f;
-
-    if (inputValue != 0.0f)
+    if (input->GetButtonHeld(Maize::KeyCode::W))
     {
         if (auto* grid = controller.grid.TryGetMutComponent<Grid>())
         {
-            const bool isForward = position.x >= controller.nextPos.x && position.y >= controller.nextPos.y;
-            const bool isBackward = position.x <= controller.lastPos.x && position.y <= controller.lastPos.y;
-
-            // going forward
-            if (inputValue > 0.0f && isForward)
+            if (Approx(position, controller.nextPos))
             {
-                HandleDirection(*grid, controller.nextPos, controller.lastPos, controller.currentTime, true);
-            }
-            else if (inputValue < 0.0f && isBackward)
-            {
-                HandleDirection(*grid, controller.nextPos, controller.lastPos, controller.currentTime, false);
+                HandleDirection(*grid, controller, controller.nextPos, controller.lastPos);
             }
         }
 
-        controller.currentTime += inputValue * controller.speed * s.DeltaTime();
+        controller.currentTime += controller.speed * s.DeltaTime();
         controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
 
         const auto lerpPos = Lerp(controller.lastPos, controller.nextPos, controller.currentTime);
@@ -296,31 +319,24 @@ public:
         CreateEntity(Maize::Vec2f(0, 0), false, false, Maize::Camera());
 
         auto grid = Grid(10, 10);
-        grid.Get(0, 1).direction = RailType::StraightNS;
-        grid.Get(0, 2).direction = RailType::StraightNS;
-        grid.Get(0, 3).direction = RailType::RightSE;
-        grid.Get(1, 3).direction = RailType::StraightWE;
-        grid.Get(2, 3).direction = RailType::StraightWE;
-        grid.Get(3, 3).direction = RailType::LeftSW;
-        grid.Get(3, 2).direction = RailType::StraightNS;
-        grid.Get(3, 1).direction = RailType::StraightNS;
-        grid.Get(3, 0).direction = RailType::LeftNW;
-        grid.Get(2, 0).direction = RailType::StraightWE;
-        grid.Get(1, 0).direction = RailType::StraightWE;
+        grid.Set(0, 3, { RailType::NorthRight }); grid.Set(1, 3, { RailType::Horizontal }); grid.Set(2, 3, { RailType::NorthRight });
+        grid.Set(0, 2, { RailType::Vertical });                                                                grid.Set(2, 2, { RailType::Vertical });
+        grid.Set(0, 1, { RailType::Vertical });                                                                grid.Set(2, 1, { RailType::Vertical });
+        grid.Set(0, 0, { RailType::SouthLeft }); grid.Set(1, 0, { RailType::Horizontal });  grid.Set(2, 0, { RailType::SouthLeft });
 
-        auto gridE = CreateEntity(Maize::Vec2f(0, 0), true, false, grid);
-
+        CreateEntity(CartesianToPixel(0, 0, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
         CreateEntity(CartesianToPixel(0, 1, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
         CreateEntity(CartesianToPixel(0, 2, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
         CreateEntity(CartesianToPixel(0, 3, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
         CreateEntity(CartesianToPixel(1, 3, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(CartesianToPixel(2, 3, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(CartesianToPixel(3, 3, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(CartesianToPixel(3, 2, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(CartesianToPixel(3, 1, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(CartesianToPixel(3, 0, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(CartesianToPixel(2, 0, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
         CreateEntity(CartesianToPixel(1, 0, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
+        CreateEntity(CartesianToPixel(2, 3, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
+        CreateEntity(CartesianToPixel(2, 2, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
+        CreateEntity(CartesianToPixel(2, 1, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
+        CreateEntity(CartesianToPixel(2, 0, 32, 32), true, false, Maize::SpriteRenderer(spriteRed));
+
+
+        auto gridE = CreateEntity(Maize::Vec2f(0, 0), true, false, grid);
 
         CreateEntity(CartesianToPixel(0, 1, 32, 32), false, false,
             Maize::SpriteRenderer(sprite),
