@@ -5,7 +5,7 @@
 #include "Maize/Core/Macros/Log.h"
 #include "Maize/Core/Macros/Assert.h"
 
-
+#include "Maize/Math/Math.h"
 #include "Maize/Math/Vec2.h"
 #include "Maize/Math/Rect.h"
 

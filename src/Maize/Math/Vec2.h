@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Maize/Math/Math.h"
+
 namespace Maize
 {
     template<typename T>
@@ -17,6 +19,19 @@ namespace Maize
         template<typename U>
         constexpr explicit Vec2(const Vec2<U>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y))
         {
+        }
+
+        constexpr Vec2<float> LerpTo(Vec2<float> to, float time)
+        {
+            const float newX = Math::Lerp(x, to.x, time);
+            const float newY = Math::Lerp(y, to.y, time);
+
+            return Vec2(newX, newY);
+        }
+
+        constexpr bool ApproxOf(Vec2<float> other)
+        {
+            return Math::Approx(x, other.x) && Math::Approx(y, other.y);
         }
 
         template<typename U>

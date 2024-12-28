@@ -69,6 +69,7 @@ add_library(MaizeEngine
         src/Maize/Scene/Systems/InputSystem.h
         src/Maize/Core/Instrumentor.h
         src/PrecompiledHeader.cpp
+        src/Maize/Math/Math.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

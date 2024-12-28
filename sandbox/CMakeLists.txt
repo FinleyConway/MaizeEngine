@@ -5,6 +5,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_executable(sandbox
         src/Sandbox.cpp
         src/TestScene.h
+        src/RailTypes.h
+        src/MineCarMovement.cpp
+        src/MineCarMovement.h
+        src/Grid.h
+        src/RailController.h
 )
 
 target_include_directories(sandbox PRIVATE ${CMAKE_SOURCE_DIR}/src)
