@@ -16,6 +16,7 @@
 #include "Maize/Scene/Components/Position.h"
 #include "Maize/Scene/Components/Rendering/Camera.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
+#include "Maize/Scene/Components/Rendering/MeshRenderer.h"
 #include "Maize/Scene/Components/SceneComponents.h"
 
 #include "Maize/Scene/Scene.h"

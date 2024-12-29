@@ -17,47 +17,42 @@ public:
         texture = std::make_shared<sf::Texture>(sf::Vector2u(32, 32));
         texture->update(data.data());
 
-        std::vector<uint8_t> data1;
-        data1.assign(32*32*4, 128);
-        textureRed = std::make_shared<sf::Texture>(sf::Vector2u(32, 32));
-        textureRed->update(data1.data());
-
-        const auto sprite = Maize::Sprite(texture, { 0, 0, 32, 32 });
-        const auto spriteRed = Maize::Sprite(textureRed, { 0, 0, 32, 32 });
-
         CreateEntity(Maize::Vec2f(0, 0), false, false, Maize::Camera());
 
         auto grid = Grid(10, 10, 32);
-        grid.Set(0, 3, { RailType::NorthRight }); grid.Set(1, 3, { RailType::Horizontal }); grid.Set(2, 3, { RailType::NorthRight });
-        grid.Set(0, 2, { RailType::Vertical });                                                                grid.Set(2, 2, { RailType::Vertical });
-        grid.Set(0, 1, { RailType::Vertical });                                                                grid.Set(2, 1, { RailType::Vertical });
-        grid.Set(0, 0, { RailType::SouthLeft }); grid.Set(1, 0, { RailType::Horizontal });  grid.Set(2, 0, { RailType::SouthLeft });
 
-        CreateEntity(grid.CartesianToPixel(0, 0), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(0, 1), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(0, 2), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(0, 3), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(1, 3), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(1, 0), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(2, 3), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(2, 2), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(2, 1), true, false, Maize::SpriteRenderer(spriteRed));
-        CreateEntity(grid.CartesianToPixel(2, 0), true, false, Maize::SpriteRenderer(spriteRed));
+        std::array<sf::Vertex, 6> vertices;
+        vertices[0].position = sf::Vector2f(0, 0);
+        vertices[1].position = sf::Vector2f(0, 32);
+        vertices[2].position = sf::Vector2f(32, 0);
+        vertices[3].position = sf::Vector2f(0, 32);
+        vertices[4].position = sf::Vector2f(32, 32);
+        vertices[5].position = sf::Vector2f(32, 0);
 
+        Maize::Mesh mesh;
+        mesh.AddVertices(vertices);
 
-        auto gridE = CreateEntity(Maize::Vec2f(0, 0), true, false, grid);
+        CreateEntity(Maize::Vec2f(0, 0), false, false, Maize::MeshRenderer(mesh));
 
-        CreateEntity(grid.CartesianToPixel(0, 1), false, false,
-            Maize::SpriteRenderer(sprite),
+        //auto mineCarEntity = CreateEntity(Maize::Vec2f(0, 0), true, false, grid);
+
+        /*CreateEntity(grid.CartesianToPixel(0, 1), false, false,
             RailController(grid.CartesianToPixel(0, 1), gridE)
         );
 
-        AddSystem<Maize::Position, RailController>("Rail Controller", flecs::OnUpdate, MineCarMovement::Move);
+        AddSystem<Maize::Position, RailController>("Rail Controller", flecs::OnUpdate, MineCarMovement::Move);*/
     }
 
     virtual void OnEnd() override {}
 
 private:
     std::shared_ptr<sf::Texture> texture;
-    std::shared_ptr<sf::Texture> textureRed;
+
+    // Vertical   = { 16, 00, 16, 16 }
+    // Horizontal = { 64, 32, 16, 16 }
+
+    // NorthRight = { 128, 00, 16, 16 }
+    // NorthLeft  = { 144, 00, 16, 16 }
+    // SouthRight = { 128, 16, 16, 16 }
+    // SouthLeft  = { 144, 16, 16, 16 }
 };

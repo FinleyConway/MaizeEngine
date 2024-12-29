@@ -70,6 +70,7 @@ add_library(MaizeEngine
         src/Maize/Core/Instrumentor.h
         src/PrecompiledHeader.cpp
         src/Maize/Math/Math.h
+        src/Maize/Scene/Components/Rendering/MeshRenderer.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

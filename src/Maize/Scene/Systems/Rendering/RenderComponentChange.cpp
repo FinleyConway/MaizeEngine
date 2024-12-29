@@ -4,6 +4,7 @@
 #include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
+#include "Maize/Scene/Components/Rendering/MeshRenderer.h"
 #include "Maize/Utils/SpatialHashGrid.h"
 
 namespace Maize::Internal
@@ -31,6 +32,35 @@ namespace Maize::Internal
         CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!")
 
         const auto globalBounds = spriteRenderer.GetGlobalBounds(position);
+
+        ctx->spatialIndex->Insert(entity, globalBounds);
+
+        entity.remove<DeferredRenderable>();
+    }
+
+    void RenderComponentChange::OnMeshRendererRemove(flecs::entity entity, const MeshRenderer&)
+    {
+        PROFILE_FUNCTION();
+
+        const auto* ctx = entity.world().get<RenderingContext>();
+
+        CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
+        CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!")
+
+        ctx->spatialIndex->Remove(entity);
+    }
+
+    void RenderComponentChange::HandleMeshRendererDefer(flecs::entity entity, const Position& position,
+        const MeshRenderer& meshRenderer)
+    {
+        PROFILE_FUNCTION();
+
+        const auto* ctx = entity.world().get<RenderingContext>();
+
+        CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
+        CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!")
+
+        const auto globalBounds = meshRenderer.GetGlobalBounds(position);
 
         ctx->spatialIndex->Insert(entity, globalBounds);
 

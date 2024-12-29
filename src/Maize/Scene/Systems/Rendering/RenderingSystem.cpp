@@ -5,6 +5,7 @@
 #include "Maize/Scene/Components/Rendering/Camera.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
+#include "Maize/Scene/Components/Rendering/MeshRenderer.h"
 #include "Maize/Utils/SpatialHashGrid.h"
 
 namespace Maize::Internal
@@ -20,6 +21,21 @@ namespace Maize::Internal
         CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!")
 
         const auto& globalBounds = spriteRenderer.GetGlobalBounds(position);
+
+        ctx->spatialIndex->Relocate(entity, globalBounds);
+    }
+
+    void RenderingSystem::UpdateMeshRendererPosition(flecs::entity entity, const Position& position,
+        const MeshRenderer& meshRenderer)
+    {
+        PROFILE_FUNCTION();
+
+        const auto* ctx = entity.world().get<RenderingContext>();
+
+        CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
+        CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!")
+
+        const auto& globalBounds = meshRenderer.GetGlobalBounds(position);
 
         ctx->spatialIndex->Relocate(entity, globalBounds);
     }
@@ -52,6 +68,9 @@ namespace Maize::Internal
             // render all types depending on what's on the entity
             if (const auto* sprite = e.get<SpriteRenderer>())
                 RenderSprite(ctx->renderer, *sprite, p);
+
+            if (const auto* mesh = e.get<MeshRenderer>())
+                RenderMesh(ctx->renderer, *mesh, p);
         }
     }
 
@@ -94,6 +113,23 @@ namespace Maize::Internal
 
         sf::Transform transform = sf::Transform::Identity;
         transform.translate({ position.x - pivot.x, -position.y - pivot.y }); // set position, based on pivot
+
+        sf::RenderStates state;
+        state.transform *= transform;
+        state.texture = texture.get(); // want to place to use sf::Texture* rather than a weak_ptr
+
+        renderer->Draw(vertices, state);
+    }
+
+    void RenderingSystem::RenderMesh(Renderer* renderer, const MeshRenderer& meshRenderer, const Position& position)
+    {
+        PROFILE_FUNCTION();
+
+        const auto& vertices = meshRenderer.mesh.GetVertices();;
+        const auto& texture = meshRenderer.texture.lock();
+
+        sf::Transform transform = sf::Transform::Identity;
+        transform.translate({ position.x, -position.y });
 
         sf::RenderStates state;
         state.transform *= transform;

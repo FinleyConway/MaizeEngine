@@ -6,7 +6,7 @@
 
 struct RailController
 {
-    float speed = 50.0f;
+    float speed = 8.0f;
 
     Maize::Vec2f lastPos;
     Maize::Vec2f nextPos;
