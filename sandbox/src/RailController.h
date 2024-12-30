@@ -2,7 +2,7 @@
 
 #include <Maize.h>
 
-#include "RailTypes.h"
+#include "Rail.h"
 
 struct RailController
 {
@@ -11,7 +11,7 @@ struct RailController
     Maize::Vec2f lastPos;
     Maize::Vec2f nextPos;
     float currentTime = 0.0f;
-    uint8_t currentDir = RailDir::N;
+    Rail::Dir currentDir = Rail::Dir::N;
 
     Maize::Entity grid;
 

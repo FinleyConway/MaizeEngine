@@ -2,11 +2,11 @@
 
 #include <Maize.h>
 
-#include "RailTypes.h"
+#include "Rail.h"
 
 struct RailTile
 {
-    uint8_t direction = RailType::None;
+    Rail::Type railType = Rail::Type::None;
 };
 
 struct Grid
@@ -49,7 +49,7 @@ struct Grid
     {
         if (IsWithin(x, y))
         {
-            if (data[x + y * width].direction != RailDir::None)
+            if (data[x + y * width].railType != Rail::Type::None)
             {
                 return true;
             }

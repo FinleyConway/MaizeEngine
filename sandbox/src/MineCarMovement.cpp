@@ -13,7 +13,7 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
         {
             if (position.ApproxOf(controller.nextPos))
             {
-                HandleDirection(*grid, controller, controller.nextPos, controller.lastPos);
+                HandleDirection(*grid, controller);
             }
         }
 
@@ -26,100 +26,37 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
     }
 }
 
-void MineCarMovement::HandleDirection(const Grid& grid, RailController& controller, Maize::Vec2f& nextPosition, Maize::Vec2f& lastPosition)
+void MineCarMovement::HandleDirection(const Grid& grid, RailController& controller)
 {
-    const Maize::Vec2i gridPos = grid.PixelToCartesian(nextPosition.x, nextPosition.y);
-    const auto& tile = grid.Get(gridPos.x, gridPos.y);
-    const Maize::Vec2i gridPosOffset = GetDirectionOffset(tile.direction, controller.currentDir, gridPos);
+    // get the current tile check if it's within the grid.
+    const Maize::Vec2i gridPos = grid.PixelToCartesian(controller.nextPos.x, controller.nextPos.y);
 
-    if (gridPosOffset == Maize::Vec2i(-1, -1)) return;
-
-    const uint8_t nextDirection = grid.Get(gridPosOffset.x, gridPosOffset.y).direction;
-
-    if ((controller.currentDir & nextDirection) == 0) return;
-
-    if (nextDirection != RailType::None)
+    if (grid.IsWithin(gridPos.x, gridPos.y))
     {
-        lastPosition = nextPosition;
-        nextPosition = grid.CartesianToPixel(gridPosOffset.x, gridPosOffset.y);
-        controller.currentTime = 0.0f;
+        // get the tile and find what the next direction is based on the travelling direction
+        const auto& tile = grid.Get(gridPos.x, gridPos.y);
+        const auto nextDirection = Rail::GetNextTravellingDir(controller.currentDir, tile.railType);
+
+        GAME_LOG_INFO("Current Rail Dir is {}", Rail::TypeToStr(tile.railType));
+
+        // don't find the next tile if its no rail.
+        if (nextDirection != Rail::Dir::None)
+        {
+            // get the next tile
+            const auto directionOffset = Rail::GetDirectionOffset(nextDirection);
+            const auto offset = Maize::Vec2i(directionOffset.x + gridPos.x, directionOffset.y + gridPos.y);
+
+            // assign the next rail destination if it's within the grid.
+            if (grid.IsWithin(offset.x, offset.y))
+            {
+                controller.lastPos = controller.nextPos;
+                controller.nextPos = grid.CartesianToPixel(offset.x, offset.y);
+                controller.currentTime = 0.0f;
+                controller.currentDir = nextDirection;
+
+                GAME_LOG_INFO("Offset: [{}, {}]", offset.x, offset.y);
+                GAME_LOG_INFO("Current direction is {}", Rail::DirToStr(nextDirection));
+            }
+        }
     }
-}
-
-Maize::Vec2i MineCarMovement::GetDirectionOffset(uint8_t direction, uint8_t& controllerDirection, Maize::Vec2i offset)
-{
-    switch (direction)
-    {
-    case RailType::Vertical:   return GetVerticalOffset(controllerDirection, offset);
-    case RailType::Horizontal: return GetHorizontalOffset(controllerDirection, offset);
-    case RailType::NorthRight: return GetNorthRightOffset(controllerDirection, offset);
-    case RailType::NorthLeft:  return GetNorthLeftOffset(controllerDirection, offset);
-    case RailType::SouthRight: return GetSouthRightOffset(controllerDirection, offset);
-    case RailType::SouthLeft:  return GetSouthLeftOffset(controllerDirection, offset);
-    case RailType::None:       return Maize::Vec2i{-1, -1};
-    default:                   GAME_ASSERT(false, "Unknown direction");
-    }
-
-    return offset;
-}
-
-Maize::Vec2i MineCarMovement::CalculateOffsetForDirection(uint8_t& controllerDirection, Maize::Vec2i offset, int deltaX, int deltaY, uint8_t newControllerDirection)
-{
-    offset.x += deltaX;
-    offset.y += deltaY;
-
-    if (newControllerDirection != 0)
-    {
-        controllerDirection = newControllerDirection;
-    }
-
-    return offset;
-}
-
-Maize::Vec2i MineCarMovement::GetVerticalOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
-{
-    if (controllerDirection == RailDir::N) return CalculateOffsetForDirection(controllerDirection, offset, 0, 1);
-    if (controllerDirection == RailDir::S) return CalculateOffsetForDirection(controllerDirection, offset, 0, -1);
-
-    return offset;
-}
-
-Maize::Vec2i MineCarMovement::GetHorizontalOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
-{
-    if (controllerDirection == RailDir::E) return CalculateOffsetForDirection(controllerDirection, offset, 1, 0);
-    if (controllerDirection == RailDir::W) return CalculateOffsetForDirection(controllerDirection, offset, -1, 0);
-
-    return offset;
-}
-
-Maize::Vec2i MineCarMovement::GetNorthRightOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
-{
-    if (controllerDirection == RailDir::N) return CalculateOffsetForDirection(controllerDirection, offset, 1, 0, RailDir::E);
-    if (controllerDirection == RailDir::E) return CalculateOffsetForDirection(controllerDirection, offset, 0, -1, RailDir::S);
-
-    return offset;
-}
-
-Maize::Vec2i MineCarMovement::GetNorthLeftOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
-{
-    if (controllerDirection == RailDir::N) return CalculateOffsetForDirection(controllerDirection, offset, -1, 0, RailDir::W);
-    if (controllerDirection == RailDir::W) return CalculateOffsetForDirection(controllerDirection, offset, 0, -1, RailDir::S);
-
-    return offset;
-}
-
-Maize::Vec2i MineCarMovement::GetSouthRightOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
-{
-    if (controllerDirection == RailDir::S) return CalculateOffsetForDirection(controllerDirection, offset, 1, 0, RailDir::E);
-    if (controllerDirection == RailDir::E) return CalculateOffsetForDirection(controllerDirection, offset, 0, 1, RailDir::N);
-
-    return offset;
-}
-
-Maize::Vec2i MineCarMovement::GetSouthLeftOffset(uint8_t& controllerDirection, Maize::Vec2i offset)
-{
-    if (controllerDirection == RailDir::S) return CalculateOffsetForDirection(controllerDirection, offset, -1, 0, RailDir::W);
-    if (controllerDirection == RailDir::W) return CalculateOffsetForDirection(controllerDirection, offset, 0, 1, RailDir::N);
-
-    return offset;
 }
