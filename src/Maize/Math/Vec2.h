@@ -35,15 +35,35 @@ namespace Maize
         }
 
         template<typename U>
-        bool operator==(const Vec2<U>& other) const
+        constexpr bool operator==(const Vec2<U>& other) const
         {
             return x == other.x && y == other.y;
         }
 
         template<typename U>
-        bool operator!=(const Vec2<U>& other) const
+        constexpr bool operator!=(const Vec2<U>& other) const
         {
             return !(*this == other);
+        }
+
+        constexpr Vec2 operator+(const Vec2& other) const
+        {
+            return Vec2(x + other.x, y + other.y);
+        }
+
+        constexpr Vec2 operator-(const Vec2& other) const
+        {
+            return Vec2(x - other.x, y - other.y);
+        }
+
+        constexpr Vec2 operator+=(const Vec2& other) const
+        {
+            return *this = *this + other;
+        }
+
+        constexpr Vec2 operator-=(const Vec2& other) const
+        {
+            return *this = *this - other;
         }
     };
 

@@ -12,5 +12,7 @@ namespace Maize
         Camera() = default;
 
         Camera(const FloatRect& viewport) : viewport(viewport) { }
+
+        Camera(float zoom) : zoom(zoom) { }
     };
 } // Maize
