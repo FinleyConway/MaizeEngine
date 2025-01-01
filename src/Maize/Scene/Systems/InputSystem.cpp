@@ -1,11 +1,12 @@
 #include "PrecompiledHeader.h"
 #include "Maize/Scene/Systems/InputSystem.h"
 
+#include "Maize/Math/Vec2.h"
 #include "Maize/Scene/Components/Input.h"
 
 namespace Maize::Internal
 {
-    InputSystem::InputSystem(flecs::world& world): m_World(world)
+    InputSystem::InputSystem(const flecs::world& world, const sf::RenderWindow& window): m_World(world), m_Window(window)
     {
         // create an input singleton
         m_World.add<Input>();
@@ -21,8 +22,8 @@ namespace Maize::Internal
         if (const auto* keyReleased = event->getIf<sf::Event::KeyReleased>())
             OnKeyReleased(*keyReleased);
 
-        /*if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>())
-                OnMouseMoved(*mouseMoved);*/
+        if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>())
+            OnMouseMoved(*mouseMoved);
 
         if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>())
             OnMouseButtonPressed(*mouseButtonPressed);
@@ -51,6 +52,14 @@ namespace Maize::Internal
 
         input.keyDownQuery.reset(codeIndex);
         input.keyUpQuery.set(codeIndex);
+    }
+
+    void InputSystem::OnMouseMoved(const sf::Event::MouseMoved& event) const
+    {
+        auto& input = m_World.ensure<Input>();
+        const auto position = m_Window.mapPixelToCoords(event.position);
+
+        input.mousePosition = Vec2f(position.x, position.y);
     }
 
     void InputSystem::OnMouseButtonPressed(const sf::Event::MouseButtonPressed& event) const

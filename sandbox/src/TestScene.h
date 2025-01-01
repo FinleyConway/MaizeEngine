@@ -2,9 +2,12 @@
 
 #include <Maize.h>
 
+#include "ChunkManager.h"
 #include "Grid.h"
 #include "MineCarMovement.h"
+#include "MineRailPlacement.h"
 #include "RailController.h"
+#include "RailSelector.h"
 #include "Rail.h"
 
 class TestScene final : public Maize::Scene
@@ -16,53 +19,40 @@ public:
         if (!m_Texture->loadFromFile("/home/finley/CLionProjects/MaizeEngine/sandbox/asserts/tileset-16x16.png"))
             return;
 
-        CreateEntity(Maize::Vec2f(0, 0), false, false, Maize::Camera());
-
-        auto grid = Grid(10, 10, 32);
-        grid.Set(0, 0, { Rail::Type::NorthRight }); // naming is correct in terms of gates but confusing when thinking about it
-        grid.Set(0, 1, { Rail::Type::Vertical });
-        grid.Set(0, 2, { Rail::Type::Vertical });
-        grid.Set(0, 3, { Rail::Type::SouthRight });
-        grid.Set(1, 3, { Rail::Type::Horizontal });
-        grid.Set(2, 3, { Rail::Type::Horizontal });
-        grid.Set(3, 3, { Rail::Type::SouthLeft });
-        grid.Set(3, 2, { Rail::Type::Vertical });
-        grid.Set(3, 1, { Rail::Type::Vertical });
-        grid.Set(3, 0, { Rail::Type::NorthLeft });
-        grid.Set(2, 0, { Rail::Type::Horizontal });
-        grid.Set(1, 0, { Rail::Type::Horizontal });
-
-        std::array<sf::Vertex, 6> vertices;
-        vertices[0].position = sf::Vector2f(0, 0);
-        vertices[1].position = sf::Vector2f(0, 32);
-        vertices[2].position = sf::Vector2f(32, 0);
-        vertices[3].position = sf::Vector2f(0, 32);
-        vertices[4].position = sf::Vector2f(32, 32);
-        vertices[5].position = sf::Vector2f(32, 0);
-
-        Maize::Mesh mesh;
-        mesh.AddVertices(vertices);
-
-        auto gridE = CreateEntity(Maize::Vec2f(0, 0), true, false, grid);
-
-        CreateEntity(grid.CartesianToPixel(0, 1), false, false,
-            Maize::MeshRenderer(mesh),
-            RailController(grid.CartesianToPixel(0, 1), gridE)
+        CreateSingleton<ChunkManager>(
+            Maize::Vec2<uint16_t>(32, 32),
+            Maize::Vec2<uint16_t>(32, 32)
         );
 
-        AddSystem<Maize::Position, RailController>("Rail Controller", flecs::OnUpdate, MineCarMovement::Move);
+        CreateEntity(Maize::Vec2f(0, 0), false, false, Maize::Camera(2));
+
+        auto sprite = Maize::Sprite(m_Texture, Maize::IntRect(128, 00, 16, 16));
+
+        auto gridE = CreateEntity(Maize::Vec2f(0, 0), true, false,
+            RailSelector(GetRailAtlas())
+        );
+
+        AddSystem<RailSelector>("Rail Placement", flecs::OnUpdate, MineRailPlacement::Handle);
+        //AddSystem<Maize::Position, RailController>("Rail Controller", flecs::OnUpdate, MineCarMovement::Move);
     }
 
     virtual void OnEnd() override {}
 
 private:
+    static std::unordered_map<Rail::Type, Maize::FloatRect> GetRailAtlas()
+    {
+        std::unordered_map<Rail::Type, Maize::FloatRect> rails;
+
+        rails.emplace(Rail::Type::Vertical,   Maize::FloatRect(016, 00, 16, 16));
+        rails.emplace(Rail::Type::Horizontal, Maize::FloatRect(064, 32, 16, 16));
+        rails.emplace(Rail::Type::NorthRight, Maize::FloatRect(128, 00, 16, 16));
+        rails.emplace(Rail::Type::NorthLeft,  Maize::FloatRect(144, 00, 16, 16));
+        rails.emplace(Rail::Type::SouthRight, Maize::FloatRect(128, 16, 16, 16));
+        rails.emplace(Rail::Type::SouthLeft,  Maize::FloatRect(144, 16, 16, 16));
+
+        return rails;
+    }
+
+private:
     std::shared_ptr<sf::Texture> m_Texture;
-
-    // Vertical   = { 16, 00, 16, 16 }
-    // Horizontal = { 64, 32, 16, 16 }
-
-    // NorthRight = { 128, 00, 16, 16 }
-    // NorthLeft  = { 144, 00, 16, 16 }
-    // SouthRight = { 128, 16, 16, 16 }
-    // SouthLeft  = { 144, 16, 16, 16 }
 };

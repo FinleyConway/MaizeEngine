@@ -11,6 +11,12 @@ add_executable(sandbox
         src/Grid.h
         src/RailController.h
         src/RailSelector.h
+        src/ChunkManager.h
+        src/MineRailPlacement.cpp
+        src/MineRailPlacement.h
+        src/RailTile.h
+        src/GridConversion.cpp
+        src/GridConversion.h
 )
 
 target_include_directories(sandbox PRIVATE ${CMAKE_SOURCE_DIR}/src)

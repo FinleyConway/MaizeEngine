@@ -50,6 +50,12 @@ namespace Maize::Internal
          */
         sf::Vector2u GetWindowSize() const;
 
+        /**
+         * Get the rendering window.
+         * @return The window.
+         */
+        const sf::RenderWindow& GetWindow() const;
+
     private:
         sf::RenderWindow& m_RenderWindow;
         uint32_t m_DrawCalls = 0;

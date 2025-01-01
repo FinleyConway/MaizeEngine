@@ -11,6 +11,8 @@ namespace Maize
         std::bitset<Internal::BUTTON_COUNT> mouseDownQuery;
         std::bitset<Internal::BUTTON_COUNT> mouseUpQuery;
 
+        Vec2f mousePosition;
+
         bool GetButtonDown(KeyCode key)
         {
             const auto index = static_cast<int32_t>(key);

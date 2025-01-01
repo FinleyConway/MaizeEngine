@@ -14,8 +14,9 @@ namespace Maize::Internal
         /**
          * Creates the input singleton when creating an instance.
          * @param world The ecs world.
+         * @param window The window of the application.
          */
-        explicit InputSystem(flecs::world& world);
+        explicit InputSystem(const flecs::world& world, const sf::RenderWindow& window);
 
         /**
          * Handles all the incoming events.
@@ -28,16 +29,14 @@ namespace Maize::Internal
 
         void OnKeyReleased(const sf::Event::KeyReleased& event) const;
 
-        /*void OnMouseMoved(const sf::Event::MouseMoved& event) const
-        {
-            // need to implement
-        }*/
+        void OnMouseMoved(const sf::Event::MouseMoved& event) const;
 
         void OnMouseButtonPressed(const sf::Event::MouseButtonPressed& event) const;
 
         void OnMouseButtonReleased(const sf::Event::MouseButtonReleased& event) const;
 
     private:
-        flecs::world& m_World;
+        const flecs::world& m_World;
+        const sf::RenderWindow& m_Window;
     };
 } // Maize::Internal

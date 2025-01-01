@@ -26,9 +26,9 @@ namespace Maize
         }
 
         /**
-         * Get persistent components.
+         * Get components.
          * @tparam TSingleton Component type.
-         * @return Returns the persistent component or nullptr if type is not found.
+         * @return Returns the component or nullptr if type is not found.
          */
         template<typename TSingleton>
         TSingleton* GetSingleton()

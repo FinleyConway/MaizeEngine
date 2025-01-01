@@ -47,4 +47,9 @@ namespace Maize::Internal
     {
         return m_RenderWindow.getSize();
     }
+
+    const sf::RenderWindow& Renderer::GetWindow() const
+    {
+        return m_RenderWindow;
+    }
 } // Maize::Internal

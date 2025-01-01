@@ -1,4 +1,4 @@
-#include "MineCarMovement.h"
+/*#include "MineCarMovement.h"
 
 #include "Grid.h"
 #include "RailController.h"
@@ -9,7 +9,7 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
 
     if (input->GetButtonHeld(Maize::KeyCode::W))
     {
-        if (const auto* grid = controller.grid.TryGetComponent<Grid>())
+        if (const auto* grid = controller.grid.TryGetComponent<Grid<RailTile>>())
         {
             if (position.ApproxOf(controller.nextPos))
             {
@@ -20,13 +20,11 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
         controller.currentTime += controller.speed * s.DeltaTime();
         controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
 
-        const auto lerpPos = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
-        position.x = lerpPos.x;
-        position.y = lerpPos.y;
+        position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
     }
 }
 
-void MineCarMovement::HandleDirection(const Grid& grid, RailController& controller)
+void MineCarMovement::HandleDirection(const Grid<RailTile>& grid, RailController& controller)
 {
     // get the current tile check if it's within the grid.
     const Maize::Vec2i gridPos = grid.PixelToCartesian(controller.nextPos.x, controller.nextPos.y);
@@ -44,7 +42,7 @@ void MineCarMovement::HandleDirection(const Grid& grid, RailController& controll
         {
             // get the next tile
             const auto directionOffset = Rail::GetDirectionOffset(nextDirection);
-            const auto offset = Maize::Vec2i(directionOffset.x + gridPos.x, directionOffset.y + gridPos.y);
+            const auto offset = directionOffset + gridPos;
 
             // assign the next rail destination if it's within the grid.
             if (grid.IsWithin(offset.x, offset.y))
@@ -59,4 +57,4 @@ void MineCarMovement::HandleDirection(const Grid& grid, RailController& controll
             }
         }
     }
-}
+}*/

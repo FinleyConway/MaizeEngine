@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 #include "Maize/Scene/SceneManager.h"
 
+#include "Maize/Rendering/Renderer.h"
 #include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
@@ -13,7 +14,7 @@
 namespace Maize::Internal
 {
     SceneManager::SceneManager(Renderer& renderer) :
-        m_SpatialHashGrid(512), m_InputHandler(m_World)
+        m_SpatialHashGrid(512), m_InputHandler(m_World, renderer.GetWindow())
     {
         PROFILE_FUNCTION();
 
