@@ -50,6 +50,37 @@ namespace Maize
         }
 
         /**
+         * Added a singleton the scene.
+         * @tparam T The singleton type.
+         */
+        template<typename T>
+        void CreateSingleton()
+        {
+            CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
+
+            flecs::entity e(m_World->c_ptr(), m_World->id<T>());
+            e.add<T>();
+
+            m_Singletons.emplace_back(e);
+        }
+
+        /**
+         * Added a singleton the scene.
+         * @tparam T The singleton type.
+         * @param args The singleton parameters.
+         */
+        template<typename T, typename... Args>
+        void CreateSingleton(Args&&... args)
+        {
+            CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
+
+            flecs::entity e(m_World->c_ptr(), m_World->id<T>());
+            e.set<T>(std::forward<Args>(args)...);
+
+            m_Singletons.emplace_back(e);
+        }
+
+        /**
          * Add a system that will provide entities logic.
          * @tparam Components What components the system will work on.
          * @tparam Func The function that provides the logic with the components as the parameters.
@@ -153,6 +184,12 @@ namespace Maize
             {
                 observer.disable();
             }
+
+            // remove all singletons
+            for (const auto entity : m_Singletons)
+            {
+                entity.clear();
+            }
         }
 
     private:
@@ -161,5 +198,6 @@ namespace Maize
         flecs::world* m_World = nullptr;
         std::vector<flecs::system> m_Systems;
         std::vector<flecs::observer> m_Observers;
+        std::vector<flecs::entity> m_Singletons;
     };
 } // Maize

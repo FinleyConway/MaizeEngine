@@ -3,6 +3,8 @@
 
 #include "Maize/Scene/SceneManager.h"
 
+class Single { };
+
 class TestScene final : public Maize::Scene
 {
 public:
@@ -10,7 +12,16 @@ public:
 	{
 		onStartCalled = true;
 
+		CreateSingleton<Single>();
+
 		auto entity = CreateEntity({ 0, 0 }, false, false);
+
+		AddSystem<>("test", flecs::OnStart, [](Maize::SystemState s, Maize::Entity e)
+		{
+			auto* single = s.GetSingleton<Single>();
+
+			REQUIRE(single != nullptr);
+		});
 
 		// check if the entity was created with all essentials
 		REQUIRE(entity.IsNull() == false);
@@ -38,7 +49,16 @@ public:
 class TestScene2 final : public Maize::Scene
 {
 public:
-	void OnStart() override {}
+	void OnStart() override
+	{
+		AddSystem<>("test", flecs::OnStart, [](Maize::SystemState s, Maize::Entity e)
+		{
+			auto* single = s.GetSingleton<Single>();
+
+			REQUIRE(single == nullptr);
+		});
+	}
+
 	void OnEnd() override {}
 };
 
