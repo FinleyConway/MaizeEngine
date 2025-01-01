@@ -75,7 +75,7 @@ namespace Maize
             CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
 
             flecs::entity e(m_World->c_ptr(), m_World->id<T>());
-            e.set<T>(std::forward<Args>(args)...);
+            e.set(T(std::forward<Args>(args)...));
 
             m_Singletons.emplace_back(e);
         }
