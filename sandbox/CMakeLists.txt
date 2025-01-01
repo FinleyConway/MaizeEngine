@@ -25,6 +25,5 @@ target_link_libraries(sandbox PRIVATE
 )
 
 if (MINGW)
-    target_compile_options(MaizeEngine PRIVATE -static-libgcc -static-libstdc++)
-    target_link_libraries(MaizeEngine PRIVATE -static-libgcc -static-libstdc++)
+    target_link_libraries(MaizeEngine PRIVATE -static-libgcc -static-libstdc++ -mwindows)
 endif ()
