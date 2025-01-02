@@ -36,17 +36,15 @@ namespace Maize
          * Create an entity.
          * @tparam Args Various components that can be added.
          * @param position World location.
-         * @param isStatic Is the entity not movable?
-         * @param isPersistent Want to exist across scenes?
          * @param args Various components parameters.
          * @return The entity.
          */
         template<typename... Args>
-        Entity CreateEntity(Vec2f position, bool isStatic, bool isPersistent, Args&&... args) const
+        Entity CreateEntity(Vec2f position, Args&&... args) const
         {
             CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
 
-            return Entity::CreateEntity(*m_World, position, isStatic, isPersistent, args...);
+            return Entity::CreateEntity(*m_World, position, args...);
         }
 
         /**
@@ -98,48 +96,19 @@ namespace Maize
 
             // Create system
             const flecs::system system = m_World->system<Components...>(systemName.c_str()).kind(updateOrder).each(
-                [&, systemName](flecs::entity e, Components&... components)
-                {
-                    PROFILE_SCOPE(systemName);
+            [&, systemName](flecs::entity e, Components&... components)
+            {
+                PROFILE_SCOPE(systemName);
 
-                    systemFunc(SystemState(*m_World), Entity(e), components...);
-                });
-            system.disable();
+                systemFunc(SystemState(*m_World), Entity(e), components...);
+
+                // flag components that have been accessed that are not constant (on set hooks).
+                ((std::is_const_v<Components> ? void() : e.modified<Components>()), ...);
+            });
 
             m_Systems.emplace_back(system);
 
             return system;
-        }
-
-        /**
-         * Add a system that will provide the ability for entities to react to.
-         * @tparam Components What components the system will work on.
-         * @tparam Func The function that provides the logic with the components as the parameters.
-         * @param systemName The name of the system.
-         * @param triggerType How will the system react.
-         * @param observerFunc The function that provides the logic with the components as the parameters.
-         * @return The observer handle.
-         */
-        template<typename... Components, typename Func>
-        flecs::observer AddObserver(const std::string& systemName, flecs::entity_t triggerType, Func&& observerFunc)
-        {
-            PROFILE_FUNCTION();
-
-            CORE_ASSERT(m_World != nullptr, "World has not been assigned!")
-
-            // create system
-            const auto observer = m_World->observer<Components...>(systemName.c_str()).event(triggerType).each(
-                [&, systemName](flecs::entity e, Components... components)
-                {
-                    PROFILE_SCOPE(systemName);
-
-                    observerFunc(SystemState(*m_World), Entity(e), components...);
-                });
-            observer.disable();
-
-            m_Observers.emplace_back(observer);
-
-            return observer;
         }
 
     private:

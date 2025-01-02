@@ -3,47 +3,58 @@
 #include <flecs.h>
 
 #include "Maize/Scene/Components/Position.h"
+#include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
+#include "Maize/Scene/Components/Rendering/MeshRenderer.h"
+#include "Maize/Scene/Components/Rendering/RenderingContext.h"
+#include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
+#include "Maize/Utils/SpatialHashGrid.h"
 
-namespace Maize
+namespace Maize::Internal
 {
-    struct SpriteRenderer;
-    struct MeshRenderer;
-
-    namespace Internal
+    class RenderComponentChange
     {
-        struct RenderingContext;
+    public:
+        /**
+         * Handles the removal of the sprite renderer component, removing it from the spatial index.
+         * @param entity The entity.
+         */
+        static void OnSpriteRendererRemove(flecs::entity entity, const SpriteRenderer&);
 
-        class RenderComponentChange
+        /**
+         * Adds the entity to the spatial index when the entity components were deferred.
+         * @param entity The entity.
+         * @param spriteRenderer The sprite renderer component.
+         */
+        static void HandleSpriteRendererDefer(flecs::entity entity, const SpriteRenderer& spriteRenderer);
+
+        /**
+         * Handles the removal of the mesh renderer component, removing it from the spatial index.
+         * @param entity The entity.
+         */
+        static void OnMeshRendererRemove(flecs::entity entity, const MeshRenderer&);
+
+        /**
+         * Adds the entity to the spatial index when the entity components were deferred.
+         * @param entity The entity.
+         * @param meshRenderer The sprite renderer component,
+         */
+        static void HandleMeshRendererDefer(flecs::entity entity, const MeshRenderer& meshRenderer);
+
+    private:
+        static const RenderingContext* GetRenderingContext(flecs::entity entity);
+
+        template<typename T>
+        static void HandleRendererChange(flecs::entity entity, const T& renderer)
         {
-        public:
-            /**
-             * Handles the removal of the sprite renderer component, removing it from the spatial index.
-             * @param entity The entity.
-             */
-            static void OnSpriteRendererRemove(flecs::entity entity, const SpriteRenderer&);
+            PROFILE_FUNCTION();
 
-            /**
-             * Adds the entity to the spatial index when the entity components were deferred.
-             * @param entity The entity.
-             * @param position The position component.
-             * @param spriteRenderer The sprite renderer component.
-             */
-            static void HandleSpriteRendererDefer(flecs::entity entity, const Position& position,
-                const SpriteRenderer& spriteRenderer);
+            const auto* ctx = GetRenderingContext(entity);
+            const auto position = entity.ensure<Position>();
+            const auto globalBounds = renderer.GetGlobalBounds({ position.x, -position.y });
 
-            /**
-             * Handles the removal of the mesh renderer component, removing it from the spatial index.
-             * @param entity The entity.
-             */
-            static void OnMeshRendererRemove(flecs::entity entity, const MeshRenderer&);
+            ctx->spatialIndex->Relocate(entity, globalBounds);
 
-            /**
-             * Adds the entity to the spatial index when the entity components were deferred.
-             * @param entity The entity.
-             * @param position The position component.
-             * @param meshRenderer The sprite renderer component,
-             */
-            static void HandleMeshRendererDefer(flecs::entity entity, const Position& position, const MeshRenderer& meshRenderer);
-        };
-    } // Internal
-} // Maize
+            entity.remove<DeferredRenderable>();
+        }
+    };
+} // Maize::Internal

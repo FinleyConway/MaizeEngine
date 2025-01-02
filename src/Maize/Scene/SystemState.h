@@ -14,15 +14,13 @@ namespace Maize
          * Create an entity.
          * @tparam Args Various components that can be added.
          * @param position World location.
-         * @param isStatic Is the entity not movable?
-         * @param isPersistent Want to exist across scenes?
          * @param args Various components parameters.
          * @return The entity.
          */
         template<typename... Args>
-        Entity CreateEntity(Vec2f position, bool isStatic, bool isPersistent, Args&&... args) const
+        Entity CreateEntity(Vec2f position, Args&&... args) const
         {
-            return Entity::CreateEntity(m_World, position, isStatic, isPersistent, args...);
+            return Entity::CreateEntity(m_World, position, args...);
         }
 
         /**

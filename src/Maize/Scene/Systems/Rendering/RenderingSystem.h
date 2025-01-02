@@ -4,34 +4,31 @@
 #include <SFML/Graphics/View.hpp>
 
 #include "Maize/Scene/Components/Position.h"
+#include "Maize/Scene/Components/Rendering/Camera.h"
+#include "Maize/Scene/Components/Rendering/RenderingContext.h"
+#include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
+#include "Maize/Scene/Components/Rendering/MeshRenderer.h"
+#include "Maize/Rendering/Renderer.h"
 
-namespace Maize
+namespace Maize::Internal
 {
-    struct Camera;
-    struct SpriteRenderer;
-    struct MeshRenderer;
-
-    namespace Internal
+    class RenderingSystem
     {
-        class Renderer;
+    public:
+        static void Render(flecs::entity entity, const Position& position, Camera& camera);
 
-        class RenderingSystem
-        {
-        public:
-            static void UpdateSpriteRendererPosition(flecs::entity entity, const Position& position,
-                const SpriteRenderer& spriteRenderer);
+    private:
+        static void RenderEntities(const std::vector<flecs::entity_t>& entities, flecs::world world, Renderer* renderer);
 
-            static void UpdateMeshRendererPosition(flecs::entity entity, const Position& position,
-                const MeshRenderer& meshRenderer);
+        static sf::View SetupCurrentCamera(const Renderer* renderer, const Position& position, Camera& camera);
 
-            static void Render(flecs::entity entity, const Position& position, Camera& camera);
+        static sf::Transform CreateTransform(const Position& position, Vec2f pivot = Vec2f());
 
-        private:
-            static sf::View SetupCurrentCamera(const Renderer* renderer, const Position& position, Camera& camera);
+        static sf::RenderStates CreateRenderState(const sf::Transform& transform, const std::shared_ptr<sf::Texture>& texture);
 
-            static void RenderSprite(Renderer* renderer, const SpriteRenderer& spriteRenderer, const Position& position);
+        static void RenderSprite(Renderer* renderer, const SpriteRenderer& spriteRenderer, const Position& position);
 
-            static void RenderMesh(Renderer* renderer, const MeshRenderer& meshRenderer, const Position& position);
-        };
-    } // Internal
-} // Maize
+        static void RenderMesh(Renderer* renderer, const MeshRenderer& meshRenderer, const Position& position);
+    };
+} // Maize::Internal
+

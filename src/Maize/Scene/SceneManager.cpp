@@ -14,7 +14,7 @@
 namespace Maize::Internal
 {
     SceneManager::SceneManager(Renderer& renderer) :
-        m_SpatialHashGrid(512), m_InputHandler(m_World, renderer.GetWindow())
+        m_SpatialHashGrid(4), m_InputHandler(m_World, renderer.GetWindow())
     {
         PROFILE_FUNCTION();
 
@@ -22,11 +22,23 @@ namespace Maize::Internal
 
         m_World.set(RenderingContext(&renderer, &m_SpatialHashGrid));
 
+        m_World.component<Position>().on_set([](flecs::entity entity, Position&)
+        {
+            entity.add<DeferredRenderable>();
+        });
         m_World.component<SpriteRenderer>().on_add([](flecs::entity entity, SpriteRenderer&)
         {
             entity.add<DeferredRenderable>();
         });
         m_World.component<MeshRenderer>().on_add([](flecs::entity entity, MeshRenderer&)
+        {
+            entity.add<DeferredRenderable>();
+        });
+        m_World.component<SpriteRenderer>().on_set([](flecs::entity entity, SpriteRenderer&)
+        {
+            entity.add<DeferredRenderable>();
+        });
+        m_World.component<MeshRenderer>().on_set([](flecs::entity entity, MeshRenderer&)
         {
             entity.add<DeferredRenderable>();
         });
@@ -38,23 +50,14 @@ namespace Maize::Internal
             .event(flecs::OnRemove)
             .each(RenderComponentChange::OnMeshRendererRemove);
 
-        m_World.system<const Position, const SpriteRenderer>("HandleSpriteRendererDefer")
+        m_World.system<const SpriteRenderer>("HandleSpriteRendererDefer")
             .with<DeferredRenderable>() // only triggers when having this component
             .immediate().kind(flecs::PreStore)
             .each(RenderComponentChange::HandleSpriteRendererDefer);
-        m_World.system<const Position, const MeshRenderer>("HandleMeshRendererDefer")
+        m_World.system<const MeshRenderer>("HandleMeshRendererDefer")
             .with<DeferredRenderable>() // only triggers when having this component
             .immediate().kind(flecs::PreStore)
             .each(RenderComponentChange::HandleMeshRendererDefer);
-
-        m_World.system<const Position, const SpriteRenderer>("UpdateSpriteRendererPosition")
-            .without<Static>().without<DeferredRenderable>() // only triggers when not having these component
-            .kind(flecs::PreStore)
-            .each(RenderingSystem::UpdateSpriteRendererPosition);
-        m_World.system<const Position, const MeshRenderer>("UpdateMeshRendererPosition")
-            .without<Static>().without<DeferredRenderable>() // only triggers when not having these component
-            .kind(flecs::PreStore)
-            .each(RenderingSystem::UpdateMeshRendererPosition);
 
         m_World.system<const Position, Camera>("RenderingSystem")
             .kind(flecs::OnStore)

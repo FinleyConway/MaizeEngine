@@ -64,6 +64,9 @@ namespace Maize
         {
             if (IsNull()) return nullptr;
 
+            // mark component as dirty (on set hooks)
+            if (HasComponent<TComponent>()) m_Handle.modified<TComponent>();
+
             return m_Handle.get_mut<TComponent>();
         }
 
@@ -215,22 +218,11 @@ namespace Maize
 
     private:
         template<typename... Args>
-        static Entity CreateEntity(flecs::world& world, Vec2f position, bool isStatic, bool isPersistent,
-                                   Args&&... args)
+        static Entity CreateEntity(flecs::world& world, Vec2f position, Args&&... args)
         {
             auto entity = Entity(world.entity());
 
-            if (isStatic) entity.AddOrReplaceComponent<Static>(); // tag that label that this entity does not move
-            if (isPersistent)
-            {
-                entity.AddOrReplaceComponent<Persistent>();
-                // tag that label that this entity will exist across multiple scenes
-            }
-            else
-            {
-                entity.AddOrReplaceComponent<Active>(); // tag that labels this entity as an active for easy removal
-            }
-
+            entity.AddOrReplaceComponent<Active>(); // tag that labels this entity as an active for easy removal
             entity.AddOrReplaceComponent(Position(position));
             (entity.AddOrReplaceComponent<Args>(std::forward<Args>(args)), ...); // add custom objects
 

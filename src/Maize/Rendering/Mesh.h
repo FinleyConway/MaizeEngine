@@ -9,6 +9,9 @@ namespace Maize
     class Mesh
     {
     public:
+        Mesh() = default;
+        virtual ~Mesh() = default;
+
         /**
          * Assigns a new mesh and automatically generate bounds
          * @param mesh A contiguous data structure that contains a mesh
@@ -43,10 +46,10 @@ namespace Maize
          */
         void Clear();
 
-    private:
+    protected:
         FloatRect GetMeshBounds();
 
-    private:
+    protected:
         std::vector<sf::Vertex> m_Mesh;
         FloatRect m_Bounds;
     };

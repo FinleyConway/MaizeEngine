@@ -10,67 +10,41 @@
 
 namespace Maize::Internal
 {
-    void RenderingSystem::UpdateSpriteRendererPosition(flecs::entity entity, const Position& position,
-        const SpriteRenderer& spriteRenderer)
-    {
-        PROFILE_FUNCTION();
-
-        const auto* ctx = entity.world().get<RenderingContext>();
-
-        CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
-        CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!")
-
-        const auto& globalBounds = spriteRenderer.GetGlobalBounds(position);
-
-        ctx->spatialIndex->Relocate(entity, globalBounds);
-    }
-
-    void RenderingSystem::UpdateMeshRendererPosition(flecs::entity entity, const Position& position,
-        const MeshRenderer& meshRenderer)
-    {
-        PROFILE_FUNCTION();
-
-        const auto* ctx = entity.world().get<RenderingContext>();
-
-        CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
-        CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!")
-
-        const auto& globalBounds = meshRenderer.GetGlobalBounds(position);
-
-        ctx->spatialIndex->Relocate(entity, globalBounds);
-    }
-
     void RenderingSystem::Render(flecs::entity entity, const Position& position, Camera& camera)
     {
         PROFILE_FUNCTION();
 
         const auto* ctx = entity.world().get<RenderingContext>();
+        CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!");
+        CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!");
+        CORE_ASSERT(ctx->renderer != nullptr, "Rendering context was created but renderer wasn't!");
 
-        CORE_ASSERT(ctx != nullptr, "Rendering context has not been added!")
-        CORE_ASSERT(ctx->spatialIndex != nullptr, "Rendering context was created but spatial index wasn't!")
-        CORE_ASSERT(ctx->renderer != nullptr, "Rendering context was created but renderer wasn't!")
-
-        // preform all the rendering for this current camera
+        // set up the current camera view
         const auto view = SetupCurrentCamera(ctx->renderer, position, camera);
-        const auto viewBounds = sf::FloatRect(view.getCenter() - (view.getSize() / 2.0f), view.getSize());
+        const auto viewBounds = sf::FloatRect(view.getCenter() - view.getSize() / 2.0f, view.getSize());
 
-        // query all entities based on the camera's view
-        auto queriedEntities = ctx->spatialIndex->Query({
+        // query and render all visible entities based on the camera's view
+        const auto queriedEntities = ctx->spatialIndex->Query({
             viewBounds.position.x, viewBounds.position.y, viewBounds.size.x, viewBounds.size.y,
         });
 
-        // render all the entities
-        for (const auto et : queriedEntities)
+        RenderEntities(queriedEntities, entity.world(), ctx->renderer);
+    }
+
+    void RenderingSystem::RenderEntities(const std::vector<flecs::entity_t>& entities, flecs::world world, Renderer* renderer)
+    {
+        PROFILE_FUNCTION();
+
+        for (const auto entity : entities)
         {
-            auto e = entity.world().entity(et);
+            auto e = world.entity(entity);
             const auto p = e.ensure<Position>();
 
-            // render all types depending on what's on the entity
             if (const auto* sprite = e.get<SpriteRenderer>())
-                RenderSprite(ctx->renderer, *sprite, p);
+                RenderSprite(renderer, *sprite, p);
 
             if (const auto* mesh = e.get<MeshRenderer>())
-                RenderMesh(ctx->renderer, *mesh, p);
+                RenderMesh(renderer, *mesh, p);
         }
     }
 
@@ -78,7 +52,7 @@ namespace Maize::Internal
     {
         PROFILE_FUNCTION();
 
-        // set up the current sfml view using camera component
+        // create the current view
         const auto windowSize = renderer->GetWindowSize();
         auto view = sf::View({ position.x, position.y }, sf::Vector2f(windowSize));
 
@@ -89,20 +63,37 @@ namespace Maize::Internal
         );
         view.setViewport(viewport);
 
-        // handle camera zoom
-        // clamp the view to being within an appropriate range
+        // apply zoom
         const auto viewSize = view.getSize();
         camera.zoom = std::max(camera.zoom, 0.1f);
         view.setSize({ viewSize.x / camera.zoom, viewSize.y / camera.zoom });
 
-        // tell the renderer to use this camera for this current rendering pass
+        // set the current view for the renderer
         renderer->SetCurrentView(view);
 
         return view;
     }
 
-    void RenderingSystem::RenderSprite(Renderer* renderer, const SpriteRenderer& spriteRenderer,
-        const Position& position)
+    sf::Transform RenderingSystem::CreateTransform(const Position& position, Vec2f pivot)
+    {
+        sf::Transform transform = sf::Transform::Identity;
+
+        transform.translate({ position.x - pivot.x, -(position.y - pivot.y) });
+
+        return transform;
+    }
+
+    sf::RenderStates RenderingSystem::CreateRenderState(const sf::Transform& transform, const std::shared_ptr<sf::Texture>& texture)
+    {
+        sf::RenderStates state;
+
+        state.transform *= transform;
+        state.texture = texture.get();
+
+        return state;
+    }
+
+    void RenderingSystem::RenderSprite(Renderer* renderer, const SpriteRenderer& spriteRenderer, const Position& position)
     {
         PROFILE_FUNCTION();
 
@@ -111,12 +102,8 @@ namespace Maize::Internal
         const auto& texture = sprite.GetTexture().lock();
         const auto& vertices = sprite.GetVertices();
 
-        sf::Transform transform = sf::Transform::Identity;
-        transform.translate({ position.x - pivot.x, -position.y - pivot.y }); // set position, based on pivot
-
-        sf::RenderStates state;
-        state.transform *= transform;
-        state.texture = texture.get(); // want to place to use sf::Texture* rather than a weak_ptr
+       const sf::Transform transform = CreateTransform(position, pivot);
+       const sf::RenderStates state = CreateRenderState(transform, texture);
 
         renderer->Draw(vertices, state);
     }
@@ -125,15 +112,11 @@ namespace Maize::Internal
     {
         PROFILE_FUNCTION();
 
-        const auto& vertices = meshRenderer.mesh.GetVertices();;
+        const auto& vertices = meshRenderer.mesh.GetVertices();
         const auto& texture = meshRenderer.texture.lock();
 
-        sf::Transform transform = sf::Transform::Identity;
-        transform.translate({ position.x, -position.y });
-
-        sf::RenderStates state;
-        state.transform *= transform;
-        state.texture = texture.get(); // want to place to use sf::Texture* rather than a weak_ptr
+        const sf::Transform transform = CreateTransform(position);
+        const sf::RenderStates state = CreateRenderState(transform, texture);
 
         renderer->Draw(vertices, state);
     }
