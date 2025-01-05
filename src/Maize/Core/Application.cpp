@@ -1,6 +1,9 @@
 #include "PrecompiledHeader.h"
 #include "Maize/Core/Application.h"
 
+#include <imgui-SFML.h>
+#include <imgui.h>
+
 namespace Maize
 {
     Application::Application(std::string_view title, uint32_t width, uint32_t height) :
@@ -14,11 +17,15 @@ namespace Maize
         PROFILE_BEGIN_SESSION("Maize", "Maize-Benchmark.json", 512);
 
         m_Window.setKeyRepeatEnabled(false); // disable text editor hold key like functionality
+
+        ImGui::SFML::Init(m_Window); // init imgui-sfml
     }
 
     Application::~Application()
     {
         PROFILE_END_SESSION();
+
+        ImGui::SFML::Shutdown();
     }
 
     void Application::Quit()
@@ -40,9 +47,12 @@ namespace Maize
 
             const float deltaTime = clock.restart().asSeconds();
 
+            ImGui::SFML::Update(m_Window, sf::seconds(deltaTime));
+
             m_Renderer.BeginDrawing();
 
             m_SceneManager.OnUpdate(deltaTime);
+            ImGui::SFML::Render(m_Window);
 
             m_Renderer.EndDrawing();
         }
@@ -59,6 +69,8 @@ namespace Maize
     {
         while (const std::optional event = m_Window.pollEvent())
         {
+            ImGui::SFML::ProcessEvent(m_Window, event.value());
+
             m_SceneManager.OnEvent(event);
 
             if (event->is<sf::Event::Closed>())

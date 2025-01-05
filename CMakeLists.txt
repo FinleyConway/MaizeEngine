@@ -21,9 +21,18 @@ endif()
 
 include(FetchContent)
 FetchContent_Declare(sfml GIT_REPOSITORY https://github.com/SFML/SFML.git GIT_TAG 3.0.0)
+FetchContent_Declare(imgui-sfml GIT_REPOSITORY https://github.com/SFML/imgui-sfml.git GIT_TAG v3.0)
+FetchContent_Declare(imgui GIT_REPOSITORY https://github.com/ocornut/imgui.git GIT_TAG v1.91.6)
 FetchContent_Declare(spdlog GIT_REPOSITORY https://github.com/gabime/spdlog.git GIT_TAG v1.13.0)
 FetchContent_Declare(flecs GIT_REPOSITORY https://github.com/SanderMertens/flecs.git GIT_TAG v4.0.3)
-FetchContent_MakeAvailable(sfml spdlog flecs)
+
+FetchContent_MakeAvailable(sfml spdlog flecs imgui)
+
+set(IMGUI_DIR ${imgui_SOURCE_DIR})
+set(IMGUI_SFML_FIND_SFML OFF)
+set(IMGUI_SFML_IMGUI_DEMO ON)
+
+FetchContent_MakeAvailable(imgui-sfml)
 
 add_library(MaizeEngine
         src/Maize.h
@@ -74,7 +83,7 @@ add_library(MaizeEngine
 )
 
 target_include_directories(MaizeEngine PRIVATE src)
-target_link_libraries(MaizeEngine PUBLIC SFML::Graphics spdlog::spdlog flecs::flecs_static)
+target_link_libraries(MaizeEngine PUBLIC SFML::Graphics spdlog::spdlog flecs::flecs_static ImGui-SFML::ImGui-SFML)
 target_compile_features(MaizeEngine PUBLIC cxx_std_20)
 target_precompile_headers(MaizeEngine PUBLIC src/PrecompiledHeader.h)
 

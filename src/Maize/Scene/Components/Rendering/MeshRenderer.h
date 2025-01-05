@@ -15,6 +15,7 @@ namespace Maize {
 
         MeshRenderer() = default;
         MeshRenderer(const Mesh& mesh) : mesh(mesh) { }
+        MeshRenderer(const std::weak_ptr<sf::Texture>& texture) : texture(texture) { }
         MeshRenderer(const Mesh& mesh, const std::shared_ptr<sf::Texture>& texture)
             : mesh(mesh), texture(texture) { }
 

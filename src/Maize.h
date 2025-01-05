@@ -22,3 +22,7 @@
 #include "Maize/Scene/Scene.h"
 #include "Maize/Scene/Entity.h"
 #include "Maize/Scene/SystemState.h"
+
+// allow to use imgui within game end :)
+#include <imgui-SFML.h>
+#include <imgui.h>

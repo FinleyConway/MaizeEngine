@@ -12,8 +12,8 @@ TEST_CASE("Null Entity Class Test", "[Null Entity]")
 
 	SECTION("Adding components")
 	{
-		REQUIRE(e.AddOrReplaceComponent<Maize::Position>() == false);
-		REQUIRE(e.AddOrReplaceComponent(Maize::Position(0, 0)) == false);
+		REQUIRE(e.AddComponent<Maize::Position>() == false);
+		REQUIRE(e.AddComponent(Maize::Position(0, 0)) == false);
 
 		REQUIRE(e.TryGetComponent<Maize::Position>() == nullptr);
 		REQUIRE(e.HasComponent<Maize::Position>() == false);

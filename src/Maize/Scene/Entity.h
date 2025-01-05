@@ -24,7 +24,7 @@ namespace Maize
          * @return Returns true if it was added.
          */
         template<typename TComponent>
-        bool AddOrReplaceComponent(TComponent&& component = TComponent{})
+        bool AddComponent(TComponent&& component = TComponent{})
         {
             if (IsNull()) return false;
 
@@ -114,7 +114,7 @@ namespace Maize
         }
 
         /**
-         * Is entity alive or non-existent.
+         * Is entity not alive or non-existent.
          */
         bool IsNull() const
         {
@@ -222,9 +222,9 @@ namespace Maize
         {
             auto entity = Entity(world.entity());
 
-            entity.AddOrReplaceComponent<Active>(); // tag that labels this entity as an active for easy removal
-            entity.AddOrReplaceComponent(Position(position));
-            (entity.AddOrReplaceComponent<Args>(std::forward<Args>(args)), ...); // add custom objects
+            entity.AddComponent<Active>(); // tag that labels this entity as an active for easy removal
+            entity.AddComponent(Position(position));
+            (entity.AddComponent<Args>(std::forward<Args>(args)), ...); // add custom objects
 
             return entity;
         }

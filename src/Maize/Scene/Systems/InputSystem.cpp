@@ -59,7 +59,7 @@ namespace Maize::Internal
         auto& input = m_World.ensure<Input>();
         const auto position = m_Window.mapPixelToCoords(event.position);
 
-        input.mousePosition = Vec2f(position.x, position.y);
+        input.mousePosition = Vec2f(position.x, -position.y); // flip y axis so y is up
     }
 
     void InputSystem::OnMouseButtonPressed(const sf::Event::MouseButtonPressed& event) const
