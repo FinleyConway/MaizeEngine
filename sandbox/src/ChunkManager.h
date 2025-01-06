@@ -16,16 +16,8 @@ public:
     ChunkManager(Maize::Vec2<uint16_t> chunkSize, Maize::Vec2<uint16_t> cellSize)
         : chunkSize(chunkSize), cellSize(cellSize) {}
 
-    template<typename T>
-    T* TryGetChunkComponent(Maize::Vec2i gridPosition)
+    Maize::Entity TryGetChunk(Maize::Vec2i chunkPosition) const
     {
-        return TryGetEntityChunk(gridPosition).TryGetMutComponent<T>();
-    }
-
-    Maize::Entity TryGetEntityChunk(Maize::Vec2i gridPosition) const
-    {
-        const auto chunkPosition = GridConversion::CartesianToChunk(gridPosition, chunkSize);
-
         if (chunks.contains(chunkPosition)) return chunks.at(chunkPosition);
         return Maize::Entity();
     }

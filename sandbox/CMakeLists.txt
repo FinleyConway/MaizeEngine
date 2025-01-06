@@ -17,6 +17,7 @@ add_executable(sandbox
         src/RailTile.h
         src/GridConversion.cpp
         src/GridConversion.h
+        src/PlaceGridTile.h
 )
 
 target_include_directories(sandbox PRIVATE ${CMAKE_SOURCE_DIR}/src)

@@ -46,12 +46,14 @@ namespace Maize
             return !(*this == other);
         }
 
-        constexpr Vec2 operator+(const Vec2& other) const
+        template<typename U>
+        constexpr Vec2 operator+(const Vec2<U>& other) const
         {
             return Vec2(x + other.x, y + other.y);
         }
 
-        constexpr Vec2 operator-(const Vec2& other) const
+        template<typename U>
+        constexpr Vec2 operator-(const Vec2<U>& other) const
         {
             return Vec2(x - other.x, y - other.y);
         }
@@ -68,12 +70,14 @@ namespace Maize
             return Vec2(x * other.x, y * other.y);
         }
 
-        constexpr Vec2 operator+=(const Vec2& other) const
+        template<typename U>
+        constexpr Vec2 operator+=(const Vec2<U>& other) const
         {
             return *this = *this + other;
         }
 
-        constexpr Vec2 operator-=(const Vec2& other) const
+        template<typename U>
+        constexpr Vec2 operator-=(const Vec2<U>& other) const
         {
             return *this = *this - other;
         }

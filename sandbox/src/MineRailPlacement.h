@@ -4,16 +4,15 @@
 
 #include "ChunkManager.h"
 #include "RailSelector.h"
-#include "Grid.h"
+#include "PlaceGridTile.h"
 #include "RailTile.h"
+#include "Grid.h"
 
 class MineRailPlacement
 {
 public:
-    static void Handle(Maize::SystemState s, Maize::Entity e, RailSelector& selector)
+    static void SelectTile(Maize::SystemState s, Maize::Entity e, const RailSelector& selector)
     {
-        std::cout << s.DeltaTime() << std::endl;
-
         auto* input = s.GetSingleton<Maize::Input>();
         auto* chunkManager = s.GetSingleton<ChunkManager>();
 
@@ -22,40 +21,110 @@ public:
         if (input->GetMouseButtonDown(Maize::MouseCode::Left))
         {
             const auto mousePosition = input->mousePosition;
-            const auto gridPosition = GridConversion::PixelToCartesian(mousePosition, chunkManager->chunkSize);
+            const auto gridPosition = GridConversion::PixelToCartesian(mousePosition, chunkManager->cellSize);
+            const auto chunkPosition = GridConversion::CartesianToChunk(gridPosition, chunkManager->chunkSize);
+            const auto localPosition = GridConversion::CartesianToChunkLocal(gridPosition, chunkManager->chunkSize);
+            auto entity = chunkManager->TryGetChunk(chunkPosition);
 
-            if (auto* grid = chunkManager->TryGetChunkComponent<Grid<RailTile>>(gridPosition))
+            if (entity.IsNull())
             {
-                GAME_LOG_INFO("Found grid");
-                const auto localPosition = GridConversion::CartesianToChunkLocal(gridPosition, chunkManager->chunkSize);
+                const auto chunkGridPosition = GridConversion::ChunkToCartesian(chunkPosition, chunkManager->chunkSize);
+                const auto pixelPosition = GridConversion::CartesianToPixel(chunkGridPosition, chunkManager->cellSize);
 
-                grid->Set(localPosition, chunkManager->chunkSize, { Rail::Type::Vertical });
+                entity = s.CreateEntity(pixelPosition,
+                    Maize::MeshRenderer(selector.texture),
+                    Grid<RailTile>(chunkManager->chunkSize)
+                );
 
-                if (auto* mesh = chunkManager->TryGetChunkComponent<Maize::MeshRenderer>(localPosition))
-                {
-
-                }
+                chunkManager->chunks[chunkPosition] = entity;
             }
-            else
-            {
-                GAME_LOG_INFO("Failed to find grid");
-                Create(s, chunkManager, gridPosition);
-            }
+
+            entity.AddComponent(
+                PlaceGridTile(
+                    chunkPosition,
+                    localPosition,
+                    selector.GetAtlas(selector.currentType),
+                    selector.railPivot,
+                    selector.gridOffset,
+                    selector.currentType
+                )
+            );
         }
     }
 
-private:
-    static void Create(Maize::SystemState s, ChunkManager* chunkManager, Maize::Vec2i gridPosition)
+    static void PlaceTile(Maize::SystemState s, Maize::Entity e, Maize::MeshRenderer& meshRenderer,
+        Grid<RailTile>& grid, const PlaceGridTile& placeTile)
     {
-        const auto chunkPosition = GridConversion::CartesianToChunk(gridPosition, chunkManager->chunkSize);
-        const auto pixelPosition = GridConversion::CartesianToPixel(gridPosition, chunkManager->chunkSize);
+        const auto* chunkManager = s.GetSingleton<ChunkManager>();
 
-        // create an entity with a pre-alloc sized mesh and grid
-        const auto entity = s.CreateEntity(pixelPosition, true, false,
-            Maize::MeshRenderer(),
-            Grid<RailTile>(chunkManager->chunkSize)
-        );
+        GAME_ASSERT(chunkManager != nullptr, "ChunkManager is nullptr");
 
-        chunkManager->chunks[chunkPosition] = entity;
+        const auto chunkSize = chunkManager->chunkSize;
+        const auto cellSize = chunkManager->cellSize;
+        const auto position = placeTile.local * cellSize;
+        const auto pivotOffset = placeTile.pivot + placeTile.gridOffset;
+        const auto quad = CreateQuad(position, cellSize, placeTile.atlas, pivotOffset);
+        const size_t index = CalculateMeshIndex(placeTile.local, chunkSize);
+
+        grid.Set(placeTile.local, chunkSize, { placeTile.railType });
+
+        /// also look into if the mesh is actually generating the bounds
+        /// look into a better way of doing this?
+        auto meshArrayCopy = meshRenderer.mesh.GetVertices();
+        if (meshArrayCopy.empty())
+        {
+            meshArrayCopy.resize(chunkSize.x * chunkSize.y * 6);
+        }
+        std::ranges::copy(quad, meshArrayCopy.begin() + index);
+        meshRenderer.mesh.AddVertices(meshArrayCopy);
+        /// ---------------
+
+        e.RemoveComponent<PlaceGridTile>();
+    }
+
+private:
+    static std::array<sf::Vertex, 6> CreateQuad(Maize::Vec2i topLeft, Maize::Vec2i size, const Maize::IntRect& atlas, Maize::Vec2i pivot)
+    {
+        std::array<sf::Vertex, 6> quad;
+
+        const auto bottomRight = topLeft + size;
+
+        // position
+        // first triangle
+        quad[0].position = sf::Vector2f(topLeft.x, -topLeft.y);
+        quad[1].position = sf::Vector2f(topLeft.x, -bottomRight.y);
+        quad[2].position = sf::Vector2f(bottomRight.x, -topLeft.y);
+
+        // second triangle
+        quad[3].position = sf::Vector2f(bottomRight.x, -topLeft.y);
+        quad[4].position = sf::Vector2f(topLeft.x, -bottomRight.y);
+        quad[5].position = sf::Vector2f(bottomRight.x, -bottomRight.y);
+
+        // apply pivot transformation
+        for (auto& v : quad)
+        {
+            v.position -= sf::Vector2f(pivot.x, pivot.y);
+        }
+
+        // atlas position
+        // first triangle
+        quad[0].texCoords = sf::Vector2f(atlas.x, atlas.y);
+        quad[1].texCoords = sf::Vector2f(atlas.x, atlas.y + atlas.height);
+        quad[2].texCoords = sf::Vector2f(atlas.x + atlas.width, atlas.y);
+
+        // second triangle
+        quad[3].texCoords = sf::Vector2f(atlas.x + atlas.width, atlas.y);
+        quad[4].texCoords = sf::Vector2f(atlas.x, atlas.y + atlas.height);
+        quad[5].texCoords = sf::Vector2f(atlas.x + atlas.width, atlas.y + atlas.height);
+
+        return quad;
+    }
+
+    static size_t CalculateMeshIndex(Maize::Vec2i localPosition, Maize::Vec2i chunkSize)
+    {
+        constexpr uint32_t verticesPerQuad = 6;
+        const size_t quadIndex = localPosition.x + localPosition.y * chunkSize.x;
+
+        return quadIndex * verticesPerQuad;
     }
 };

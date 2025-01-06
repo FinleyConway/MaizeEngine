@@ -16,39 +16,37 @@ public:
     virtual void OnStart() override
     {
         m_Texture = std::make_shared<sf::Texture>();
-        if (!m_Texture->loadFromFile("/home/finley/CLionProjects/MaizeEngine/sandbox/asserts/tileset-16x16.png"))
+        if (!m_Texture->loadFromFile("/home/finley/CLionProjects/MaizeEngine/sandbox/assets/tileset-16x16.png"))
             return;
 
         CreateSingleton<ChunkManager>(
             Maize::Vec2<uint16_t>(32, 32),
-            Maize::Vec2<uint16_t>(32, 32)
+            Maize::Vec2<uint16_t>(16, 16)
         );
 
-        CreateEntity(Maize::Vec2f(0, 0), false, false, Maize::Camera(2));
+        CreateEntity(Maize::Vec2f(0, 0), Maize::Camera(2));
+        CreateEntity(Maize::Vec2f(0, 0), RailSelector(m_Texture, GetRailAtlas()));
 
-        auto sprite = Maize::Sprite(m_Texture, Maize::IntRect(128, 00, 16, 16));
-
-        auto gridE = CreateEntity(Maize::Vec2f(0, 0), true, false,
-            RailSelector(GetRailAtlas())
+        AddSystem<const RailSelector>("Rail Select Tile", flecs::OnUpdate, MineRailPlacement::SelectTile);
+        AddSystem<Maize::MeshRenderer, Grid<RailTile>, const PlaceGridTile>(
+            "Rail Place Tile", flecs::OnUpdate, MineRailPlacement::PlaceTile
         );
-
-        AddSystem<RailSelector>("Rail Placement", flecs::OnUpdate, MineRailPlacement::Handle);
         //AddSystem<Maize::Position, RailController>("Rail Controller", flecs::OnUpdate, MineCarMovement::Move);
     }
 
     virtual void OnEnd() override {}
 
 private:
-    static std::unordered_map<Rail::Type, Maize::FloatRect> GetRailAtlas()
+    static std::unordered_map<Rail::Type, Maize::IntRect> GetRailAtlas()
     {
-        std::unordered_map<Rail::Type, Maize::FloatRect> rails;
+        std::unordered_map<Rail::Type, Maize::IntRect> rails;
 
-        rails.emplace(Rail::Type::Vertical,   Maize::FloatRect(016, 00, 16, 16));
-        rails.emplace(Rail::Type::Horizontal, Maize::FloatRect(064, 32, 16, 16));
-        rails.emplace(Rail::Type::NorthRight, Maize::FloatRect(128, 00, 16, 16));
-        rails.emplace(Rail::Type::NorthLeft,  Maize::FloatRect(144, 00, 16, 16));
-        rails.emplace(Rail::Type::SouthRight, Maize::FloatRect(128, 16, 16, 16));
-        rails.emplace(Rail::Type::SouthLeft,  Maize::FloatRect(144, 16, 16, 16));
+        rails.emplace(Rail::Type::Vertical,   Maize::IntRect(16 , 0, 16, 16));
+        rails.emplace(Rail::Type::Horizontal, Maize::IntRect(48 , 32, 16, 16));
+        rails.emplace(Rail::Type::NorthRight, Maize::IntRect(128, 0, 16, 16));
+        rails.emplace(Rail::Type::NorthLeft,  Maize::IntRect(144, 0, 16, 16));
+        rails.emplace(Rail::Type::SouthRight, Maize::IntRect(128, 16, 16, 16));
+        rails.emplace(Rail::Type::SouthLeft,  Maize::IntRect(144, 16, 16, 16));
 
         return rails;
     }
