@@ -1,6 +1,7 @@
 #include "PrecompiledHeader.h"
 #include "Maize/Scene/Systems/Rendering/RenderingSystem.h"
 
+#include "../../../../../build/linux/release/_deps/imgui-src/imgui.h"
 #include "Maize/Rendering/Renderer.h"
 #include "Maize/Scene/Components/Rendering/Camera.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
@@ -54,7 +55,7 @@ namespace Maize::Internal
 
         // create the current view
         const auto windowSize = renderer->GetWindowSize();
-        auto view = sf::View({ position.x, position.y }, sf::Vector2f(windowSize));
+        auto view = sf::View({ position.x, -position.y }, sf::Vector2f(windowSize));
 
         // apply viewport
         const auto viewport = sf::FloatRect(
@@ -102,8 +103,8 @@ namespace Maize::Internal
         const auto& texture = sprite.GetTexture().lock();
         const auto& vertices = sprite.GetVertices();
 
-       const sf::Transform transform = CreateTransform(position, pivot);
-       const sf::RenderStates state = CreateRenderState(transform, texture);
+        const sf::Transform transform = CreateTransform(position, pivot);
+        const sf::RenderStates state = CreateRenderState(transform, texture);
 
         renderer->Draw(vertices, state);
     }

@@ -14,7 +14,7 @@
 namespace Maize::Internal
 {
     SceneManager::SceneManager(Renderer& renderer) :
-        m_SpatialHashGrid(4), m_InputHandler(m_World, renderer.GetWindow())
+        m_SpatialHashGrid(512), m_InputHandler(m_World, renderer.GetWindow())
     {
         PROFILE_FUNCTION();
 

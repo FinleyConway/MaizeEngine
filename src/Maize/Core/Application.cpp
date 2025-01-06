@@ -49,6 +49,11 @@ namespace Maize
 
             ImGui::SFML::Update(m_Window, sf::seconds(deltaTime));
 
+            ImGui::Begin("Settings");
+            ImGui::Text("Draw calls: %d", m_Renderer.GetDrawCalls());
+            ImGui::Text("Frame Time: %.5f", deltaTime);
+            ImGui::End();
+
             m_Renderer.BeginDrawing();
 
             m_SceneManager.OnUpdate(deltaTime);

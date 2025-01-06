@@ -2,8 +2,6 @@
 
 #include <Maize.h>
 
-#include "GridConversion.h"
-
 struct ChunkManager
 {
 public:
@@ -15,6 +13,11 @@ public:
     ChunkManager() = default;
     ChunkManager(Maize::Vec2<uint16_t> chunkSize, Maize::Vec2<uint16_t> cellSize)
         : chunkSize(chunkSize), cellSize(cellSize) {}
+
+    Maize::FloatRect GetChunkBounds() const
+    {
+        return Maize::FloatRect(0 , 0, cellSize.x * chunkSize.x, cellSize.y * chunkSize.y);
+    }
 
     Maize::Entity TryGetChunk(Maize::Vec2i chunkPosition) const
     {

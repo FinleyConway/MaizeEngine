@@ -50,7 +50,7 @@ namespace Maize::Internal
 
             const auto* ctx = GetRenderingContext(entity);
             const auto position = entity.ensure<Position>();
-            const auto globalBounds = renderer.GetGlobalBounds({ position.x, -position.y });
+            const auto globalBounds = renderer.GetGlobalBounds({ position.x, position.y }); // a bit unsafe
 
             ctx->spatialIndex->Relocate(entity, globalBounds);
 

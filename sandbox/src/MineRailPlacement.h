@@ -2,6 +2,7 @@
 
 #include <Maize.h>
 
+#include "GridConversion.h"
 #include "ChunkManager.h"
 #include "RailSelector.h"
 #include "PlaceGridTile.h"
@@ -68,7 +69,6 @@ public:
 
         grid.Set(placeTile.local, chunkSize, { placeTile.railType });
 
-        /// also look into if the mesh is actually generating the bounds
         /// look into a better way of doing this?
         auto meshArrayCopy = meshRenderer.mesh.GetVertices();
         if (meshArrayCopy.empty())
@@ -76,7 +76,7 @@ public:
             meshArrayCopy.resize(chunkSize.x * chunkSize.y * 6);
         }
         std::ranges::copy(quad, meshArrayCopy.begin() + index);
-        meshRenderer.mesh.AddVertices(meshArrayCopy);
+        meshRenderer.mesh.AddVertices(meshArrayCopy, chunkManager->GetChunkBounds());
         /// ---------------
 
         e.RemoveComponent<PlaceGridTile>();
