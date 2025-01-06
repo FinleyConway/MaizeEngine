@@ -24,6 +24,11 @@ namespace Maize::Internal
          */
         void OnEvent(const std::optional<sf::Event>& event) const;
 
+        /**
+         * Handle end of frame
+         */
+        void OnUpdateEnd() const;
+
     private:
         void OnKeyPressed(const sf::Event::KeyPressed& event) const;
 
@@ -34,6 +39,8 @@ namespace Maize::Internal
         void OnMouseButtonPressed(const sf::Event::MouseButtonPressed& event) const;
 
         void OnMouseButtonReleased(const sf::Event::MouseButtonReleased& event) const;
+
+        void OnMouseWheelScrolled(const sf::Event::MouseWheelScrolled& event) const;
 
     private:
         const flecs::world& m_World;

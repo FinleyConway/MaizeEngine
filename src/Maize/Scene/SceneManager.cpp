@@ -125,6 +125,7 @@ namespace Maize::Internal
         PROFILE_FUNCTION();
 
         m_World.progress(deltaTime);
+        m_InputHandler.OnUpdateEnd();
     }
 
     void SceneManager::ChangeSceneObserver()

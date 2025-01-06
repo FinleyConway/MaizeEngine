@@ -30,6 +30,22 @@ namespace Maize::Internal
 
         if (const auto* mouseButtonReleased = event->getIf<sf::Event::MouseButtonReleased>())
             OnMouseButtonReleased(*mouseButtonReleased);
+
+        if (const auto* mouseWheelScrolled = event->getIf<sf::Event::MouseWheelScrolled>())
+            OnMouseWheelScrolled(*mouseWheelScrolled);
+    }
+
+    void InputSystem::OnUpdateEnd() const
+    {
+        PROFILE_FUNCTION();
+
+        // reset input singleton every frame
+        auto& input = m_World.ensure<Input>();
+        input.keyDownQuery.reset();
+        input.keyUpQuery.reset();
+        input.mouseDownQuery.reset();
+        input.mouseUpQuery.reset();
+        input.scrollWheelDelta = 0.0f;
     }
 
     void InputSystem::OnKeyPressed(const sf::Event::KeyPressed& event) const
@@ -82,5 +98,12 @@ namespace Maize::Internal
 
         input.mouseDownQuery.reset(codeIndex);
         input.mouseUpQuery.set(codeIndex);
+    }
+
+    void InputSystem::OnMouseWheelScrolled(const sf::Event::MouseWheelScrolled& event) const
+    {
+        auto& input = m_World.ensure<Input>();
+
+        input.scrollWheelDelta = event.delta;
     }
 } // Internal::Maize
