@@ -7,7 +7,7 @@
 // TODO: Separate this component
 struct RailSelector
 {
-    Rail::Type currentType = Rail::Type::Vertical; // TODO: change to none
+    Rail::Type currentType = Rail::Type::NorthRight; // TODO: change to none
     std::unordered_map<Rail::Type, Maize::IntRect> railType;
 
     std::weak_ptr<sf::Texture> texture;

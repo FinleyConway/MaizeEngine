@@ -51,6 +51,28 @@ public:
                 )
             );
         }
+        else if (input->GetMouseButtonDown(Maize::MouseCode::Right))
+        {
+            const auto mousePosition = input->mousePosition;
+            const auto gridPosition = GridConversion::PixelToCartesian(mousePosition, chunkManager->cellSize);
+            const auto chunkPosition = GridConversion::CartesianToChunk(gridPosition, chunkManager->chunkSize);
+            const auto localPosition = GridConversion::CartesianToChunkLocal(gridPosition, chunkManager->chunkSize);
+            auto entity = chunkManager->TryGetChunk(chunkPosition);
+
+            if (!entity.IsNull())
+            {
+                entity.AddComponent(
+                PlaceGridTile(
+                    chunkPosition,
+                    localPosition,
+                    selector.GetAtlas(Rail::Type::None),
+                    selector.railPivot,
+                    selector.gridOffset,
+                    Rail::Type::None
+                )
+            );
+            }
+        }
     }
 
     static void PlaceTile(Maize::SystemState s, Maize::Entity e, Maize::MeshRenderer& meshRenderer,
