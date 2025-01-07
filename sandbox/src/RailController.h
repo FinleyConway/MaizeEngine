@@ -13,9 +13,8 @@ struct RailController
     float currentTime = 0.0f;
     Rail::Dir currentDir = Rail::Dir::N;
 
-    Maize::Entity grid;
-
     RailController() = default;
-    RailController(Maize::Vec2f lastPos, Maize::Entity grid)
-        : lastPos(lastPos), nextPos(lastPos), grid(grid) {}
+
+    RailController(Maize::Vec2f lastPos)
+        : lastPos(lastPos), nextPos(lastPos) {}
 };

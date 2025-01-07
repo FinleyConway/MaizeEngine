@@ -1,20 +1,22 @@
-/*#include "MineCarMovement.h"
+#include "MineCarMovement.h"
 
+#include "ChunkManager.h"
 #include "Grid.h"
+#include "GridConversion.h"
 #include "RailController.h"
 
 void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller)
 {
     auto* input = s.GetSingleton<Maize::Input>();
+    const auto* chunkManager = s.GetSingleton<ChunkManager>();
+
+    GAME_ASSERT(chunkManager != nullptr, "ChunkManager is nullptr");
 
     if (input->GetButtonHeld(Maize::KeyCode::W))
     {
-        if (const auto* grid = controller.grid.TryGetComponent<Grid<RailTile>>())
+        if (position.ApproxOf(controller.nextPos))
         {
-            if (position.ApproxOf(controller.nextPos))
-            {
-                HandleDirection(*grid, controller);
-            }
+            HandleDirection(chunkManager, controller);
         }
 
         controller.currentTime += controller.speed * s.DeltaTime();
@@ -24,37 +26,36 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
     }
 }
 
-void MineCarMovement::HandleDirection(const Grid<RailTile>& grid, RailController& controller)
+void MineCarMovement::HandleDirection(const ChunkManager* chunkManager, RailController& controller)
 {
     // get the current tile check if it's within the grid.
-    const Maize::Vec2i gridPos = grid.PixelToCartesian(controller.nextPos.x, controller.nextPos.y);
+    const auto gridPosition = GridConversion::PixelToCartesian(controller.nextPos, chunkManager->cellSize);
+    const auto chunkPosition = GridConversion::CartesianToChunk(gridPosition, chunkManager->chunkSize);
+    const auto entity = chunkManager->TryGetChunk(chunkPosition);
 
-    if (grid.IsWithin(gridPos.x, gridPos.y))
+    if (const auto* grid = entity.TryGetComponent<Grid<RailTile>>())
     {
         // get the tile and find what the next direction is based on the travelling direction
-        const auto& tile = grid.Get(gridPos.x, gridPos.y);
+        const auto localPosition = GridConversion::CartesianToChunkLocal(gridPosition, chunkManager->chunkSize);
+        const auto& tile = grid->Get(localPosition, chunkManager->chunkSize);
         const auto nextDirection = Rail::GetNextTravellingDir(controller.currentDir, tile.railType);
-
-        GAME_LOG_INFO("Current Rail Dir is {}", Rail::TypeToStr(tile.railType));
 
         // don't find the next tile if its no rail.
         if (nextDirection != Rail::Dir::None)
         {
             // get the next tile
             const auto directionOffset = Rail::GetDirectionOffset(nextDirection);
-            const auto offset = directionOffset + gridPos;
+            const auto offset = directionOffset + gridPosition;
+            const auto nextPosition = GridConversion::CartesianToPixel(offset, chunkManager->cellSize);
 
-            // assign the next rail destination if it's within the grid.
-            if (grid.IsWithin(offset.x, offset.y))
-            {
-                controller.lastPos = controller.nextPos;
-                controller.nextPos = grid.CartesianToPixel(offset.x, offset.y);
-                controller.currentTime = 0.0f;
-                controller.currentDir = nextDirection;
+            /**
+             * Figure out why the minecart is travel onto a empty tile when there is a ending?
+             */
 
-                GAME_LOG_INFO("Offset: [{}, {}]", offset.x, offset.y);
-                GAME_LOG_INFO("Current direction is {}", Rail::DirToStr(nextDirection));
-            }
+            controller.lastPos = controller.nextPos;
+            controller.nextPos = nextPosition;
+            controller.currentTime = 0.0f;
+            controller.currentDir = nextDirection;
         }
     }
-}*/
+}

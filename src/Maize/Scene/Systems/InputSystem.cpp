@@ -39,12 +39,7 @@ namespace Maize::Internal
     {
         PROFILE_FUNCTION();
 
-        // reset input singleton every frame
         auto& input = m_World.ensure<Input>();
-        input.keyDownQuery.reset();
-        input.keyUpQuery.reset();
-        input.mouseDownQuery.reset();
-        input.mouseUpQuery.reset();
         input.scrollWheelDelta = 0.0f;
     }
 

@@ -16,14 +16,14 @@ public:
         data.resize(size.x * size.y);
     }
 
-    const T& Get(int32_t x, int32_t y, uint16_t width) const
+    const T& Get(Maize::Vec2i position, Maize::Vec2i size) const
     {
-        return data[x + y * width];
+        return data[position.x + position.y * size.x];
     }
 
-    T& Get(int32_t x, int32_t y, uint16_t width)
+    T& Get(Maize::Vec2i position, Maize::Vec2i size)
     {
-        return data[x + y * width];
+        return data[position.x + position.y * size.x];
     }
 
     bool Set(Maize::Vec2i position, Maize::Vec2i size, const T& tile)

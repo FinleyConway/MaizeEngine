@@ -77,6 +77,22 @@ public:
         }
     }
 
+    static Type GetType(uint8_t i)
+    {
+        switch (i)
+        {
+            case 0: return Type::Vertical;
+            case 1: return Type::NorthRight;
+            case 2: return Type::Horizontal;
+            case 3: return Type::SouthRight;
+            case 4: return Type::Vertical;
+            case 5: return Type::SouthLeft;
+            case 6: return Type::Horizontal;
+            case 7: return Type::NorthLeft;
+            default: return Type::None;
+        }
+    }
+
     /**
      * Flip direction to the other side. E.g: N -> S, E -> W
      */

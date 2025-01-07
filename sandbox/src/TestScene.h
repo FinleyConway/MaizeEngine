@@ -24,14 +24,18 @@ public:
             Maize::Vec2<uint16_t>(16, 16)
         );
 
+        auto sprite = Maize::Sprite(m_Texture, {0, 0, 16, 16}, {0, -16});
+
         CreateEntity(Maize::Vec2f(0, 0), Maize::Camera(2));
         CreateEntity(Maize::Vec2f(0, 0), RailSelector(m_Texture, GetRailAtlas()));
+        CreateEntity(Maize::Vec2f(0, 0), RailController(), Maize::SpriteRenderer(sprite));
 
+        AddSystem<RailSelector>("Choose Rail Type", flecs::OnUpdate, MineRailPlacement::ChooseRailType);
         AddSystem<const RailSelector>("Rail Select Tile", flecs::OnUpdate, MineRailPlacement::SelectTile);
         AddSystem<Maize::MeshRenderer, Grid<RailTile>, const PlaceGridTile>(
             "Rail Place Tile", flecs::OnUpdate, MineRailPlacement::PlaceTile
         );
-        //AddSystem<Maize::Position, RailController>("Rail Controller", flecs::OnUpdate, MineCarMovement::Move);
+        AddSystem<Maize::Position, RailController>("Rail Controller", flecs::OnUpdate, MineCarMovement::Move);
     }
 
     virtual void OnEnd() override {}
