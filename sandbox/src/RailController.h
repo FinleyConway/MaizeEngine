@@ -6,12 +6,16 @@
 
 struct RailController
 {
-    float speed = 8.0f;
+    float speed = 2.0f;
 
     Maize::Vec2f lastPos;
     Maize::Vec2f nextPos;
     float currentTime = 0.0f;
-    Rail::Dir currentDir = Rail::Dir::N;
+
+    Rail::Dir travellingDirection = Rail::Dir::N;
+    Rail::Type nextRail = Rail::Type::None;
+    bool isTurning = false;
+    float turningTime = 0.0f;
 
     RailController() = default;
 

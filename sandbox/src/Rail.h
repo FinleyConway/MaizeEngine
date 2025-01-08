@@ -94,6 +94,21 @@ public:
     }
 
     /**
+     * Check if a tile is curve.
+     */
+    static bool IsCurve(Type type)
+    {
+        switch (type)
+        {
+            case Type::NorthRight: return true;
+            case Type::NorthLeft:  return true;
+            case Type::SouthRight: return true;
+            case Type::SouthLeft:  return true;
+            default: return false;
+        }
+    }
+
+    /**
      * Flip direction to the other side. E.g: N -> S, E -> W
      */
     static Dir FlipDir(Dir dir)

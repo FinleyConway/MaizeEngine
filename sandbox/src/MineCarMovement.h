@@ -15,4 +15,6 @@ public:
 
 private:
     static void HandleDirection(const ChunkManager* chunkManager, RailController& controller);
+
+    static void HandleTurning(RailController& controller);
 };

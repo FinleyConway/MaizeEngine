@@ -16,10 +16,6 @@ public:
     {
         auto* input = s.GetSingleton<Maize::Input>();
 
-        ImGui::Begin("Rail Type");
-        ImGui::Text("Rail Type: %s", Rail::TypeToStr(selector.currentType).data());
-        ImGui::End();
-
         static uint8_t i = 0;
 
         if (input->GetButtonDown(Maize::KeyCode::R))
@@ -44,11 +40,6 @@ public:
         const auto chunkPosition = GridConversion::CartesianToChunk(gridPosition, chunkManager->chunkSize);
         const auto localPosition = GridConversion::CartesianToChunkLocal(gridPosition, chunkManager->chunkSize);
         auto entity = chunkManager->TryGetChunk(chunkPosition);
-
-        ImGui::Begin("Rail Position");
-        ImGui::Text("Chunk Position: %d, %d", chunkPosition.x, chunkPosition.y);
-        ImGui::Text("Local Position: %d, %d", localPosition.x, localPosition.y);
-        ImGui::End();
 
         if (input->GetMouseButtonDown(Maize::MouseCode::Left))
         {
