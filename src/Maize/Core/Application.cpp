@@ -76,7 +76,11 @@ namespace Maize
         {
             ImGui::SFML::ProcessEvent(m_Window, event.value());
 
-            m_SceneManager.OnEvent(event);
+            const auto io = ImGui::GetIO(); // make sure imgui is first priority.
+            if (!(io.WantCaptureMouse || io.WantCaptureKeyboard))
+            {
+                m_SceneManager.OnEvent(event);
+            }
 
             if (event->is<sf::Event::Closed>())
             {
