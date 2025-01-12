@@ -3,7 +3,7 @@
 #include <flecs.h>
 
 #include "Maize/Scene/Components/Position.h"
-#include "Maize/Scene/Components/SceneComponents.h"
+#include "Maize/Scene/Components/Active.h"
 
 namespace Maize
 {

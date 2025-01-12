@@ -20,8 +20,8 @@ public:
             return;
 
         CreateSingleton<ChunkManager>(
-            Maize::Vec2<uint16_t>(32, 32),
-            Maize::Vec2<uint16_t>(16, 16)
+            Maize::Vec2i(32, 32),
+            Maize::Vec2i(16, 16)
         );
 
         auto sprite = Maize::Sprite(m_Texture, {0, 0, 16, 16}, {0, -16});

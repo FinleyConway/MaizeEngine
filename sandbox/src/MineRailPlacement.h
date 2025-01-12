@@ -36,17 +36,17 @@ public:
         GAME_ASSERT(chunkManager != nullptr, "ChunkManager is nullptr");
 
         const auto mousePosition = input->mousePosition;
-        const auto gridPosition = GridConversion::PixelToCartesian(mousePosition, chunkManager->cellSize);
-        const auto chunkPosition = GridConversion::CartesianToChunk(gridPosition, chunkManager->chunkSize);
-        const auto localPosition = GridConversion::CartesianToChunkLocal(gridPosition, chunkManager->chunkSize);
+        const auto gridPosition = GridConversion::PixelToGrid(mousePosition, chunkManager->cellSize);
+        const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkManager->chunkSize);
+        const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
         auto entity = chunkManager->TryGetChunk(chunkPosition);
 
         if (input->GetMouseButtonDown(Maize::MouseCode::Left))
         {
             if (entity.IsNull())
             {
-                const auto chunkGridPosition = GridConversion::ChunkToCartesian(chunkPosition, chunkManager->chunkSize);
-                const auto pixelPosition = GridConversion::CartesianToPixel(chunkGridPosition, chunkManager->cellSize);
+                const auto chunkGridPosition = GridConversion::ChunkToGrid(chunkPosition, chunkManager->chunkSize);
+                const auto pixelPosition = GridConversion::GridToPixel(chunkGridPosition, chunkManager->cellSize);
 
                 entity = s.CreateEntity(pixelPosition,
                     Maize::MeshRenderer(selector.texture),

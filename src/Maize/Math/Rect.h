@@ -16,6 +16,15 @@ namespace Maize
         {
         }
 
+        constexpr std::string ToString() const
+        {
+            return "Rect(" +
+                std::to_string(x) + ", " +
+                std::to_string(y) + ", " +
+                std::to_string(width) + ", " +
+                std::to_string(height) + ")";
+        }
+
         template<typename U>
         constexpr explicit Rect(const Rect<U>& other)
             : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), width(static_cast<T>(other.width)),

@@ -1,7 +1,6 @@
 #include "PrecompiledHeader.h"
 #include "Maize/Scene/Systems/Rendering/RenderingSystem.h"
 
-#include "../../../../../build/linux/release/_deps/imgui-src/imgui.h"
 #include "Maize/Rendering/Renderer.h"
 #include "Maize/Scene/Components/Rendering/Camera.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"

@@ -2,12 +2,12 @@
 
 #include <Maize.h>
 
-class GridConversion
+#include "StaticHelperBase.h"
+
+class GridConversion final : public StaticHelperBase
 {
 public:
-    GridConversion() = delete;
-
-    static Maize::Vec2f CartesianToPixel(Maize::Vec2i p, Maize::Vec2i cellSize)
+    static Maize::Vec2f GridToPixel(Maize::Vec2i p, Maize::Vec2i cellSize)
     {
         const auto screenX = static_cast<float>(p.x * cellSize.x);
         const auto screenY = static_cast<float>(p.y * cellSize.y);
@@ -15,7 +15,7 @@ public:
         return Maize::Vec2f(screenX, screenY);
     }
 
-    static Maize::Vec2i PixelToCartesian(Maize::Vec2f p, Maize::Vec2i cellSize)
+    static Maize::Vec2i PixelToGrid(Maize::Vec2f p, Maize::Vec2i cellSize)
     {
         int32_t gridX = 0;
         int32_t gridY = 0;
@@ -26,7 +26,7 @@ public:
         return Maize::Vec2i(gridX, gridY);
     }
 
-    static Maize::Vec2i ChunkToCartesian(Maize::Vec2i chunkPosition, Maize::Vec2i chunkSize)
+    static Maize::Vec2i ChunkToGrid(Maize::Vec2i chunkPosition, Maize::Vec2i chunkSize)
     {
         const int32_t chunkX = chunkPosition.x * chunkSize.x;
         const int32_t chunkY = chunkPosition.y * chunkSize.y;
@@ -34,7 +34,7 @@ public:
         return Maize::Vec2i(chunkX, chunkY);
     }
 
-    static Maize::Vec2i CartesianToChunk(Maize::Vec2i gridPosition, Maize::Vec2i chunkSize)
+    static Maize::Vec2i GridToChunk(Maize::Vec2i gridPosition, Maize::Vec2i chunkSize)
     {
         int32_t chunkX = 0;
         int32_t chunkY = 0;
@@ -45,7 +45,7 @@ public:
         return Maize::Vec2i(chunkX, chunkY);
     }
 
-    static Maize::Vec2i CartesianToChunkLocal(Maize::Vec2i gridPosition, Maize::Vec2i chunkSize)
+    static Maize::Vec2i GridToChunkLocal(Maize::Vec2i gridPosition, Maize::Vec2i chunkSize)
     {
         int32_t localX = 0;
         int32_t localY = 0;

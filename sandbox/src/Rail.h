@@ -2,10 +2,12 @@
 
 #include <string_view>
 
+#include "StaticHelperBase.h"
+
 /**
  * Helper class for rail related logic.
  */
-class Rail
+class Rail final : public StaticHelperBase
 {
 public:
     /**
@@ -115,7 +117,7 @@ public:
     {
         constexpr uint8_t shift = 4;
         const uint8_t dirByte = static_cast<uint8_t>(dir);
-        const uint8_t result = dirByte << shift | dirByte >> 8 - shift;
+        const uint8_t result = dirByte << shift | dirByte >> shift;
 
         return static_cast<Dir>(result & 0xFF);
     }

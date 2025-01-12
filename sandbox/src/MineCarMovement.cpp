@@ -17,8 +17,8 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
     ImGui::Text("Current Dir: %s", Rail::DirToStr(controller.travellingDirection).data());
     ImGui::Text("Current Dir: %s", controller.isTurning ? "Turning" : "Not Turning");
     ImGui::Text("Current Time To Next: %f", controller.currentTime);
-    ImGui::Text("Last Position: [%f, %f]", controller.lastPos.x, controller.lastPos.y);
-    ImGui::Text("Next Position: [%f, %f]", controller.nextPos.x, controller.nextPos.y);
+    ImGui::Text("Last Position: %s", controller.lastPos.ToString().data());
+    ImGui::Text("Next Position: %s", controller.nextPos.ToString().data());
     ImGui::Text("Next Direction: %s", Rail::TypeToStr(controller.nextRail).data());
     ImGui::Text("Turning Time: %f", controller.turningTime);
     ImGui::End();
@@ -42,14 +42,14 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
 void MineCarMovement::HandleDirection(const ChunkManager* chunkManager, RailController& controller)
 {
     // get the current tile check if it's within the grid.
-    const auto gridPosition = GridConversion::PixelToCartesian(controller.nextPos, chunkManager->cellSize);
-    const auto chunkPosition = GridConversion::CartesianToChunk(gridPosition, chunkManager->chunkSize);
+    const auto gridPosition = GridConversion::PixelToGrid(controller.nextPos, chunkManager->cellSize);
+    const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkManager->chunkSize);
     const auto entity = chunkManager->TryGetChunk(chunkPosition);
 
     if (const auto* grid = entity.TryGetComponent<Grid<RailTile>>())
     {
         // get the tile and find what the next direction is based on the travelling direction
-        const auto localPosition = GridConversion::CartesianToChunkLocal(gridPosition, chunkManager->chunkSize);
+        const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
         const auto& tile = grid->Get(localPosition, chunkManager->chunkSize);
         const auto nextDirection = Rail::GetNextTravellingDir(controller.travellingDirection, tile.railType);
 
@@ -59,13 +59,13 @@ void MineCarMovement::HandleDirection(const ChunkManager* chunkManager, RailCont
             // get the next tile
             const auto directionOffset = Rail::GetDirectionOffset(nextDirection);
             const auto offset = directionOffset + gridPosition;
-            const auto nextPosition = GridConversion::CartesianToPixel(offset, chunkManager->cellSize);
-            const auto offsetChunk = GridConversion::CartesianToChunk(offset, chunkManager->chunkSize);
+            const auto nextPosition = GridConversion::GridToPixel(offset, chunkManager->cellSize);
+            const auto offsetChunk = GridConversion::GridToChunk(offset, chunkManager->chunkSize);
             const auto offsetEntity = chunkManager->TryGetChunk(offsetChunk);
 
             if (const auto* offsetGrid = offsetEntity.TryGetComponent<Grid<RailTile>>())
             {
-                const auto nextLocalPosition = GridConversion::CartesianToChunkLocal(offset, chunkManager->chunkSize);
+                const auto nextLocalPosition = GridConversion::GridToChunkLocal(offset, chunkManager->chunkSize);
                 const auto& nextTile = offsetGrid->Get(nextLocalPosition, chunkManager->chunkSize);
 
                 controller.lastPos = controller.nextPos;

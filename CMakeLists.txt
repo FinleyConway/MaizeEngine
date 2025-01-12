@@ -58,7 +58,6 @@ add_library(MaizeEngine
 
         src/Maize/Scene/Entity.h
         src/Maize/Scene/Components/Position.h
-        src/Maize/Scene/Components/SceneComponents.h
         src/Maize/Scene/Scene.h
         src/Maize/Scene/SystemState.h
         src/Maize/Scene/SceneManager.cpp
@@ -80,6 +79,8 @@ add_library(MaizeEngine
         src/PrecompiledHeader.cpp
         src/Maize/Math/Math.h
         src/Maize/Scene/Components/Rendering/MeshRenderer.h
+        src/Maize/Scene/Components/Active.h
+        src/Maize/Scene/Components/ChangeScene.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)

@@ -2,6 +2,7 @@
 #include "Maize/Scene/SceneManager.h"
 
 #include "Maize/Rendering/Renderer.h"
+#include "Maize/Scene/Components/ChangeScene.h"
 #include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"

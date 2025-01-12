@@ -34,6 +34,11 @@ namespace Maize
             return Math::Approx(x, other.x) && Math::Approx(y, other.y);
         }
 
+        constexpr std::string ToString() const
+        {
+            return "Vec2(" + std::to_string(x) + ", " + std::to_string(y) + ")";
+        }
+
         template<typename U>
         constexpr bool operator==(const Vec2<U>& other) const
         {

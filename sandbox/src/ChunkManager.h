@@ -11,7 +11,7 @@ public:
 
 public:
     ChunkManager() = default;
-    ChunkManager(Maize::Vec2<uint16_t> chunkSize, Maize::Vec2<uint16_t> cellSize)
+    ChunkManager(Maize::Vec2i chunkSize, Maize::Vec2i cellSize)
         : chunkSize(chunkSize), cellSize(cellSize) {}
 
     Maize::FloatRect GetChunkBounds() const
