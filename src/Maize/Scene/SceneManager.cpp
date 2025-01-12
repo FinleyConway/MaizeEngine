@@ -23,26 +23,37 @@ namespace Maize::Internal
 
         m_World.set(RenderingContext(&renderer, &m_SpatialHashGrid));
 
-        m_World.component<Position>().on_set([](flecs::entity entity, Position&)
-        {
-            entity.add<DeferredRenderable>();
+        m_World.observer<Position>()
+            .event(flecs::OnSet)
+            .each([](flecs::entity entity, Position&) {
+                entity.add<DeferredRenderable>();
+            });
+
+        // on add/set sprite renderer
+        m_World.observer<SpriteRenderer>()
+            .event(flecs::OnAdd)
+            .each([](flecs::entity entity, SpriteRenderer&) {
+                entity.add<DeferredRenderable>();
         });
-        m_World.component<SpriteRenderer>().on_add([](flecs::entity entity, SpriteRenderer&)
-        {
-            entity.add<DeferredRenderable>();
-        });
-        m_World.component<MeshRenderer>().on_add([](flecs::entity entity, MeshRenderer&)
-        {
-            entity.add<DeferredRenderable>();
-        });
-        m_World.component<SpriteRenderer>().on_set([](flecs::entity entity, SpriteRenderer&)
-        {
-            entity.add<DeferredRenderable>();
-        });
-        m_World.component<MeshRenderer>().on_set([](flecs::entity entity, MeshRenderer&)
-        {
-            entity.add<DeferredRenderable>();
-        });
+        m_World.observer<SpriteRenderer>().event(flecs::OnSet)
+            .each([](flecs::entity entity, SpriteRenderer&)
+            {
+                entity.add<DeferredRenderable>();
+            });
+
+        // on add/set mesh renderer
+        m_World.observer<MeshRenderer>()
+            .event(flecs::OnAdd)
+            .each([](flecs::entity entity, MeshRenderer&)
+            {
+                entity.add<DeferredRenderable>();
+            });
+        m_World.observer<MeshRenderer>().event(flecs::OnSet)
+            .each([](flecs::entity entity, MeshRenderer&)
+            {
+                entity.add<DeferredRenderable>();
+            });
+
 
         m_World.observer<const SpriteRenderer>("OnSpriteRendererRemove")
             .event(flecs::OnRemove)

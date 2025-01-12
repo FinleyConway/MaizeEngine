@@ -17,8 +17,10 @@ struct RailController
     bool isTurning = false;
     float turningTime = 0.0f;
 
+    std::unordered_map<Rail::Type, std::array<Maize::IntRect, 3>> spriteTurns; // temp
+
     RailController() = default;
 
-    RailController(Maize::Vec2f lastPos)
-        : lastPos(lastPos), nextPos(lastPos) {}
+    RailController(Maize::Vec2f lastPos, const std::unordered_map<Rail::Type, std::array<Maize::IntRect, 3>>& sprites)
+        : lastPos(lastPos), nextPos(lastPos),  spriteTurns(sprites) {}
 };
