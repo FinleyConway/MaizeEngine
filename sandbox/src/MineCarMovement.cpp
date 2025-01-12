@@ -4,6 +4,9 @@
 #include "Grid.h"
 #include "GridConversion.h"
 #include "RailController.h"
+#include "Rail.h"
+#include "RailTile.h"
+#include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
 
 void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller)
 {
@@ -30,7 +33,7 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
             HandleDirection(chunkManager, controller);
         }
 
-        HandleTurning(controller);
+        HandleTurning(e, controller);
 
         controller.currentTime += controller.speed * s.DeltaTime();
         controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
@@ -82,10 +85,12 @@ void MineCarMovement::HandleDirection(const ChunkManager* chunkManager, RailCont
     }
 }
 
-void MineCarMovement::HandleTurning(RailController& controller)
+void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller)
 {
     constexpr float turningPoint = 0.5f;
     const bool isTurningPoint = controller.currentTime >= turningPoint;
+
+    static auto currentTurnRailType = Rail::Type::None;
 
     // is the next rail type a bend
     if (Rail::IsCurve(controller.nextRail))
@@ -93,6 +98,7 @@ void MineCarMovement::HandleTurning(RailController& controller)
         if (isTurningPoint && !controller.isTurning)
         {
             controller.isTurning = true;
+            currentTurnRailType = controller.nextRail;
         }
     }
     // has hit the next turning point
@@ -100,6 +106,7 @@ void MineCarMovement::HandleTurning(RailController& controller)
     {
         controller.isTurning = false;
         controller.turningTime = 0.0f;
+        currentTurnRailType = Rail::Type::None;
     }
 
     if (controller.isTurning)
@@ -109,13 +116,20 @@ void MineCarMovement::HandleTurning(RailController& controller)
         else
         {
             controller.turningTime = controller.currentTime + 0.5f;
-            if (controller.turningTime >= 0.95f) controller.turningTime = 1.0f;
         }
 
         // get the index of the current sprite turn.
-        constexpr uint8_t numberOfSprites = 10; // temp
-        const uint8_t currentSprite = static_cast<uint8_t>(controller.turningTime * numberOfSprites);
+        if (controller.spriteTurns.contains(currentTurnRailType))
+        {
+            const auto& sprites = controller.spriteTurns.at(currentTurnRailType);
 
-        CORE_LOG_INFO(currentSprite);
+            const uint8_t numberOfSprites = sprites.size();
+            const uint8_t currentSprite = static_cast<uint8_t>(controller.turningTime * numberOfSprites);
+
+            if (auto* renderer = e.TryGetMutComponent<Maize::SpriteRenderer>())
+            {
+                renderer->sprite.SetTextureRect(sprites[currentSprite]);
+            }
+        }
     }
 }

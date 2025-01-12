@@ -2,9 +2,6 @@
 
 #include <Maize.h>
 
-#include "Grid.h"
-#include "RailTile.h"
-
 struct ChunkManager;
 struct RailController;
 
@@ -16,5 +13,5 @@ public:
 private:
     static void HandleDirection(const ChunkManager* chunkManager, RailController& controller);
 
-    static void HandleTurning(RailController& controller);
+    static void HandleTurning(Maize::Entity e, RailController& controller);
 };
