@@ -94,6 +94,7 @@ void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller,
     const bool isTurningPoint = controller.currentTime >= turningPoint;
 
     static auto currentTurnRailType = Rail::Type::None;
+    static auto currentTurnDir = Rail::Dir::None;
 
     // is the next rail type a bend
     if (Rail::IsCurve(controller.nextRail))
@@ -102,6 +103,7 @@ void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller,
         {
             controller.isTurning = true;
             currentTurnRailType = controller.nextRail;
+            currentTurnDir = controller.travellingDirection;
         }
     }
     // has hit the next turning point
@@ -110,28 +112,22 @@ void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller,
         controller.isTurning = false;
         controller.turningTime = 0.0f;
         currentTurnRailType = Rail::Type::None;
-
-        if (auto* renderer = e.TryGetMutComponent<Maize::SpriteRenderer>())
-        {
-            renderer->sprite.SetTextureRect(rotations.GetRotationSprite(rotations.GetDirectionIndex(controller.travellingDirection)));
-        }
+        currentTurnDir = Rail::Dir::None;
     }
 
     if (controller.isTurning)
     {
         // normalise the turning time from [0.5f -> 0.5f] to [0.0f -> 1.0f]
         if (Rail::IsCurve(controller.nextRail)) controller.turningTime = controller.currentTime - 0.5f;
-        else
-        {
-            controller.turningTime = controller.currentTime + 0.5f;
-        }
+        else controller.turningTime = controller.currentTime + 0.5f;
 
-        /*const uint8_t numberOfSprites = sprites.size();
+        const auto [from, to] = rotations.GetRotations(currentTurnDir, currentTurnRailType);
+        const uint8_t numberOfSprites = to - from;
         const uint8_t currentSprite = static_cast<uint8_t>(controller.turningTime * numberOfSprites);
 
         if (auto* renderer = e.TryGetMutComponent<Maize::SpriteRenderer>())
         {
-            renderer->sprite.SetTextureRect(sprites[currentSprite]);
-        }*/
+            renderer->sprite.SetTextureRect(rotations.GetRotationSprite(from + currentSprite));
+        }
     }
 }

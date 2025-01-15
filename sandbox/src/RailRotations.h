@@ -21,21 +21,38 @@ public:
         return rotations[index];
     }
 
-    size_t GetDirectionIndex(Rail::Dir direction) const
+    size_t GetDirectionIndex(Rail::Dir direction, bool wrap = false) const
     {
         constexpr uint8_t rotationOffset = 16;
 
+        if (wrap) return 8 * rotationOffset/* -1 */;
+
         switch (direction)
         {
-        case Rail::Dir::N:    return 0 * rotationOffset;
-        case Rail::Dir::NE:   return 1 * rotationOffset - 1;
-        case Rail::Dir::E:    return 2 * rotationOffset - 1;
-        case Rail::Dir::SE:   return 3 * rotationOffset - 1;
-        case Rail::Dir::S:    return 4 * rotationOffset - 1;
-        case Rail::Dir::SW:   return 5 * rotationOffset - 1;
-        case Rail::Dir::W:    return 6 * rotationOffset - 1;
-        case Rail::Dir::NW:   return 7 * rotationOffset - 1;
-        default:              return 0 * rotationOffset - 1;
+            case Rail::Dir::N:    return 0 * rotationOffset;
+            case Rail::Dir::NE:   return 1 * rotationOffset/* -1 */;
+            case Rail::Dir::E:    return 2 * rotationOffset/* -1 */;
+            case Rail::Dir::SE:   return 3 * rotationOffset/* -1 */;
+            case Rail::Dir::S:    return 4 * rotationOffset/* -1 */;
+            case Rail::Dir::SW:   return 5 * rotationOffset/* -1 */;
+            case Rail::Dir::W:    return 6 * rotationOffset/* -1 */;
+            case Rail::Dir::NW:   return 7 * rotationOffset/* -1 */;
+            default:              return 0 * rotationOffset;
+
+
+
+
+
+
         }
+    }
+
+    std::pair<size_t, size_t> GetRotations(Rail::Dir currentDir, Rail::Type railType) const
+    {
+        const auto direction = Rail::GetNextTravellingDir(currentDir, railType);
+        const size_t from = GetDirectionIndex(currentDir);
+        const size_t to = GetDirectionIndex(direction, currentDir == Rail::Dir::W && direction == Rail::Dir::N);
+
+        return { from, to };
     }
 };
