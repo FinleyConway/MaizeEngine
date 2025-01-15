@@ -82,6 +82,6 @@ namespace Maize
         vertices[5].texCoords = sf::Vector2f(right, top);
 
         // construct mesh and its bounds
-        m_Mesh.AddVertices(vertices, bounds);
+        m_Mesh.AddVertices(vertices, { 0, 0, bounds.width, bounds.height });
     }
 } // Maize

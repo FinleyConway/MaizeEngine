@@ -6,9 +6,9 @@
 #include "RailController.h"
 #include "Rail.h"
 #include "RailTile.h"
-#include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
+#include "RailRotations.h"
 
-void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller)
+void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller, const RailRotations& rotations)
 {
     auto* input = s.GetSingleton<Maize::Input>();
     const auto* chunkManager = s.GetSingleton<ChunkManager>();
@@ -33,12 +33,15 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
             HandleDirection(chunkManager, controller);
         }
 
-        HandleTurning(e, controller);
+        HandleTurning(e, controller, rotations);
 
-        controller.currentTime += controller.speed * s.DeltaTime();
-        controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
+        if (controller.nextRail != Rail::Type::None)
+        {
+            controller.currentTime += controller.speed * s.DeltaTime();
+            controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
 
-        position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
+            position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
+        }
     }
 }
 
@@ -85,7 +88,7 @@ void MineCarMovement::HandleDirection(const ChunkManager* chunkManager, RailCont
     }
 }
 
-void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller)
+void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller, const RailRotations& rotations)
 {
     constexpr float turningPoint = 0.5f;
     const bool isTurningPoint = controller.currentTime >= turningPoint;
@@ -107,6 +110,11 @@ void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller)
         controller.isTurning = false;
         controller.turningTime = 0.0f;
         currentTurnRailType = Rail::Type::None;
+
+        if (auto* renderer = e.TryGetMutComponent<Maize::SpriteRenderer>())
+        {
+            renderer->sprite.SetTextureRect(rotations.GetRotationSprite(rotations.GetDirectionIndex(controller.travellingDirection)));
+        }
     }
 
     if (controller.isTurning)
@@ -118,18 +126,12 @@ void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller)
             controller.turningTime = controller.currentTime + 0.5f;
         }
 
-        // get the index of the current sprite turn.
-        if (controller.spriteTurns.contains(currentTurnRailType))
+        /*const uint8_t numberOfSprites = sprites.size();
+        const uint8_t currentSprite = static_cast<uint8_t>(controller.turningTime * numberOfSprites);
+
+        if (auto* renderer = e.TryGetMutComponent<Maize::SpriteRenderer>())
         {
-            const auto& sprites = controller.spriteTurns.at(currentTurnRailType);
-
-            const uint8_t numberOfSprites = sprites.size();
-            const uint8_t currentSprite = static_cast<uint8_t>(controller.turningTime * numberOfSprites);
-
-            if (auto* renderer = e.TryGetMutComponent<Maize::SpriteRenderer>())
-            {
-                renderer->sprite.SetTextureRect(sprites[currentSprite]);
-            }
-        }
+            renderer->sprite.SetTextureRect(sprites[currentSprite]);
+        }*/
     }
 }
