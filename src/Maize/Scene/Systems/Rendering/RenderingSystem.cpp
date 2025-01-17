@@ -78,7 +78,7 @@ namespace Maize::Internal
     {
         sf::Transform transform = sf::Transform::Identity;
 
-        transform.translate({ position.x - pivot.x, -(position.y - pivot.y) });
+        transform.translate({ position.x - pivot.x, -(position.y + pivot.y) });
 
         return transform;
     }

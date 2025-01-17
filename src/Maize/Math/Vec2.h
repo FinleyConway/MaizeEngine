@@ -76,6 +76,28 @@ namespace Maize
         }
 
         template<typename U>
+        constexpr Vec2 operator/(U scalar) const
+        {
+            if (scalar != 0)
+            {
+                return Vec2(x / scalar, y / scalar);
+            }
+
+            return Vec2(0, 0);
+        }
+
+        template<typename U>
+        constexpr Vec2 operator/(const Vec2<U>& other) const
+        {
+            if (other.x != 0 && other.y != 0)
+            {
+                return Vec2(x / other.x, y / other.y);
+            }
+
+            return Vec2(0, 0);
+        }
+
+        template<typename U>
         constexpr Vec2 operator+=(const Vec2<U>& other) const
         {
             return *this = *this + other;

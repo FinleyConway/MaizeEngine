@@ -9,8 +9,8 @@ namespace Maize
         UpdateTextureRect(rect);
     }
 
-    Sprite::Sprite(const std::shared_ptr<sf::Texture>& texture, const IntRect& rect,
-                   Vec2f pivot) : m_TextureReference(texture), m_TextureRect(rect), m_Pivot(pivot)
+    Sprite::Sprite(const std::shared_ptr<sf::Texture>& texture, const IntRect& rect, Vec2f pivot)
+        : m_TextureReference(texture), m_TextureRect(rect), m_Pivot(pivot)
     {
         UpdateTextureRect(rect);
     }

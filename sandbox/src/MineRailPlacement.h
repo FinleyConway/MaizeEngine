@@ -12,36 +12,67 @@
 class MineRailPlacement
 {
 public:
-    static void ChooseRailType(Maize::SystemState s, Maize::Entity e, RailSelector& selector)
+    static void ChooseRailType(Maize::SystemState s, Maize::Entity e, Maize::Position& p, Maize::SpriteRenderer& sprite, RailSelector& selector)
     {
         auto* input = s.GetSingleton<Maize::Input>();
+        const auto* chunkManager = s.GetSingleton<ChunkManager>();
 
-        static uint8_t i = 0;
+        const auto mousePosition = input->mousePosition;
+        const auto gridPosition = GridConversion::PixelToGrid(mousePosition, chunkManager->cellSize);
+        const auto tilePosition = GridConversion::GridToPixel(gridPosition, chunkManager->cellSize);
 
-        if (input->GetButtonDown(Maize::KeyCode::R))
+        if (!input->GetMouseButtonHeld(Maize::MouseCode::Left))
         {
-            i++;
+            const auto tile = GetTypeFromPointInSquare(selector.currentType, mousePosition, tilePosition, chunkManager->cellSize);
 
-            if (i > 7) i = 0;
+            if (tile == Rail::Type::Vertical) selector.lock = RailSelector::AxisLock::Y;
+            else if (tile == Rail::Type::Horizontal) selector.lock = RailSelector::AxisLock::X;
+            else if (tile == Rail::Type::NWSE) selector.lock = RailSelector::AxisLock::XY;
+            else if (tile == Rail::Type::NESW) selector.lock = RailSelector::AxisLock::XY;
 
-            selector.currentType = Rail::GetType(i);
+            selector.isLocked = false;
+            selector.currentType = tile;
+            selector.lockedTilePosition = tilePosition;
+
+            sprite.sprite.SetTextureRect(selector.GetAtlas(tile));
         }
+        else
+        {
+            if (!selector.isLocked)
+            {
+                selector.lockedTilePosition.y = tilePosition.y;
+                selector.isLocked = true;
+            }
+
+            if (selector.lock == RailSelector::AxisLock::X) selector.lockedTilePosition.x = tilePosition.x;
+            else if (selector.lock == RailSelector::AxisLock::Y) selector.lockedTilePosition.y = tilePosition.y;
+        }
+
+        p = selector.lockedTilePosition;
     }
 
-    static void SelectTile(Maize::SystemState s, Maize::Entity e, const RailSelector& selector)
+    static void SelectTile(Maize::SystemState s, Maize::Entity e, RailSelector& selector)
     {
         auto* input = s.GetSingleton<Maize::Input>();
         auto* chunkManager = s.GetSingleton<ChunkManager>();
 
         GAME_ASSERT(chunkManager != nullptr, "ChunkManager is nullptr");
 
-        const auto mousePosition = input->mousePosition;
-        const auto gridPosition = GridConversion::PixelToGrid(mousePosition, chunkManager->cellSize);
+        const auto gridPosition = GridConversion::PixelToGrid(selector.lockedTilePosition, chunkManager->cellSize);
         const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkManager->chunkSize);
         const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
         auto entity = chunkManager->TryGetChunk(chunkPosition);
 
-        if (input->GetMouseButtonDown(Maize::MouseCode::Left))
+        ImGui::Begin("Rail");
+        ImGui::Text("Mouse Position: %s", selector.lockedTilePosition.ToString().c_str());
+        ImGui::Text("Grid Position: %s", gridPosition.ToString().c_str());
+        ImGui::Text("Chunk Position: %s", chunkPosition.ToString().c_str());
+        ImGui::Text("Local Position: %s", localPosition.ToString().c_str());
+        ImGui::End();
+
+        static bool isLocked = false;
+
+        if (input->GetMouseButtonHeld(Maize::MouseCode::Left))
         {
             if (entity.IsNull())
             {
@@ -61,13 +92,12 @@ public:
                     chunkPosition,
                     localPosition,
                     selector.GetAtlas(selector.currentType),
-                    selector.railPivot,
                     selector.gridOffset,
                     selector.currentType
                 )
             );
         }
-        else if (input->GetMouseButtonDown(Maize::MouseCode::Right))
+        if (input->GetMouseButtonHeld(Maize::MouseCode::Right))
         {
             if (!entity.IsNull())
             {
@@ -76,7 +106,6 @@ public:
                         chunkPosition,
                         localPosition,
                         selector.GetAtlas(Rail::Type::None),
-                        selector.railPivot,
                         selector.gridOffset,
                         Rail::Type::None
                     )
@@ -94,9 +123,8 @@ public:
 
         const auto chunkSize = chunkManager->chunkSize;
         const auto cellSize = chunkManager->cellSize;
-        const auto position = placeTile.local * cellSize;
-        const auto pivotOffset = placeTile.pivot + placeTile.gridOffset;
-        const auto quad = CreateQuad(position, cellSize, placeTile.atlas, pivotOffset);
+        const auto position = Maize::Vec2i(placeTile.local.x, -placeTile.local.y) * cellSize;
+        const auto quad = CreateQuad(position, cellSize, placeTile.atlas, placeTile.gridOffset);
         const size_t index = CalculateMeshIndex(placeTile.local, chunkSize);
 
         grid.Set(placeTile.local, chunkSize, { placeTile.railType });
@@ -115,6 +143,41 @@ public:
     }
 
 private:
+    static Rail::Type GetTypeFromPointInSquare(Rail::Type currentType, Maize::Vec2f mousePosition, Maize::Vec2f tilePosition, Maize::Vec2i squareSize)
+    {
+        constexpr uint8_t quadrants = 3;  // number of sections per axis (for a 3x3 grid)
+        const auto quadrantSize = Maize::Vec2f(squareSize / quadrants);
+
+        const float relMouseX = mousePosition.x - tilePosition.x;
+        const float relMouseY = mousePosition.y - tilePosition.y;
+
+        auto getRailTypeForQuadrant = [&](int32_t xIndex, int32_t yIndex) -> Rail::Type
+        {
+            if (xIndex == 0)
+            {
+                if (yIndex == 0) return Rail::Type::NESW;                       // top-left
+                if (yIndex == 1) return Rail::Type::Horizontal;                 // middle-left
+                return Rail::Type::NWSE;                                        // bottom-left
+            }
+
+            if (xIndex == 1)
+            {
+                if (yIndex == 0 || yIndex == 2) return Rail::Type::Vertical;    // top-middle, bottom-middle
+                return currentType;                                             // center-middle
+            }
+
+            if (yIndex == 0) return Rail::Type::NWSE;                           // top-right
+            if (yIndex == 1) return Rail::Type::Horizontal;                     // middle-right
+            return Rail::Type::NESW;                                            // bottom-right
+        };
+
+        // get the quadrant indices based on mouse position
+        const int32_t xIndex = static_cast<int32_t>(relMouseX / quadrantSize.x);
+        const int32_t yIndex = static_cast<int32_t>(relMouseY / quadrantSize.y);
+
+        return getRailTypeForQuadrant(xIndex, yIndex);
+    }
+
     static std::array<sf::Vertex, 6> CreateQuad(Maize::Vec2i topLeft, Maize::Vec2i size, const Maize::IntRect& atlas, Maize::Vec2i pivot)
     {
         std::array<sf::Vertex, 6> quad;
@@ -123,14 +186,14 @@ private:
 
         // position
         // first triangle
-        quad[0].position = sf::Vector2f(topLeft.x, -topLeft.y);
-        quad[1].position = sf::Vector2f(topLeft.x, -bottomRight.y);
-        quad[2].position = sf::Vector2f(bottomRight.x, -topLeft.y);
+        quad[0].position = sf::Vector2f(topLeft.x, topLeft.y);
+        quad[1].position = sf::Vector2f(topLeft.x, bottomRight.y);
+        quad[2].position = sf::Vector2f(bottomRight.x, topLeft.y);
 
         // second triangle
-        quad[3].position = sf::Vector2f(bottomRight.x, -topLeft.y);
-        quad[4].position = sf::Vector2f(topLeft.x, -bottomRight.y);
-        quad[5].position = sf::Vector2f(bottomRight.x, -bottomRight.y);
+        quad[3].position = sf::Vector2f(bottomRight.x, topLeft.y);
+        quad[4].position = sf::Vector2f(topLeft.x, bottomRight.y);
+        quad[5].position = sf::Vector2f(bottomRight.x, bottomRight.y);
 
         // apply pivot transformation
         for (auto& v : quad)

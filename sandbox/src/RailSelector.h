@@ -7,12 +7,20 @@
 // TODO: Separate this component
 struct RailSelector
 {
-    Rail::Type currentType = Rail::Type::Vertical; // TODO: change to none
+    enum class AxisLock
+    {
+        X, Y, XY
+    };
+
+    Rail::Type currentType = Rail::Type::None;
+    AxisLock lock = AxisLock::X;
+    Maize::Vec2f lockedTilePosition;
+    bool isLocked = false;
+
     std::unordered_map<Rail::Type, Maize::IntRect> railType;
 
     std::weak_ptr<sf::Texture> texture;
-    Maize::Vec2i railPivot = Maize::Vec2i(8, 8);
-    Maize::Vec2i gridOffset = Maize::Vec2i(-8, -8);
+    Maize::Vec2i gridOffset = Maize::Vec2i(0, 64);
 
     RailSelector() = default;
 

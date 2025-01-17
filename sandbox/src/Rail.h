@@ -31,13 +31,17 @@ public:
      */
     enum class Type : uint8_t
     {
-        None       = static_cast<uint8_t>(Dir::None),                             // No direction
-        Vertical   = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::S), // (N ↔ S)
-        Horizontal = static_cast<uint8_t>(Dir::W) | static_cast<uint8_t>(Dir::E), // (W ↔ E)
-        NorthRight = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::E), // (N → E | E → N)
-        NorthLeft  = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::W), // (N → W | W → N)
-        SouthRight = static_cast<uint8_t>(Dir::S) | static_cast<uint8_t>(Dir::E), // (S → E | E → S)
-        SouthLeft  = static_cast<uint8_t>(Dir::S) | static_cast<uint8_t>(Dir::W), // (S → W | W → S)
+        None       = static_cast<uint8_t>(Dir::None),                                // No direction
+        Vertical   = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::S),    // (N ↔ S)
+        Horizontal = static_cast<uint8_t>(Dir::W) | static_cast<uint8_t>(Dir::E),    // (W ↔ E)
+
+        NorthRight = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::E),    // (N → E | E → N)
+        NorthLeft  = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::W),    // (N → W | W → N)
+        SouthRight = static_cast<uint8_t>(Dir::S) | static_cast<uint8_t>(Dir::E),    // (S → E | E → S)
+        SouthLeft  = static_cast<uint8_t>(Dir::S) | static_cast<uint8_t>(Dir::W),    // (S → W | W → S)
+
+        NESW       = static_cast<uint8_t>(Dir::NE) | static_cast<uint8_t>(Dir::SW),  // (NE → SW | SW → NE)
+        NWSE       = static_cast<uint8_t>(Dir::NW) | static_cast<uint8_t>(Dir::SE),  // (NW → SE | SE → NW)
     };
 
 public:
@@ -75,6 +79,8 @@ public:
             case Type::NorthLeft:  return "North Left";
             case Type::SouthRight: return "South Right";
             case Type::SouthLeft:  return "South Left";
+            case Type::NESW:       return "NESW";
+            case Type::NWSE:       return "NWSE";
             default:               return "Unknown";
         }
     }
