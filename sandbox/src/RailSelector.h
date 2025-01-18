@@ -9,13 +9,13 @@ struct RailSelector
 {
     enum class AxisLock
     {
-        X, Y, XY
+        None, X, Y, XY, YX
     };
 
     Rail::Type currentType = Rail::Type::None;
-    AxisLock lock = AxisLock::X;
-    Maize::Vec2f lockedTilePosition;
+    AxisLock lock = AxisLock::None;
     bool isLocked = false;
+    Maize::Vec2f initMouse;
 
     std::unordered_map<Rail::Type, Maize::IntRect> railType;
 

@@ -42,7 +42,7 @@ public:
         );
 
         AddSystem<Maize::Position, Maize::SpriteRenderer, RailSelector>("Choose Rail Type", flecs::OnUpdate, MineRailPlacement::ChooseRailType);
-        AddSystem<RailSelector>("Rail Select Tile", flecs::OnUpdate, MineRailPlacement::SelectTile);
+        AddSystem<const Maize::Position, const RailSelector>("Rail Select Tile", flecs::OnUpdate, MineRailPlacement::SelectTile);
         AddSystem<Maize::MeshRenderer, Grid<RailTile>, const PlaceGridTile>(
             "Rail Place Tile", flecs::OnUpdate, MineRailPlacement::PlaceTile
         );

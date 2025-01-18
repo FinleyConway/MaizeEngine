@@ -19,7 +19,7 @@ public:
 
         const auto mousePosition = input->mousePosition;
         const auto gridPosition = GridConversion::PixelToGrid(mousePosition, chunkManager->cellSize);
-        const auto tilePosition = GridConversion::GridToPixel(gridPosition, chunkManager->cellSize);
+        auto tilePosition = GridConversion::GridToPixel(gridPosition, chunkManager->cellSize);
 
         if (!input->GetMouseButtonHeld(Maize::MouseCode::Left))
         {
@@ -27,12 +27,13 @@ public:
 
             if (tile == Rail::Type::Vertical) selector.lock = RailSelector::AxisLock::Y;
             else if (tile == Rail::Type::Horizontal) selector.lock = RailSelector::AxisLock::X;
-            else if (tile == Rail::Type::NWSE) selector.lock = RailSelector::AxisLock::XY;
+            else if (tile == Rail::Type::NWSE) selector.lock = RailSelector::AxisLock::YX;
             else if (tile == Rail::Type::NESW) selector.lock = RailSelector::AxisLock::XY;
 
             selector.isLocked = false;
             selector.currentType = tile;
-            selector.lockedTilePosition = tilePosition;
+            selector.initMouse = tilePosition;
+            p = tilePosition;
 
             sprite.sprite.SetTextureRect(selector.GetAtlas(tile));
         }
@@ -40,31 +41,45 @@ public:
         {
             if (!selector.isLocked)
             {
-                selector.lockedTilePosition.y = tilePosition.y;
+                p.y = tilePosition.y;
                 selector.isLocked = true;
             }
 
-            if (selector.lock == RailSelector::AxisLock::X) selector.lockedTilePosition.x = tilePosition.x;
-            else if (selector.lock == RailSelector::AxisLock::Y) selector.lockedTilePosition.y = tilePosition.y;
-        }
+            if (selector.lock == RailSelector::AxisLock::X) p.x = tilePosition.x;
+            else if (selector.lock == RailSelector::AxisLock::Y) p.y = tilePosition.y;
+            else if (selector.lock == RailSelector::AxisLock::XY)
+            {
+                const auto delta = tilePosition - selector.initMouse;
+                const auto locked = selector.initMouse + Maize::Vec2f(delta.x, delta.x);
 
-        p = selector.lockedTilePosition;
+                p.x = locked.x;
+                p.y = locked.y;
+            }
+            else if (selector.lock == RailSelector::AxisLock::YX)
+            {
+                const auto delta = tilePosition - selector.initMouse;
+                const auto locked = selector.initMouse + Maize::Vec2f(delta.x, -delta.x);
+
+                p.x = locked.x;
+                p.y = locked.y;
+            }
+        }
     }
 
-    static void SelectTile(Maize::SystemState s, Maize::Entity e, RailSelector& selector)
+    static void SelectTile(Maize::SystemState s, Maize::Entity e, const Maize::Position& p, const RailSelector& selector)
     {
         auto* input = s.GetSingleton<Maize::Input>();
         auto* chunkManager = s.GetSingleton<ChunkManager>();
 
         GAME_ASSERT(chunkManager != nullptr, "ChunkManager is nullptr");
 
-        const auto gridPosition = GridConversion::PixelToGrid(selector.lockedTilePosition, chunkManager->cellSize);
+        const auto gridPosition = GridConversion::PixelToGrid(p, chunkManager->cellSize);
         const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkManager->chunkSize);
         const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
         auto entity = chunkManager->TryGetChunk(chunkPosition);
 
         ImGui::Begin("Rail");
-        ImGui::Text("Mouse Position: %s", selector.lockedTilePosition.ToString().c_str());
+        ImGui::Text("Mouse Position: %s", p.ToString().c_str());
         ImGui::Text("Grid Position: %s", gridPosition.ToString().c_str());
         ImGui::Text("Chunk Position: %s", chunkPosition.ToString().c_str());
         ImGui::Text("Local Position: %s", localPosition.ToString().c_str());
