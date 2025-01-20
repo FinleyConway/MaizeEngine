@@ -4,7 +4,10 @@
 
 #include "RailSelector.h"
 #include "ChunkManager.h"
+#include "Grid.h"
 #include "GridConversion.h"
+#include "RailTile.h"
+#include "Rail.h"
 
 class RailTileChooser
 {
@@ -24,7 +27,7 @@ public:
         if (!input->GetMouseButtonHeld(Maize::MouseCode::Left))
         {
             // TODO: decide what the tile type is based on the surrounding tiles
-
+            GAME_LOG_INFO((int)EvaluateSurroundingTiles(chunkManager, gridPosition));
             const auto tile = GetTypeFromPointInSquare(selector.currentType, mousePosition, tilePosition, cellSize);
 
             selector.lockState = GetAxisLock(tile);
@@ -41,6 +44,55 @@ public:
     }
 
 private:
+    static uint8_t EvaluateSurroundingTiles(const ChunkManager* chunkManager, Maize::Vec2i gridPosition)
+    {
+        uint8_t bitset = 0;
+
+        static std::array surroundingTiles =
+        {
+            Maize::Vec2i(+0, +1), // north
+            Maize::Vec2i(+1, +1), // north-east
+            Maize::Vec2i(+1, +0), // east
+            Maize::Vec2i(+1, -1), // south-east
+            Maize::Vec2i(+0, -1), // south
+            Maize::Vec2i(-1, -1), // south-west
+            Maize::Vec2i(-1, +0), // west
+            Maize::Vec2i(-1, +1), // north-west
+        };
+
+        // go through each direction
+        for (uint8_t i = 0; i < 8; i++)
+        {
+            const auto direction = surroundingTiles[i];
+            const auto tilePosition = gridPosition + direction;
+            const auto chunkPosition = GridConversion::GridToChunk(tilePosition, chunkManager->chunkSize);
+            const auto localPosition = GridConversion::GridToChunkLocal(tilePosition, chunkManager->chunkSize);
+
+            const auto entity = chunkManager->TryGetChunk(chunkPosition);
+
+            if (entity.IsNull()) continue;
+
+            if (const auto* grid = entity.TryGetComponent<Grid<RailTile>>())
+            {
+                const uint8_t bitDirection = 1 << i;
+
+                GAME_ASSERT(Rail::IsValidDirection(bitDirection), "Invalid direction!");
+
+                const auto tileDirection = static_cast<Rail::Dir>(bitDirection); // this should be safe
+                const auto& tile = grid->Get(localPosition, chunkManager->chunkSize);
+
+                // if current type and offset type can connect
+                if (Rail::GetNextTravellingDir(tileDirection, tile.railType) == tileDirection)
+                {
+                    // update bitset direction
+                    bitset |= 1 << i;
+                }
+            }
+        }
+
+        return bitset;
+    }
+
     static Rail::Type GetRailTypeQuadRant(Rail::Type currentType, int32_t x, int32_t y)
     {
         if (x == 0)

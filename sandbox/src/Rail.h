@@ -86,20 +86,16 @@ public:
         }
     }
 
-    static Type GetType(uint8_t i)
+    /**
+     * Check if two rail types can connect
+     */
+    static bool CanConnect(Type currentTile, Type tileToTest)
     {
-        switch (i)
-        {
-            case 0: return Type::Vertical;
-            case 1: return Type::NorthRight;
-            case 2: return Type::Horizontal;
-            case 3: return Type::SouthRight;
-            case 4: return Type::Vertical;
-            case 5: return Type::SouthLeft;
-            case 6: return Type::Horizontal;
-            case 7: return Type::NorthLeft;
-            default: return Type::None;
-        }
+        const auto aBit = static_cast<uint8_t>(FlipType(currentTile));
+        const auto bBit = static_cast<uint8_t>(tileToTest);
+
+        // check if they overlap
+        return aBit & bBit;
     }
 
     /**
@@ -127,6 +123,21 @@ public:
         const uint8_t result = dirByte << shift | dirByte >> shift;
 
         return static_cast<Dir>(result & 0xFF);
+    }
+
+    /**
+     * Flip direction to the other side. E.g: NorthRight -> SouthLeft, SouthLeft -> NorthRight
+     */
+    static Type FlipType(Type type)
+    {
+        if (type == Type::Diagonal) return Type::ADiagonal;
+        if (type == Type::ADiagonal) return Type::Diagonal;
+
+        constexpr uint8_t shift = 4;
+        const uint8_t dirByte = static_cast<uint8_t>(type);
+        const uint8_t result = dirByte << shift | dirByte >> shift;
+
+        return static_cast<Type>(result & 0xFF);
     }
 
     /**
@@ -169,7 +180,6 @@ public:
         }
     }
 
-private:
     static bool IsValidDirection(uint8_t value)
     {
         switch (static_cast<Dir>(value))
