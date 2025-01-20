@@ -10,6 +10,7 @@ A small game engine made in c++.
 ```
 sudo apt update
 sudo apt install \
+    libxi-dev \
     libxrandr-dev \
     libxcursor-dev \
     libudev-dev \
