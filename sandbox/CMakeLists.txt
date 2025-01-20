@@ -20,6 +20,8 @@ add_executable(sandbox
         src/PlaceGridTile.h
         src/StaticHelperBase.h
         src/RailRotations.h
+        src/RailTileChooser.cpp
+        src/RailTileChooser.h
 )
 
 target_include_directories(sandbox PRIVATE ${CMAKE_SOURCE_DIR}/src)

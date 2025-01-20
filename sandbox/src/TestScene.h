@@ -10,6 +10,7 @@
 #include "RailSelector.h"
 #include "Rail.h"
 #include "RailRotations.h"
+#include "RailTileChooser.h"
 
 class TestScene final : public Maize::Scene
 {
@@ -41,7 +42,7 @@ public:
             RailSelector(m_TextureRails, GetRailAtlas())
         );
 
-        AddSystem<Maize::Position, Maize::SpriteRenderer, RailSelector>("Choose Rail Type", flecs::OnUpdate, MineRailPlacement::ChooseRailType);
+        AddSystem<Maize::Position, Maize::SpriteRenderer, RailSelector>("Choose Rail Type", flecs::OnUpdate, RailTileChooser::ChooseRailType);
         AddSystem<const Maize::Position, const RailSelector>("Rail Select Tile", flecs::OnUpdate, MineRailPlacement::SelectTile);
         AddSystem<Maize::MeshRenderer, Grid<RailTile>, const PlaceGridTile>(
             "Rail Place Tile", flecs::OnUpdate, MineRailPlacement::PlaceTile
@@ -57,9 +58,9 @@ private:
         std::unordered_map<Rail::Type, Maize::IntRect> rails;
 
         rails.emplace(Rail::Type::Vertical, Maize::IntRect(0, 0, 64, 64));
-        rails.emplace(Rail::Type::NESW, Maize::IntRect(64, 0, 64, 64));
+        rails.emplace(Rail::Type::Diagonal, Maize::IntRect(64, 0, 64, 64));
         rails.emplace(Rail::Type::Horizontal, Maize::IntRect(128, 0, 64, 64));
-        rails.emplace(Rail::Type::NWSE, Maize::IntRect(448, 0, 64, 64));
+        rails.emplace(Rail::Type::ADiagonal, Maize::IntRect(448, 0, 64, 64));
 
         return rails;
     }

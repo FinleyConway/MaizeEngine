@@ -7,15 +7,11 @@
 // TODO: Separate this component
 struct RailSelector
 {
-    enum class AxisLock
-    {
-        None, X, Y, XY, YX
-    };
+    enum class AxisLock { None, X, Y, XY, YX };
 
     Rail::Type currentType = Rail::Type::None;
-    AxisLock lock = AxisLock::None;
-    bool isLocked = false;
-    Maize::Vec2f initMouse;
+    AxisLock lockState = AxisLock::None;
+    Maize::Vec2f initialMousePosition;
 
     std::unordered_map<Rail::Type, Maize::IntRect> railType;
 
