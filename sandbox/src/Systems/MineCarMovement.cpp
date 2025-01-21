@@ -1,12 +1,12 @@
 #include "MineCarMovement.h"
 
-#include "ChunkManager.h"
-#include "Grid.h"
-#include "GridConversion.h"
-#include "RailController.h"
-#include "Rail.h"
-#include "RailTile.h"
-#include "RailRotations.h"
+#include "Components/Grid.h"
+#include "Components/ChunkManager.h"
+#include "Components/RailController.h"
+#include "Components/RailRotations.h"
+#include "Utils/GridConversion.h"
+#include "Utils/RailTile.h"
+#include "Utils/Rail.h"
 
 void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller, const RailRotations& rotations)
 {

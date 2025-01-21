@@ -2,7 +2,7 @@
 
 #include <Maize.h>
 
-#include "Rail.h"
+#include "Utils/Rail.h"
 
 // TODO: Separate this component
 struct RailSelector
@@ -15,6 +15,7 @@ struct RailSelector
 
     std::unordered_map<Rail::Type, Maize::IntRect> railType;
 
+    // remove these later on
     std::weak_ptr<sf::Texture> texture;
     Maize::Vec2i gridOffset = Maize::Vec2i(0, 64);
 

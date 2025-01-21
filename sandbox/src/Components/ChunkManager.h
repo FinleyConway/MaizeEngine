@@ -11,6 +11,7 @@ public:
 
 public:
     ChunkManager() = default;
+
     ChunkManager(Maize::Vec2i chunkSize, Maize::Vec2i cellSize)
         : chunkSize(chunkSize), cellSize(cellSize) {}
 

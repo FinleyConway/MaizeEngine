@@ -1,5 +1,5 @@
 #include "Maize.h"
-#include "TestScene.h"
+#include "Scenes/TestScene.h"
 
 class SandBox final : public Maize::Application
 {

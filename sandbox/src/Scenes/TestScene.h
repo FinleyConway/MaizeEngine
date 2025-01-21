@@ -2,16 +2,19 @@
 
 #include <Maize.h>
 
-#include "ChunkManager.h"
-#include "FuzzyShape.h"
-#include "Grid.h"
-#include "MineCarMovement.h"
-#include "MineRailPlacement.h"
-#include "RailController.h"
-#include "RailSelector.h"
-#include "Rail.h"
-#include "RailRotations.h"
-#include "RailTileChooser.h"
+#include "Components/Grid.h"
+#include "Components/ChunkManager.h"
+#include "Components/RailController.h"
+#include "Components/RailSelector.h"
+#include "Components/RailRotations.h"
+#include "Components/PlaceChunkTile.h"
+#include "Systems/MineCarMovement.h"
+#include "Systems/MineRailPlacement.h"
+#include "Systems/RailTileChooser.h"
+#include "Utils/PlaceRailData.h"
+#include "Utils/FuzzyShape.h"
+#include "Utils/RailTile.h"
+#include "Utils/Rail.h"
 
 class TestScene final : public Maize::Scene
 {
@@ -45,7 +48,7 @@ public:
 
         AddSystem<Maize::Position, Maize::SpriteRenderer, RailSelector>("Choose Rail Type", flecs::OnUpdate, RailTileChooser::ChooseRailType);
         AddSystem<const Maize::Position, const RailSelector>("Rail Select Tile", flecs::OnUpdate, MineRailPlacement::SelectTile);
-        AddSystem<Maize::MeshRenderer, Grid<RailTile>, const PlaceGridTile>(
+        AddSystem<Maize::MeshRenderer, Grid<RailTile>, const PlaceChunkTile<PlaceRailData>>(
             "Rail Place Tile", flecs::OnUpdate, MineRailPlacement::PlaceTile
         );
 
