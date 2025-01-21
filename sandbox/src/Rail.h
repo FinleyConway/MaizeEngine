@@ -87,15 +87,15 @@ public:
     }
 
     /**
-     * Check if two rail types can connect
+     * Check if direction can lead to rail type.
      */
-    static bool CanConnect(Type currentTile, Type tileToTest)
+    static bool CanDirToType(Dir direction, Type type)
     {
-        const auto aBit = static_cast<uint8_t>(FlipType(currentTile));
-        const auto bBit = static_cast<uint8_t>(tileToTest);
+        const auto railBit = static_cast<uint8_t>(type);
+        const auto flippedDirBit = static_cast<uint8_t>(FlipDir(direction));
 
         // check if they overlap
-        return aBit & bBit;
+        return railBit & flippedDirBit;
     }
 
     /**

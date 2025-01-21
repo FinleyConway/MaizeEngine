@@ -16,6 +16,14 @@ struct FuzzyShape
 
     }
 
+    Rail::Type GetType(uint8_t x, uint8_t y) const
+    {
+        // out of bounds
+        if (x > 2 || y > 2) return Rail::Type::None;
+
+        return quadrants[x + y * 3];
+    }
+
     bool Match(uint8_t bitset) const
     {
         return (shape & mask) == (bitset & mask);

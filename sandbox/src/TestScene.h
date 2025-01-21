@@ -19,7 +19,7 @@ public:
     virtual void OnStart() override
     {
         m_TextureRails = std::make_shared<sf::Texture>();
-        if (!m_TextureRails->loadFromFile("/home/finley/CppProjects/MaizeEngine/sandbox/assets/TestRailDir.png"))
+        if (!m_TextureRails->loadFromFile("/home/finley/CLionProjects/MaizeEngine/sandbox/assets/TestRailDir.png"))
             return;
 
         std::vector<Maize::IntRect> mineCarRects;

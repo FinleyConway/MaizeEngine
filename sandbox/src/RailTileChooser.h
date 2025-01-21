@@ -27,8 +27,9 @@ public:
 
         if (!input->GetMouseButtonHeld(Maize::MouseCode::Left))
         {
-            // TODO: decide what the tile type is based on the surrounding tiles
             const uint8_t bitset = EvaluateSurroundingTiles(chunkManager, gridPosition);
+
+            // clean this up later
             const std::vector shapes =
             {
                 FuzzyShape(0b00000000, 0b11111111, std::array {
@@ -84,7 +85,7 @@ public:
                 if (shape.Match(bitset))
                 {
                     currentShape = &shape;
-                    GAME_LOG_INFO("{} match with: {}", std::bitset<8>(shape.shape).to_string(), std::bitset<8>(bitset).to_string());
+                    //GAME_LOG_INFO("{} match with: {}", std::bitset<8>(shape.shape).to_string(), std::bitset<8>(bitset).to_string());
                     break;
                 }
             }
@@ -127,30 +128,23 @@ private:
         // go through each direction
         for (uint8_t i = 0; i < 8; i++)
         {
+            // get the chunk position attempt to get the entity
             const auto direction = surroundingTiles[i];
             const auto tilePosition = gridPosition + direction;
             const auto chunkPosition = GridConversion::GridToChunk(tilePosition, chunkManager->chunkSize);
             const auto localPosition = GridConversion::GridToChunkLocal(tilePosition, chunkManager->chunkSize);
-
             const auto entity = chunkManager->TryGetChunk(chunkPosition);
 
             if (entity.IsNull()) continue;
 
             if (const auto* grid = entity.TryGetComponent<Grid<RailTile>>())
             {
-                const uint8_t bitDirection = 1 << i;
-
-                GAME_ASSERT(Rail::IsValidDirection(bitDirection), "Invalid direction!");
-
-                const auto tileDirection = static_cast<Rail::Dir>(bitDirection); // this should be safe
+                // get the current direction and nearby tile type
+                const auto currentDirection = static_cast<Rail::Dir>(1 << i);
                 const auto& tile = grid->Get(localPosition, chunkManager->chunkSize);
 
-                // if current type and offset type can connect
-                if (Rail::GetNextTravellingDir(tileDirection, tile.railType) == tileDirection)
-                {
-                    // update bitset direction
-                    bitset |= 1 << i;
-                }
+                // check if current direction can travel to rail type
+                if (Rail::CanDirToType(currentDirection, tile.railType)) bitset |= 1 << i;
             }
         }
 
@@ -166,7 +160,7 @@ private:
         const auto relMouse = mousePosition - tilePosition;
         const auto point = Maize::Vec2i(relMouse.x / quadrantSize.x, relMouse.y / quadrantSize.y);
 
-        return shape.quadrants[point.x + point.y * quadrants];
+        return shape.GetType(point.x, point.y);
     }
 
     static RailSelector::AxisLock GetAxisLock(Rail::Type currentType)
