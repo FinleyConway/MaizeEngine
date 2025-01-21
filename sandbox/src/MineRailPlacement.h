@@ -31,8 +31,6 @@ public:
         ImGui::Text("Local Position: %s", localPosition.ToString().c_str());
         ImGui::End();
 
-        static bool isLocked = false;
-
         if (input->GetMouseButtonHeld(Maize::MouseCode::Left))
         {
             if (entity.IsNull())

@@ -3,6 +3,7 @@
 #include <Maize.h>
 
 #include "ChunkManager.h"
+#include "FuzzyShape.h"
 #include "Grid.h"
 #include "MineCarMovement.h"
 #include "MineRailPlacement.h"
@@ -61,7 +62,11 @@ private:
         rails.emplace(Rail::Type::Vertical, Maize::IntRect(0, 0, 64, 64));
         rails.emplace(Rail::Type::Diagonal, Maize::IntRect(64, 0, 64, 64));
         rails.emplace(Rail::Type::Horizontal, Maize::IntRect(128, 0, 64, 64));
-        rails.emplace(Rail::Type::ADiagonal, Maize::IntRect(448, 0, 64, 64));
+        rails.emplace(Rail::Type::ADiagonal, Maize::IntRect(192, 0, 64, 64));
+        rails.emplace(Rail::Type::SouthRight, Maize::IntRect(256, 0, 64, 64));
+        rails.emplace(Rail::Type::SouthLeft, Maize::IntRect(320, 0, 64, 64));
+        rails.emplace(Rail::Type::NorthRight, Maize::IntRect(384, 0, 64, 64));
+        rails.emplace(Rail::Type::NorthLeft, Maize::IntRect(448, 0, 64, 64));
 
         return rails;
     }

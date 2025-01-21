@@ -22,6 +22,7 @@ add_executable(sandbox
         src/RailRotations.h
         src/RailTileChooser.cpp
         src/RailTileChooser.h
+        src/FuzzyShape.h
 )
 
 target_include_directories(sandbox PRIVATE ${CMAKE_SOURCE_DIR}/src)

@@ -4,6 +4,7 @@
 
 #include "RailSelector.h"
 #include "ChunkManager.h"
+#include "FuzzyShape.h"
 #include "Grid.h"
 #include "GridConversion.h"
 #include "RailTile.h"
@@ -27,15 +28,78 @@ public:
         if (!input->GetMouseButtonHeld(Maize::MouseCode::Left))
         {
             // TODO: decide what the tile type is based on the surrounding tiles
-            GAME_LOG_INFO((int)EvaluateSurroundingTiles(chunkManager, gridPosition));
-            const auto tile = GetTypeFromPointInSquare(selector.currentType, mousePosition, tilePosition, cellSize);
+            const uint8_t bitset = EvaluateSurroundingTiles(chunkManager, gridPosition);
+            const std::vector shapes =
+            {
+                FuzzyShape(0b00000000, 0b11111111, std::array {
+                    Rail::Type::Diagonal,   Rail::Type::Vertical, Rail::Type::ADiagonal,
+                    Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
+                    Rail::Type::ADiagonal,  Rail::Type::Vertical, Rail::Type::Diagonal
+                }), // default
+                FuzzyShape(0b11010111, 0b00010000, std::array {
+                    Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
+                    Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
+                    Rail::Type::ADiagonal, Rail::Type::Vertical, Rail::Type::Diagonal
+                }), // north
+                FuzzyShape(0b00100111, 0b00100000, std::array {
+                    Rail::Type::Diagonal, Rail::Type::Vertical, Rail::Type::Horizontal,
+                    Rail::Type::Diagonal, Rail::Type::Diagonal, Rail::Type::Horizontal,
+                    Rail::Type::Diagonal, Rail::Type::Vertical, Rail::Type::Diagonal
+                }), // north-east
+                FuzzyShape(0b01011111, 0b01000000, std::array {
+                    Rail::Type::SouthLeft,  Rail::Type::SouthLeft,  Rail::Type::ADiagonal,
+                    Rail::Type::Horizontal, Rail::Type::Horizontal, Rail::Type::Horizontal,
+                    Rail::Type::NorthLeft,  Rail::Type::NorthLeft,  Rail::Type::Diagonal
+                }), // east
+                FuzzyShape(0b10011100, 0b10000000, std::array {
+                    Rail::Type::ADiagonal, Rail::Type::Vertical,  Rail::Type::ADiagonal,
+                    Rail::Type::ADiagonal, Rail::Type::ADiagonal, Rail::Type::Horizontal,
+                    Rail::Type::ADiagonal, Rail::Type::Vertical,  Rail::Type::Horizontal
+                }), // south-east
+                FuzzyShape(0b01111101, 0b00000001, std::array {
+                    Rail::Type::Diagonal,  Rail::Type::Vertical, Rail::Type::ADiagonal,
+                    Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight,
+                    Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight
+                }), // south
+                FuzzyShape(0b01110010, 0b00000010, std::array {
+                    Rail::Type::Diagonal,   Rail::Type::Vertical,  Rail::Type::Diagonal,
+                    Rail::Type::Horizontal, Rail::Type::Diagonal,  Rail::Type::Diagonal,
+                    Rail::Type::Horizontal, Rail::Type::Vertical,  Rail::Type::Diagonal
+                }), // south-west
+                FuzzyShape(0b11110101, 0b00000100, std::array {
+                    Rail::Type::Diagonal,  Rail::Type::SouthRight,  Rail::Type::SouthRight,
+                    Rail::Type::Horizontal, Rail::Type::Horizontal, Rail::Type::Horizontal,
+                    Rail::Type::ADiagonal,  Rail::Type::NorthRight, Rail::Type::NorthRight
+                }), // west
+                FuzzyShape(0b11001001, 0b00001000, std::array {
+                    Rail::Type::Horizontal, Rail::Type::Vertical,  Rail::Type::ADiagonal,
+                    Rail::Type::Horizontal, Rail::Type::ADiagonal, Rail::Type::ADiagonal,
+                    Rail::Type::ADiagonal,  Rail::Type::Vertical,  Rail::Type::ADiagonal
+                }), // north-west
+            };
 
-            selector.lockState = GetAxisLock(tile);
-            selector.currentType = tile;
-            selector.initialMousePosition = tilePosition;
+            const FuzzyShape* currentShape = &shapes[1];
+            for (const auto shape : shapes)
+            {
+                if (shape.Match(bitset))
+                {
+                    currentShape = &shape;
+                    GAME_LOG_INFO("{} match with: {}", std::bitset<8>(shape.shape).to_string(), std::bitset<8>(bitset).to_string());
+                    break;
+                }
+            }
 
-            spriteRenderer.sprite.SetTextureRect(selector.GetAtlas(tile));
-            position = tilePosition;
+            if (currentShape != nullptr)
+            {
+                const auto tile = GetTypeFromPointInSquare(*currentShape, mousePosition, tilePosition, cellSize);
+
+                selector.lockState = GetAxisLock(tile);
+                selector.currentType = tile;
+                selector.initialMousePosition = tilePosition;
+
+                spriteRenderer.sprite.SetTextureRect(selector.GetAtlas(tile));
+                position = tilePosition;
+            }
         }
         else
         {
@@ -93,30 +157,7 @@ private:
         return bitset;
     }
 
-    static Rail::Type GetRailTypeQuadRant(Rail::Type currentType, int32_t x, int32_t y)
-    {
-        if (x == 0)
-        {
-            if (y == 0) return Rail::Type::Diagonal;              // top-left
-            if (y == 1) return Rail::Type::Horizontal;            // middle-left
-
-            return Rail::Type::ADiagonal;                         // bottom-left
-        }
-
-        if (x == 1)
-        {
-            if (y == 0 || y == 2) return Rail::Type::Vertical;    // top-middle, bottom-middle
-
-            return currentType;                                   // center-middle
-        }
-
-        if (y == 0) return Rail::Type::ADiagonal;                 // top-right
-        if (y == 1) return Rail::Type::Horizontal;                // middle-right
-
-        return Rail::Type::Diagonal;                              // bottom-right
-    }
-
-    static Rail::Type GetTypeFromPointInSquare(Rail::Type currentType, Maize::Vec2f mousePosition, Maize::Vec2f tilePosition, Maize::Vec2i squareSize)
+    static Rail::Type GetTypeFromPointInSquare(const FuzzyShape& shape, Maize::Vec2f mousePosition, Maize::Vec2f tilePosition, Maize::Vec2i squareSize)
     {
         constexpr uint8_t quadrants = 3;  // number of sections per axis (for a 3x3 grid)
         const auto quadrantSize = Maize::Vec2f(squareSize / quadrants);
@@ -125,7 +166,7 @@ private:
         const auto relMouse = mousePosition - tilePosition;
         const auto point = Maize::Vec2i(relMouse.x / quadrantSize.x, relMouse.y / quadrantSize.y);
 
-        return GetRailTypeQuadRant(currentType, point.x, point.y);
+        return shape.quadrants[point.x + point.y * quadrants];
     }
 
     static RailSelector::AxisLock GetAxisLock(Rail::Type currentType)
