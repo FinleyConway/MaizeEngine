@@ -33,11 +33,11 @@ void MineRailPlacement::SelectTile(Maize::SystemState s, Maize::Entity e, const 
 
             chunkManager->chunks[chunkPosition] = entity;
         }
-
+        GAME_LOG_INFO(selector.currentBitset);
         entity.AddComponent(PlaceChunkTile<PlaceRailData>(
                 chunkPosition,
                 localPosition,
-                { selector.GetAtlas(selector.currentType), selector.gridOffset, selector.currentType }
+                { selector.GetBitRail(selector.currentBitset), selector.gridOffset, selector.currentType }
             )
         );
     }

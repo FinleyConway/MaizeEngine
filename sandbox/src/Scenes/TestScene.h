@@ -22,7 +22,7 @@ public:
     virtual void OnStart() override
     {
         m_TextureRails = std::make_shared<sf::Texture>();
-        if (!m_TextureRails->loadFromFile("/home/finley/CLionProjects/MaizeEngine/sandbox/assets/TestRailDir.png"))
+        if (!m_TextureRails->loadFromFile("/home/finley/CLionProjects/MaizeEngine/sandbox/assets/TestRailAutoTile.png"))
             return;
 
         std::vector<Maize::IntRect> mineCarRects;
@@ -36,14 +36,14 @@ public:
 
         CreateSingleton<ChunkManager>(
             Maize::Vec2i(32, 32),
-            Maize::Vec2i(64, 64)
+            Maize::Vec2i(32, 32)
         );
 
-        CreateEntity(Maize::Vec2f(0, 0), Maize::Camera(1));
+        CreateEntity(Maize::Vec2f(0, 0), Maize::Camera(2));
         CreateEntity(
             Maize::Vec2f(0, 0),
-            Maize::SpriteRenderer(Maize::Sprite(m_TextureRails, {0, 0, 64, 64}, { 0, 64 })),
-            RailSelector(m_TextureRails, GetRailAtlas())
+            Maize::SpriteRenderer(Maize::Sprite(m_TextureRails, {0, 0, 32, 32}, { 0, 32 })),
+            RailSelector(m_TextureRails, GetRailAtlas(), GetAutoTiles())
         );
 
         AddSystem<Maize::Position, Maize::SpriteRenderer, RailSelector>("Choose Rail Type", flecs::OnUpdate, RailTileChooser::ChooseRailType);
@@ -62,16 +62,43 @@ private:
     {
         std::unordered_map<Rail::Type, Maize::IntRect> rails;
 
-        rails.emplace(Rail::Type::Vertical, Maize::IntRect(0, 0, 64, 64));
-        rails.emplace(Rail::Type::Diagonal, Maize::IntRect(64, 0, 64, 64));
-        rails.emplace(Rail::Type::Horizontal, Maize::IntRect(128, 0, 64, 64));
-        rails.emplace(Rail::Type::ADiagonal, Maize::IntRect(192, 0, 64, 64));
-        rails.emplace(Rail::Type::SouthRight, Maize::IntRect(256, 0, 64, 64));
-        rails.emplace(Rail::Type::SouthLeft, Maize::IntRect(320, 0, 64, 64));
-        rails.emplace(Rail::Type::NorthRight, Maize::IntRect(384, 0, 64, 64));
-        rails.emplace(Rail::Type::NorthLeft, Maize::IntRect(448, 0, 64, 64));
+        rails.emplace(Rail::Type::Vertical, Maize::IntRect(0, 0, 32, 32));
+        rails.emplace(Rail::Type::Horizontal, Maize::IntRect(32, 0, 32, 32));
+
+        rails.emplace(Rail::Type::Diagonal, Maize::IntRect(64, 0, 32, 32));
+        rails.emplace(Rail::Type::ADiagonal, Maize::IntRect(96, 0, 32, 32));
+
+        rails.emplace(Rail::Type::NorthLeft, Maize::IntRect(0, 32, 32, 32));
+        rails.emplace(Rail::Type::NorthRight, Maize::IntRect(32, 32, 32, 32));
+
+        rails.emplace(Rail::Type::SouthLeft, Maize::IntRect(64, 32, 32, 32));
+        rails.emplace(Rail::Type::SouthRight, Maize::IntRect(96, 32, 32, 32));
 
         return rails;
+    }
+
+    static std::unordered_map<uint8_t, Maize::IntRect> GetAutoTiles()
+    {
+        std::unordered_map<uint8_t, Maize::IntRect> autoTiles;
+
+        autoTiles.emplace(17, Maize::IntRect(0, 0, 32, 32));
+        autoTiles.emplace(68, Maize::IntRect(32, 0, 32, 32));
+        autoTiles.emplace(34, Maize::IntRect(64, 0, 32, 32));
+        autoTiles.emplace(136, Maize::IntRect(96, 0, 32, 32));
+        autoTiles.emplace(65, Maize::IntRect(0, 32, 32, 32));
+        autoTiles.emplace(5, Maize::IntRect(32, 32, 32, 32));
+        autoTiles.emplace(80, Maize::IntRect(64, 32, 32, 32));
+        autoTiles.emplace(20, Maize::IntRect(96, 32, 32, 32));
+        autoTiles.emplace(144, Maize::IntRect(0, 64, 32, 32));
+        autoTiles.emplace(18, Maize::IntRect(32, 64, 32, 32));
+        autoTiles.emplace(33, Maize::IntRect(64, 64, 32, 32));
+        autoTiles.emplace(9, Maize::IntRect(96, 64, 32, 32));
+        autoTiles.emplace(132, Maize::IntRect(0, 96, 32, 32));
+        autoTiles.emplace(36, Maize::IntRect(32, 96, 32, 32));
+        autoTiles.emplace(66, Maize::IntRect(64, 96, 32, 32));
+        autoTiles.emplace(72, Maize::IntRect(96, 96, 32, 32));
+
+        return autoTiles;
     }
 
 private:

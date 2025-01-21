@@ -91,6 +91,7 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Entity e, Maiz
             selector.lockState = GetAxisLock(tile);
             selector.currentType = tile;
             selector.initialMousePosition = tilePosition;
+            selector.currentBitset = bitset;
 
             spriteRenderer.sprite.SetTextureRect(selector.GetAtlas(tile));
             position = tilePosition;
