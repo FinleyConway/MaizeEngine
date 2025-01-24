@@ -93,7 +93,8 @@ void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller,
     constexpr float turningPoint = 0.5f;
     const bool isTurningPoint = controller.currentTime >= turningPoint;
 
-    static auto currentOffset = 0;
+    static const RailTurnDirection* turningDirection = nullptr;
+    static auto currentDir = Rail::Dir::None;
 
     // is the next rail type a bend
     if (Rail::IsCurve(controller.nextRail))
@@ -101,7 +102,16 @@ void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller,
         if (isTurningPoint && !controller.isTurning)
         {
             controller.isTurning = true;
-            currentOffset = rotations.GetDirectionIndex(controller.travellingDirection);
+
+            for (const auto& rotation : rotations.rotations)
+            {
+                if (rotation.DoesMatchDirection(controller.travellingDirection, controller.nextRail))
+                {
+                    turningDirection = &rotation;
+                    currentDir = controller.travellingDirection;
+                    break;
+                }
+            }
         }
     }
     // has hit the next turning point
@@ -117,14 +127,16 @@ void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller,
         if (Rail::IsCurve(controller.nextRail)) controller.turningTime = controller.currentTime - 0.5f;
         else controller.turningTime = controller.currentTime + 0.5f;
 
-        constexpr uint8_t numberOfSprites = 3;
-        uint8_t currentSprite = static_cast<uint8_t>(controller.turningTime * numberOfSprites) + currentOffset;
+        controller.turningTime = std::clamp(controller.turningTime, 0.0f, 1.0f);
 
-        if (currentSprite > rotations.rotations.size() - 1) currentSprite = 0;
+        const uint8_t numberOfSprites = turningDirection->GetNumberOfRotations();
+        const uint8_t currentSprite = static_cast<uint8_t>(controller.turningTime * numberOfSprites);
+
+        const auto& rect = turningDirection->GetRotation(currentDir, currentSprite);
 
         if (auto* renderer = e.TryGetMutComponent<Maize::SpriteRenderer>())
         {
-            renderer->sprite.SetTextureRect(rotations.rotations[currentSprite]);
+            renderer->sprite.SetTextureRect(rect);
         }
     }
 }

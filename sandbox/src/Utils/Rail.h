@@ -50,6 +50,10 @@ public:
     };
 
 public:
+    using DirBits = std::underlying_type_t<Dir>;
+    using TypeBits = std::underlying_type_t<Type>;
+
+public:
     /**
      * Converts a Direction enum value to its corresponding string representation.
      */

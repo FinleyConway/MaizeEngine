@@ -22,7 +22,7 @@ public:
     virtual void OnStart() override
     {
         m_Texture = std::make_shared<sf::Texture>();
-        bool created = m_Texture->loadFromFile("/home/finley/CppProjects/MaizeEngine/sandbox/assets/TestRailAutoTile.png");
+        bool created = m_Texture->loadFromFile("/home/finley/CLionProjects/MaizeEngine/sandbox/assets/TestRailAutoTile.png");
 
         CreateSingleton<ChunkManager>(
             Maize::Vec2i(32, 32),
@@ -67,14 +67,20 @@ public:
     virtual void OnEnd() override {}
 
 private:
-    static std::vector<Maize::IntRect> GetCartDirs()
+    static std::vector<RailTurnDirection> GetCartDirs()
     {
-        std::vector<Maize::IntRect> directions;
+        std::vector<RailTurnDirection> directions;
 
-        for (uint8_t i = 0; i < 8; i++)
-        {
-            directions.emplace_back(i * 32, 0, 32, 32);
-        }
+        // handles N->E, E->N rotations
+        directions.emplace_back(
+            Rail::ToBitset(Rail::Dir::N),
+            Rail::ToBitset(Rail::Dir::E),
+            std::vector<Maize::IntRect> {
+                { 0, 0, 32, 32 },
+                { 32, 0, 32, 32 },
+                { 64, 0, 32, 32 },
+            }
+        );
 
         return directions;
     }
