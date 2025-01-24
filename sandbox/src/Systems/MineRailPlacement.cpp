@@ -27,30 +27,24 @@ void MineRailPlacement::SelectTile(Maize::SystemState s, Maize::Entity e, const 
             const auto pixelPosition = GridConversion::GridToPixel(chunkGridPosition, chunkManager->cellSize);
 
             entity = s.CreateEntity(pixelPosition,
-                                    Maize::MeshRenderer(selector.texture),
-                                    Grid<RailTile>(chunkManager->chunkSize)
+                Maize::MeshRenderer(selector.texture),
+                Grid<RailTile>(chunkManager->chunkSize)
             );
 
-            chunkManager->chunks[chunkPosition] = entity;
+            chunkManager->chunks.emplace(chunkPosition, entity);
         }
-        GAME_LOG_INFO(selector.currentBitset);
-        entity.AddComponent(PlaceChunkTile<PlaceRailData>(
-                chunkPosition,
-                localPosition,
-                { selector.GetBitRail(selector.currentBitset), selector.gridOffset, selector.currentType }
-            )
-        );
+
+        const auto data = PlaceRailData(selector.GetBitRail(Rail::ToBitset(selector.currentType)), selector.gridOffset, selector.currentType);
+
+        entity.AddComponent(PlaceChunkTile(chunkPosition, localPosition, data));
     }
-    if (input->GetMouseButtonHeld(Maize::MouseCode::Right))
+    else if (input->GetMouseButtonHeld(Maize::MouseCode::Right))
     {
         if (!entity.IsNull())
         {
-            entity.AddComponent(PlaceChunkTile<PlaceRailData>(
-                    chunkPosition,
-                    localPosition,
-                    { selector.GetAtlas(Rail::Type::None), selector.gridOffset, Rail::Type::None }
-                )
-            );
+            const auto data = PlaceRailData(selector.GetBitRail(Rail::ToBitset(Rail::Type::None)), selector.gridOffset, Rail::Type::None);
+
+            entity.AddComponent(PlaceChunkTile(chunkPosition, localPosition, data));
         }
     }
 }

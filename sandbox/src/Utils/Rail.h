@@ -31,18 +31,22 @@ public:
      */
     enum class Type : uint8_t
     {
-        None       = static_cast<uint8_t>(Dir::None),                                // No direction
+        None            = static_cast<uint8_t>(Dir::None),                                // No direction
 
-        Vertical   = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::S),    // (N ↔ S)
-        Horizontal = static_cast<uint8_t>(Dir::W) | static_cast<uint8_t>(Dir::E),    // (W ↔ E)
+        Vertical        = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::S),    // (N ↔ S)
+        Horizontal      = static_cast<uint8_t>(Dir::W) | static_cast<uint8_t>(Dir::E),    // (W ↔ E)
 
-        NorthRight = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::E),    // (N → E | E → N)
-        NorthLeft  = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::W),    // (N → W | W → N)
-        SouthRight = static_cast<uint8_t>(Dir::S) | static_cast<uint8_t>(Dir::E),    // (S → E | E → S)
-        SouthLeft  = static_cast<uint8_t>(Dir::S) | static_cast<uint8_t>(Dir::W),    // (S → W | W → S)
+        NorthRight      = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::E),    // (N → E | E → N)
+        NorthLeft       = static_cast<uint8_t>(Dir::N) | static_cast<uint8_t>(Dir::W),    // (N → W | W → N)
+        SouthRight      = static_cast<uint8_t>(Dir::S) | static_cast<uint8_t>(Dir::E),    // (S → E | E → S)
+        SouthLeft       = static_cast<uint8_t>(Dir::S) | static_cast<uint8_t>(Dir::W),    // (S → W | W → S)
 
-        Diagonal   = static_cast<uint8_t>(Dir::NE) | static_cast<uint8_t>(Dir::SW),  // (NE → SW | SW → NE)
-        ADiagonal  = static_cast<uint8_t>(Dir::NW) | static_cast<uint8_t>(Dir::SE),  // (NW → SE | SE → NW)
+        TJunctionDown   = Horizontal | static_cast<uint8_t>(Dir::S),
+        TJunctionUp     = Horizontal | static_cast<uint8_t>(Dir::N),
+        TJunctionLeft   = Vertical   | static_cast<uint8_t>(Dir::W),
+        TJunctionRight  = Vertical   | static_cast<uint8_t>(Dir::E),
+
+        CrossJunction   = Horizontal | Vertical,
     };
 
 public:
@@ -80,10 +84,17 @@ public:
             case Type::NorthLeft:  return "North Left";
             case Type::SouthRight: return "South Right";
             case Type::SouthLeft:  return "South Left";
-            case Type::Diagonal:   return "Diagonal";
-            case Type::ADiagonal:  return "Anti-Diagonal";
             default:               return "Unknown";
         }
+    }
+
+    /**
+     * Convert Rail Dir or Type to its underlying type.
+     */
+    template<typename Enum>
+    static std::underlying_type_t<Enum> ToBitset(Enum value)
+    {
+        return static_cast<std::underlying_type_t<Enum>>(value);
     }
 
     /**
@@ -130,9 +141,6 @@ public:
      */
     static Type FlipType(Type type)
     {
-        if (type == Type::Diagonal) return Type::ADiagonal;
-        if (type == Type::ADiagonal) return Type::Diagonal;
-
         constexpr uint8_t shift = 4;
         const uint8_t dirByte = static_cast<uint8_t>(type);
         const uint8_t result = dirByte << shift | dirByte >> shift;

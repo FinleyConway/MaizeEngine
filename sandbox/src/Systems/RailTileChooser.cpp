@@ -27,50 +27,34 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Entity e, Maiz
         const std::vector shapes =
         {
             FuzzyShape(0b00000000, 0b11111111, std::array {
-                           Rail::Type::Diagonal,   Rail::Type::Vertical, Rail::Type::ADiagonal,
-                           Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
-                           Rail::Type::ADiagonal,  Rail::Type::Vertical, Rail::Type::Diagonal
-                       }), // default
+                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
+                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
+                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal
+            }), // default
+
             FuzzyShape(0b11010111, 0b00010000, std::array {
-                           Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
-                           Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
-                           Rail::Type::ADiagonal, Rail::Type::Vertical, Rail::Type::Diagonal
-                       }), // north
-            FuzzyShape(0b00100111, 0b00100000, std::array {
-                           Rail::Type::Diagonal, Rail::Type::Vertical, Rail::Type::Horizontal,
-                           Rail::Type::Diagonal, Rail::Type::Diagonal, Rail::Type::Horizontal,
-                           Rail::Type::Diagonal, Rail::Type::Vertical, Rail::Type::Diagonal
-                       }), // north-east
+                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
+                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
+                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight
+            }), // north
+
             FuzzyShape(0b01011111, 0b01000000, std::array {
-                           Rail::Type::SouthLeft,  Rail::Type::SouthLeft,  Rail::Type::ADiagonal,
-                           Rail::Type::Horizontal, Rail::Type::Horizontal, Rail::Type::Horizontal,
-                           Rail::Type::NorthLeft,  Rail::Type::NorthLeft,  Rail::Type::Diagonal
-                       }), // east
-            FuzzyShape(0b10011100, 0b10000000, std::array {
-                           Rail::Type::ADiagonal, Rail::Type::Vertical,  Rail::Type::ADiagonal,
-                           Rail::Type::ADiagonal, Rail::Type::ADiagonal, Rail::Type::Horizontal,
-                           Rail::Type::ADiagonal, Rail::Type::Vertical,  Rail::Type::Horizontal
-                       }), // south-east
+                Rail::Type::SouthLeft,  Rail::Type::SouthLeft,  Rail::Type::SouthLeft,
+                Rail::Type::Horizontal, Rail::Type::Horizontal, Rail::Type::Horizontal,
+                Rail::Type::NorthLeft,  Rail::Type::NorthLeft,  Rail::Type::NorthLeft
+            }), // east
+
             FuzzyShape(0b01111101, 0b00000001, std::array {
-                           Rail::Type::Diagonal,  Rail::Type::Vertical, Rail::Type::ADiagonal,
-                           Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight,
-                           Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight
-                       }), // south
-            FuzzyShape(0b01110010, 0b00000010, std::array {
-                           Rail::Type::Diagonal,   Rail::Type::Vertical,  Rail::Type::Diagonal,
-                           Rail::Type::Horizontal, Rail::Type::Diagonal,  Rail::Type::Diagonal,
-                           Rail::Type::Horizontal, Rail::Type::Vertical,  Rail::Type::Diagonal
-                       }), // south-west
+                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight,
+                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight,
+                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight
+            }), // south
+
             FuzzyShape(0b11110101, 0b00000100, std::array {
-                           Rail::Type::Diagonal,  Rail::Type::SouthRight,  Rail::Type::SouthRight,
-                           Rail::Type::Horizontal, Rail::Type::Horizontal, Rail::Type::Horizontal,
-                           Rail::Type::ADiagonal,  Rail::Type::NorthRight, Rail::Type::NorthRight
-                       }), // west
-            FuzzyShape(0b11001001, 0b00001000, std::array {
-                           Rail::Type::Horizontal, Rail::Type::Vertical,  Rail::Type::ADiagonal,
-                           Rail::Type::Horizontal, Rail::Type::ADiagonal, Rail::Type::ADiagonal,
-                           Rail::Type::ADiagonal,  Rail::Type::Vertical,  Rail::Type::ADiagonal
-                       }), // north-west
+                Rail::Type::SouthRight,  Rail::Type::SouthRight, Rail::Type::SouthRight,
+                Rail::Type::Horizontal,  Rail::Type::Horizontal, Rail::Type::Horizontal,
+                Rail::Type::NorthRight,  Rail::Type::NorthRight, Rail::Type::NorthRight
+            }), // west
         };
 
         const FuzzyShape* currentShape = &shapes[1];
@@ -79,7 +63,6 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Entity e, Maiz
             if (shape.Match(bitset))
             {
                 currentShape = &shape;
-                //GAME_LOG_INFO("{} match with: {}", std::bitset<8>(shape.shape).to_string(), std::bitset<8>(bitset).to_string());
                 break;
             }
         }
@@ -91,9 +74,8 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Entity e, Maiz
             selector.lockState = GetAxisLock(tile);
             selector.currentType = tile;
             selector.initialMousePosition = tilePosition;
-            selector.currentBitset = bitset;
 
-            spriteRenderer.sprite.SetTextureRect(selector.GetAtlas(tile));
+            spriteRenderer.sprite.SetTextureRect(selector.GetBitRail(Rail::ToBitset(tile)));
             position = tilePosition;
         }
     }
@@ -164,8 +146,6 @@ RailSelector::AxisLock RailTileChooser::GetAxisLock(Rail::Type currentType)
     {
         case Rail::Type::Vertical:   return RailSelector::AxisLock::Y;
         case Rail::Type::Horizontal: return RailSelector::AxisLock::X;
-        case Rail::Type::Diagonal:   return RailSelector::AxisLock::XY;
-        case Rail::Type::ADiagonal:  return RailSelector::AxisLock::YX;
         default:                     return RailSelector::AxisLock::None;
     }
 }
@@ -182,23 +162,5 @@ void RailTileChooser::LockPositionAxis(Maize::Position& position, const RailSele
     else if (selector.lockState == RailSelector::AxisLock::Y)
     {
         position.y = tilePosition.y;
-    }
-    // lock the diagonal axis
-    else if (selector.lockState == RailSelector::AxisLock::XY)
-    {
-        const auto delta = tilePosition - selector.initialMousePosition;
-        const auto locked = selector.initialMousePosition + Maize::Vec2f(delta.x, delta.x);
-
-        position.x = locked.x;
-        position.y = locked.y;
-    }
-    // lock the anti-diagonal axis
-    else if (selector.lockState == RailSelector::AxisLock::YX)
-    {
-        const auto delta = tilePosition - selector.initialMousePosition;
-        const auto locked = selector.initialMousePosition + Maize::Vec2f(delta.x, -delta.x);
-
-        position.x = locked.x;
-        position.y = locked.y;
     }
 }
