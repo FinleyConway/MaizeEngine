@@ -16,7 +16,7 @@ struct RailController
     bool isMoving = false;
 
     Rail::Dir travellingDirection = Rail::Dir::N;
-    Rail::Type nextRail = Rail::Type::None;
+    Rail::Type nextRail = Rail::Type::Vertical;
 
     bool isTurning = false;
     float turningTime = 0.0f;

@@ -17,6 +17,7 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
     ImGui::Text("Current Dir: %s", Rail::DirToStr(controller.travellingDirection).data());
     ImGui::Text("Current Dir: %s", controller.isTurning ? "Turning" : "Not Turning");
     ImGui::Text("Current Time To Next: %f", controller.currentTime);
+    ImGui::Text("Current Position: %s", position.ToString().data());
     ImGui::Text("Last Position: %s", controller.lastPos.ToString().data());
     ImGui::Text("Next Position: %s", controller.nextPos.ToString().data());
     ImGui::Text("Next Direction: %s", Rail::TypeToStr(controller.nextRail).data());
@@ -35,11 +36,13 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
 
 void MineCarMovement::HandleMovement(Maize::SystemState s, Maize::Position& position, RailController& controller, const ChunkManager* chunkManager)
 {
+    // try to move to the next rail when travelled to the next position.
     if (position.ApproxOf(controller.nextPos))
     {
         HandleDirection(chunkManager, controller);
     }
 
+    // move the controller.
     if (controller.nextRail != Rail::Type::None)
     {
         controller.isMoving = true;
@@ -48,6 +51,7 @@ void MineCarMovement::HandleMovement(Maize::SystemState s, Maize::Position& posi
 
         position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
     }
+    // keep checking if there is a next rail when there is no rail ahead.
     else
     {
         HandleDirection(chunkManager, controller);
@@ -60,6 +64,7 @@ void MineCarMovement::HandleDirection(const ChunkManager* chunkManager, RailCont
     const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkManager->chunkSize);
     const auto entity = chunkManager->TryGetChunk(chunkPosition);
 
+    // check if the grid exists and get the next rail.
     if (const auto* grid = entity.TryGetComponent<Grid<RailTile>>())
     {
         HandleNextRail(grid, gridPosition, chunkManager, controller);
@@ -72,7 +77,13 @@ void MineCarMovement::HandleNextRail(const Grid<RailTile>* grid, Maize::Vec2i gr
     const auto& tile = grid->Get(localPosition, chunkManager->chunkSize);
     const auto nextDirection = Rail::GetNextTravellingDir(controller.travellingDirection, tile.railType);
 
-    if (nextDirection != Rail::Dir::None)
+    // assign a next rail if there is no rail ahead assigned.
+    if (controller.nextRail == Rail::Type::None)
+    {
+        controller.nextRail = tile.railType;
+    }
+    // update controller next positions
+    else if (nextDirection != Rail::Dir::None)
     {
         UpdateRailPosition(gridPosition, nextDirection, chunkManager, controller);
     }
@@ -94,11 +105,7 @@ void MineCarMovement::UpdateRailPosition(Maize::Vec2i gridPosition, Rail::Dir ne
         controller.lastPos = controller.nextPos;
         controller.currentTime = 0.0f;
         controller.travellingDirection = nextDirection;
-
-        if (nextTile.railType != Rail::Type::None)
-        {
-            controller.nextPos = nextPosition;
-            controller.nextRail = nextTile.railType;
-        }
+        controller.nextPos = nextPosition;
+        controller.nextRail = nextTile.railType;
     }
 }
