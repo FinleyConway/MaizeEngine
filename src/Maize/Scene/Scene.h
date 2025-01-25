@@ -100,7 +100,23 @@ namespace Maize
             {
                 PROFILE_SCOPE(systemName);
 
-                systemFunc(SystemState(*m_World), Entity(e), components...);
+                // allow for optional SystemState and Entity
+                if constexpr (std::is_invocable_v<Func, SystemState, Entity, Components&...>)
+                {
+                    systemFunc(SystemState(*m_World), Entity(e), components...);
+                }
+                else if constexpr (std::is_invocable_v<Func, SystemState, Components&...>)
+                {
+                    systemFunc(SystemState(*m_World), components...);
+                }
+                else if constexpr (std::is_invocable_v<Func, Entity, Components&...>)
+                {
+                    systemFunc(Entity(e), components...);
+                }
+                else
+                {
+                    systemFunc(components...);
+                }
 
                 // flag components that have been accessed that are not constant (on set hooks).
                 ((std::is_const_v<Components> ? void() : e.modified<Components>()), ...);

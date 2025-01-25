@@ -6,7 +6,7 @@
 #include "Utils/FuzzyShape.h"
 #include "Utils/RailTile.h"
 
-void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Entity e, Maize::Position& position,
+void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Position& position,
     Maize::SpriteRenderer& spriteRenderer, RailSelector& selector)
 {
     auto* input = s.GetSingleton<Maize::Input>();

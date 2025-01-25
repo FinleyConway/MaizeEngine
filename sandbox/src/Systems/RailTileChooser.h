@@ -12,7 +12,7 @@ struct RailSelector;
 class RailTileChooser
 {
 public:
-    static void ChooseRailType(Maize::SystemState s, Maize::Entity e, Maize::Position& position, Maize::SpriteRenderer& spriteRenderer, RailSelector& selector);
+    static void ChooseRailType(Maize::SystemState s, Maize::Position& position, Maize::SpriteRenderer& spriteRenderer, RailSelector& selector);
 
 private:
     static uint8_t EvaluateSurroundingTiles(const ChunkManager* chunkManager, Maize::Vec2i gridPosition);

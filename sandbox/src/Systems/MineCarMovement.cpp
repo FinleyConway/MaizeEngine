@@ -5,7 +5,7 @@
 #include "Utils/GridConversion.h"
 #include "Utils/Rail.h"
 
-void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller)
+void MineCarMovement::Move(Maize::SystemState s, Maize::Position& position, RailController& controller)
 {
     auto* input = s.GetSingleton<Maize::Input>();
     const auto* chunkManager = s.GetSingleton<ChunkManager>();

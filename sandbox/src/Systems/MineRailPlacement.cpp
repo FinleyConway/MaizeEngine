@@ -6,8 +6,7 @@
 #include "Utils/GridConversion.h"
 #include "Utils/PlaceRailData.h"
 
-void MineRailPlacement::SelectTile(Maize::SystemState s, Maize::Entity e, const Maize::Position& p,
-                                   const RailSelector& selector)
+void MineRailPlacement::SelectTile(Maize::SystemState s, const Maize::Position& p, const RailSelector& selector)
 {
     auto* input = s.GetSingleton<Maize::Input>();
     auto* chunkManager = s.GetSingleton<ChunkManager>();

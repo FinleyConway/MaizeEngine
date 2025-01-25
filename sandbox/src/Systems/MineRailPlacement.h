@@ -13,7 +13,7 @@ struct RailTile;
 class MineRailPlacement
 {
 public:
-    static void SelectTile(Maize::SystemState s, Maize::Entity e, const Maize::Position& p, const RailSelector& selector);
+    static void SelectTile(Maize::SystemState s, const Maize::Position& p, const RailSelector& selector);
 
     static void PlaceTile(Maize::SystemState s, Maize::Entity e, Maize::MeshRenderer& meshRenderer,
                           Grid<RailTile>& grid, const PlaceChunkTile<PlaceRailData>& placeTile);

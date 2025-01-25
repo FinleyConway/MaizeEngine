@@ -3,8 +3,8 @@
 #include "Components/RailController.h"
 #include "Components/RailRotations.h"
 
-void MineCarRotate::Rotate(Maize::SystemState s, Maize::Entity e, Maize::SpriteRenderer& spriteRenderer,
-    RailController& controller, const RailRotations& rotations)
+void MineCarRotate::Rotate(Maize::SystemState s, Maize::SpriteRenderer& spriteRenderer, RailController& controller,
+    const RailRotations& rotations)
 {
     // handle on turn state
     OnTurnStart(controller, rotations);
