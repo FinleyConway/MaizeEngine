@@ -7,8 +7,6 @@
 class RailTurnDirection
 {
 public:
-    RailTurnDirection() = default;
-
     RailTurnDirection(Rail::DirBits directions, Rail::DirBits reversedDirections, std::vector<Maize::IntRect>&& rotations):
         m_Directions(directions), m_ReverseDirections(reversedDirections),  m_Rotations(std::move(rotations))
     {
@@ -16,12 +14,18 @@ public:
 
     bool DoesMatchDirection(Rail::Dir currentDirection, Rail::Type nextRail) const
     {
-        // check if the next rail will lead to these rotations.
-        const auto railBits = Rail::ToBitset(Rail::GetNextTravellingDir(currentDirection, nextRail));
-        const bool match = m_Directions & railBits;
-        const bool reversedMatch = m_ReverseDirections & railBits;
+        const auto currentDirectionBits = Rail::ToBitset(currentDirection);
 
-        return match || reversedMatch;
+        // check if current direction matches any valid direction or reverse direction
+        if (currentDirectionBits & (m_Directions | m_ReverseDirections))
+        {
+            const Rail::DirBits railBits = Rail::ToBitset(Rail::GetNextTravellingDir(currentDirection, nextRail));
+
+            // check if the next rail will lead to these rotations.
+            return (m_Directions & railBits) || (m_ReverseDirections & railBits);
+        }
+
+        return false;
     }
 
     const Maize::IntRect& GetRotation(Rail::Dir nextDirection, size_t index) const
@@ -38,7 +42,7 @@ public:
 
     size_t GetNumberOfRotations() const
     {
-        return m_Rotations.size();
+        return m_Rotations.size() - 1;
     }
 
 private:

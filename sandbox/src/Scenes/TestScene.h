@@ -9,8 +9,10 @@
 #include "Components/RailRotations.h"
 #include "Components/PlaceChunkTile.h"
 #include "Systems/MineCarMovement.h"
+#include "Systems/MineCarRotate.h"
 #include "Systems/MineRailPlacement.h"
 #include "Systems/RailTileChooser.h"
+#include "Utils/RailTurnDirection.h"
 #include "Utils/PlaceRailData.h"
 #include "Utils/FuzzyShape.h"
 #include "Utils/RailTile.h"
@@ -22,7 +24,7 @@ public:
     virtual void OnStart() override
     {
         m_Texture = std::make_shared<sf::Texture>();
-        bool created = m_Texture->loadFromFile("/home/finley/CLionProjects/MaizeEngine/sandbox/assets/TestRailAutoTile.png");
+        bool created = m_Texture->loadFromFile("/home/finley/CppProjects/MaizeEngine/sandbox/assets/TestRailAutoTile.png");
 
         CreateSingleton<ChunkManager>(
             Maize::Vec2i(32, 32),
@@ -59,8 +61,12 @@ public:
             "Rail Place Tile", flecs::OnUpdate, MineRailPlacement::PlaceTile
         );
 
-        AddSystem<Maize::Position, RailController, const RailRotations>(
-            "Rail Controller", flecs::OnUpdate, MineCarMovement::Move
+        AddSystem<Maize::Position, RailController>(
+            "Rail Movement", flecs::OnUpdate, MineCarMovement::Move
+        );
+
+        AddSystem<Maize::SpriteRenderer, RailController, const RailRotations>(
+            "Rail Rotate", flecs::OnUpdate, MineCarRotate::Rotate
         );
     }
 
@@ -75,10 +81,47 @@ private:
         directions.emplace_back(
             Rail::ToBitset(Rail::Dir::N),
             Rail::ToBitset(Rail::Dir::E),
-            std::vector<Maize::IntRect> {
+            std::vector<Maize::IntRect>
+            {
                 { 0, 0, 32, 32 },
                 { 32, 0, 32, 32 },
                 { 64, 0, 32, 32 },
+            }
+        );
+
+        // handles E->S, S->E rotations
+        directions.emplace_back(
+            Rail::ToBitset(Rail::Dir::E),
+            Rail::ToBitset(Rail::Dir::S),
+            std::vector<Maize::IntRect>
+            {
+                { 64, 0, 32, 32 },
+                { 96, 0, 32, 32 },
+                { 128, 0, 32, 32 },
+            }
+        );
+
+        // handles S->W, W->S rotations
+        directions.emplace_back(
+            Rail::ToBitset(Rail::Dir::S),
+            Rail::ToBitset(Rail::Dir::W),
+            std::vector<Maize::IntRect>
+            {
+                { 128, 0, 32, 32 },
+                { 160, 0, 32, 32 },
+                { 192, 0, 32, 32 },
+            }
+        );
+
+        // handles W->N, N->W rotations
+        directions.emplace_back(
+            Rail::ToBitset(Rail::Dir::W),
+            Rail::ToBitset(Rail::Dir::N),
+            std::vector<Maize::IntRect>
+            {
+                { 192, 0, 32, 32 },
+                { 224, 0, 32, 32 },
+                { 0, 0, 32, 32 },
             }
         );
 

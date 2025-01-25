@@ -3,12 +3,11 @@
 #include "Components/Grid.h"
 #include "Components/ChunkManager.h"
 #include "Components/RailController.h"
-#include "Components/RailRotations.h"
 #include "Utils/GridConversion.h"
 #include "Utils/RailTile.h"
 #include "Utils/Rail.h"
 
-void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller, const RailRotations& rotations)
+void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller)
 {
     auto* input = s.GetSingleton<Maize::Input>();
     const auto* chunkManager = s.GetSingleton<ChunkManager>();
@@ -33,15 +32,18 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
             HandleDirection(chunkManager, controller);
         }
 
-        HandleTurning(e, controller, rotations);
-
         if (controller.nextRail != Rail::Type::None)
         {
+            controller.isMoving = true;
             controller.currentTime += controller.speed * s.DeltaTime();
             controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
 
             position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
         }
+    }
+    else
+    {
+        controller.isMoving = false;
     }
 }
 
@@ -84,59 +86,6 @@ void MineCarMovement::HandleDirection(const ChunkManager* chunkManager, RailCont
                     controller.nextRail = nextTile.railType;
                 }
             }
-        }
-    }
-}
-
-void MineCarMovement::HandleTurning(Maize::Entity e, RailController& controller, const RailRotations& rotations)
-{
-    constexpr float turningPoint = 0.5f;
-    const bool isTurningPoint = controller.currentTime >= turningPoint;
-
-    static const RailTurnDirection* turningDirection = nullptr;
-    static auto currentDir = Rail::Dir::None;
-
-    // is the next rail type a bend
-    if (Rail::IsCurve(controller.nextRail))
-    {
-        if (isTurningPoint && !controller.isTurning)
-        {
-            controller.isTurning = true;
-
-            for (const auto& rotation : rotations.rotations)
-            {
-                if (rotation.DoesMatchDirection(controller.travellingDirection, controller.nextRail))
-                {
-                    turningDirection = &rotation;
-                    currentDir = controller.travellingDirection;
-                    break;
-                }
-            }
-        }
-    }
-    // has hit the next turning point
-    else if (isTurningPoint && controller.isTurning)
-    {
-        controller.isTurning = false;
-        controller.turningTime = 0.0f;
-    }
-
-    if (controller.isTurning)
-    {
-        // normalise the turning time from [0.5f -> 0.5f] to [0.0f -> 1.0f]
-        if (Rail::IsCurve(controller.nextRail)) controller.turningTime = controller.currentTime - 0.5f;
-        else controller.turningTime = controller.currentTime + 0.5f;
-
-        controller.turningTime = std::clamp(controller.turningTime, 0.0f, 1.0f);
-
-        const uint8_t numberOfSprites = turningDirection->GetNumberOfRotations();
-        const uint8_t currentSprite = static_cast<uint8_t>(controller.turningTime * numberOfSprites);
-
-        const auto& rect = turningDirection->GetRotation(currentDir, currentSprite);
-
-        if (auto* renderer = e.TryGetMutComponent<Maize::SpriteRenderer>())
-        {
-            renderer->sprite.SetTextureRect(rect);
         }
     }
 }

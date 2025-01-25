@@ -25,6 +25,8 @@ add_executable(sandbox
         src/Utils/FuzzyShape.h
         src/Utils/PlaceRailData.h
         src/Utils/RailTurnDirection.h
+        src/Systems/MineCarRotate.cpp
+        src/Systems/MineCarRotate.h
 )
 
 target_include_directories(sandbox PRIVATE src ${CMAKE_SOURCE_DIR}/src)
