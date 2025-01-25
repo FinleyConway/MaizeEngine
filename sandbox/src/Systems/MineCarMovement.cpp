@@ -1,10 +1,8 @@
 #include "MineCarMovement.h"
 
-#include "Components/Grid.h"
 #include "Components/ChunkManager.h"
 #include "Components/RailController.h"
 #include "Utils/GridConversion.h"
-#include "Utils/RailTile.h"
 #include "Utils/Rail.h"
 
 void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Position& position, RailController& controller)
@@ -27,19 +25,7 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
 
     if (input->GetButtonHeld(Maize::KeyCode::W))
     {
-        if (position.ApproxOf(controller.nextPos))
-        {
-            HandleDirection(chunkManager, controller);
-        }
-
-        if (controller.nextRail != Rail::Type::None)
-        {
-            controller.isMoving = true;
-            controller.currentTime += controller.speed * s.DeltaTime();
-            controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
-
-            position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
-        }
+        HandleMovement(s, position, controller, chunkManager);
     }
     else
     {
@@ -47,45 +33,72 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Entity e, Maize::Positio
     }
 }
 
+void MineCarMovement::HandleMovement(Maize::SystemState s, Maize::Position& position, RailController& controller, const ChunkManager* chunkManager)
+{
+    if (position.ApproxOf(controller.nextPos))
+    {
+        HandleDirection(chunkManager, controller);
+    }
+
+    if (controller.nextRail != Rail::Type::None)
+    {
+        controller.isMoving = true;
+        controller.currentTime += controller.speed * s.DeltaTime();
+        controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
+
+        position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
+    }
+    else
+    {
+        HandleDirection(chunkManager, controller);
+    }
+}
+
 void MineCarMovement::HandleDirection(const ChunkManager* chunkManager, RailController& controller)
 {
-    // get the current tile check if it's within the grid.
     const auto gridPosition = GridConversion::PixelToGrid(controller.nextPos, chunkManager->cellSize);
     const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkManager->chunkSize);
     const auto entity = chunkManager->TryGetChunk(chunkPosition);
 
     if (const auto* grid = entity.TryGetComponent<Grid<RailTile>>())
     {
-        // get the tile and find what the next direction is based on the travelling direction
-        const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
-        const auto& tile = grid->Get(localPosition, chunkManager->chunkSize);
-        const auto nextDirection = Rail::GetNextTravellingDir(controller.travellingDirection, tile.railType);
+        HandleNextRail(grid, gridPosition, chunkManager, controller);
+    }
+}
 
-        // don't find the next tile if its no rail.
-        if (nextDirection != Rail::Dir::None)
+void MineCarMovement::HandleNextRail(const Grid<RailTile>* grid, Maize::Vec2i gridPosition, const ChunkManager* chunkManager, RailController& controller)
+{
+    const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
+    const auto& tile = grid->Get(localPosition, chunkManager->chunkSize);
+    const auto nextDirection = Rail::GetNextTravellingDir(controller.travellingDirection, tile.railType);
+
+    if (nextDirection != Rail::Dir::None)
+    {
+        UpdateRailPosition(gridPosition, nextDirection, chunkManager, controller);
+    }
+}
+
+void MineCarMovement::UpdateRailPosition(Maize::Vec2i gridPosition, Rail::Dir nextDirection, const ChunkManager* chunkManager, RailController& controller)
+{
+    const auto directionOffset = Rail::GetDirectionOffset(nextDirection);
+    const auto offset = directionOffset + gridPosition;
+    const auto nextPosition = GridConversion::GridToPixel(offset, chunkManager->cellSize);
+    const auto offsetChunk = GridConversion::GridToChunk(offset, chunkManager->chunkSize);
+    const auto offsetEntity = chunkManager->TryGetChunk(offsetChunk);
+
+    if (const auto* offsetGrid = offsetEntity.TryGetComponent<Grid<RailTile>>())
+    {
+        const auto nextLocalPosition = GridConversion::GridToChunkLocal(offset, chunkManager->chunkSize);
+        const auto& nextTile = offsetGrid->Get(nextLocalPosition, chunkManager->chunkSize);
+
+        controller.lastPos = controller.nextPos;
+        controller.currentTime = 0.0f;
+        controller.travellingDirection = nextDirection;
+
+        if (nextTile.railType != Rail::Type::None)
         {
-            // get the next tile
-            const auto directionOffset = Rail::GetDirectionOffset(nextDirection);
-            const auto offset = directionOffset + gridPosition;
-            const auto nextPosition = GridConversion::GridToPixel(offset, chunkManager->cellSize);
-            const auto offsetChunk = GridConversion::GridToChunk(offset, chunkManager->chunkSize);
-            const auto offsetEntity = chunkManager->TryGetChunk(offsetChunk);
-
-            if (const auto* offsetGrid = offsetEntity.TryGetComponent<Grid<RailTile>>())
-            {
-                const auto nextLocalPosition = GridConversion::GridToChunkLocal(offset, chunkManager->chunkSize);
-                const auto& nextTile = offsetGrid->Get(nextLocalPosition, chunkManager->chunkSize);
-
-                controller.lastPos = controller.nextPos;
-                controller.currentTime = 0.0f;
-                controller.travellingDirection = nextDirection;
-
-                if (nextTile.railType != Rail::Type::None)
-                {
-                    controller.nextPos = nextPosition;
-                    controller.nextRail = nextTile.railType;
-                }
-            }
+            controller.nextPos = nextPosition;
+            controller.nextRail = nextTile.railType;
         }
     }
 }

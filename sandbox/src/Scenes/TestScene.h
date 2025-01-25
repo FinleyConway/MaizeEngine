@@ -128,9 +128,9 @@ private:
         return directions;
     }
 
-    static std::unordered_map<std::underlying_type_t<Rail::Type>, Maize::IntRect> GetAutoTiles()
+    static std::unordered_map<Rail::TypeBits, Maize::IntRect> GetAutoTiles()
     {
-        std::unordered_map<std::underlying_type_t<Rail::Type>, Maize::IntRect> autoTiles;
+        std::unordered_map<Rail::TypeBits, Maize::IntRect> autoTiles;
 
         autoTiles.emplace(20, Maize::IntRect(0, 32, 32, 32));
         autoTiles.emplace(80, Maize::IntRect(32, 32, 32, 32));
