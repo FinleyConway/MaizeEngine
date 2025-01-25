@@ -43,8 +43,8 @@ void MineCarRotate::OnTurn(Maize::SystemState s, Maize::SpriteRenderer& spriteRe
         controller.turningTime += controller.speed * s.DeltaTime();
         controller.turningTime = std::clamp(controller.turningTime, 0.0f, 1.0f);
 
-        const uint8_t numberOfSprites = controller.currentRotations->GetNumberOfRotations();
-        const uint8_t currentSprite = std::round(controller.turningTime * numberOfSprites);
+        const size_t numberOfSprites = controller.currentRotations->GetNumberOfRotations();
+        const size_t currentSprite = std::round(controller.turningTime * numberOfSprites);
         const auto& rect = controller.currentRotations->GetRotation(controller.currentRotateDirection, currentSprite);
 
         spriteRenderer.sprite.SetTextureRect(rect);

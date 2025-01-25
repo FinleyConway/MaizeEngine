@@ -8,7 +8,7 @@ class RailTurnDirection;
 
 struct RailController
 {
-    float speed = 2.0f;
+    float speed = 5.0f;
 
     Maize::Vec2f lastPos;
     Maize::Vec2f nextPos;

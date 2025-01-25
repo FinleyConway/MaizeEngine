@@ -23,42 +23,8 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Position& posi
     {
         const uint8_t bitset = EvaluateSurroundingTiles(chunkManager, gridPosition);
 
-        // clean this up later
-        const std::vector shapes =
-        {
-            FuzzyShape(0b00000000, 0b11111111, std::array {
-                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
-                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
-                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal
-            }), // default
-
-            FuzzyShape(0b11010111, 0b00010000, std::array {
-                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
-                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
-                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight
-            }), // north
-
-            FuzzyShape(0b01011111, 0b01000000, std::array {
-                Rail::Type::SouthLeft,  Rail::Type::SouthLeft,  Rail::Type::SouthLeft,
-                Rail::Type::Horizontal, Rail::Type::Horizontal, Rail::Type::Horizontal,
-                Rail::Type::NorthLeft,  Rail::Type::NorthLeft,  Rail::Type::NorthLeft
-            }), // east
-
-            FuzzyShape(0b01111101, 0b00000001, std::array {
-                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight,
-                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight,
-                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight
-            }), // south
-
-            FuzzyShape(0b11110101, 0b00000100, std::array {
-                Rail::Type::SouthRight,  Rail::Type::SouthRight, Rail::Type::SouthRight,
-                Rail::Type::Horizontal,  Rail::Type::Horizontal, Rail::Type::Horizontal,
-                Rail::Type::NorthRight,  Rail::Type::NorthRight, Rail::Type::NorthRight
-            }), // west
-        };
-
-        const FuzzyShape* currentShape = &shapes[1];
-        for (const auto shape : shapes)
+        const FuzzyShape* currentShape = &selector.quadrantShapes[1];
+        for (const auto shape : selector.quadrantShapes)
         {
             if (shape.Match(bitset))
             {

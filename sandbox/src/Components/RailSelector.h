@@ -2,6 +2,7 @@
 
 #include <Maize.h>
 
+#include "Utils/FuzzyShape.h"
 #include "Utils/Rail.h"
 
 // TODO: Separate this component
@@ -13,7 +14,8 @@ struct RailSelector
     AxisLock lockState = AxisLock::None;
     Maize::Vec2f initialMousePosition;
 
-    std::unordered_map<std::underlying_type_t<Rail::Type>, Maize::IntRect> autoRails;
+    std::unordered_map<Rail::TypeBits, Maize::IntRect> autoRails;
+    std::vector<FuzzyShape> quadrantShapes;
 
     // remove these later on
     std::weak_ptr<sf::Texture> texture;
@@ -21,9 +23,9 @@ struct RailSelector
 
     RailSelector() = default;
 
-    RailSelector(const std::shared_ptr<sf::Texture>& texture,
-        const std::unordered_map<std::underlying_type_t<Rail::Type>, Maize::IntRect>& autoRails)
-        : autoRails(autoRails), texture(texture) {}
+    RailSelector(const std::shared_ptr<sf::Texture>& texture, const std::unordered_map<Rail::TypeBits, Maize::IntRect>& autoRails,
+        const std::vector<FuzzyShape>& quadrantShapes)
+        : autoRails(autoRails), quadrantShapes(quadrantShapes), texture(texture) {}
 
     Maize::IntRect GetBitRail(uint8_t type) const
     {

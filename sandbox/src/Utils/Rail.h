@@ -106,26 +106,11 @@ public:
      */
     static bool CanDirToType(Dir direction, Type type)
     {
-        const auto railBit = static_cast<uint8_t>(type);
-        const auto flippedDirBit = static_cast<uint8_t>(FlipDir(direction));
+        const auto railBit = ToBitset(type);
+        const auto flippedDirBit = ToBitset(FlipDir(direction));
 
         // check if they overlap
         return railBit & flippedDirBit;
-    }
-
-    /**
-     * Check if a tile is curve.
-     */
-    static bool IsCurve(Type type)
-    {
-        switch (type)
-        {
-            case Type::NorthRight: return true;
-            case Type::NorthLeft:  return true;
-            case Type::SouthRight: return true;
-            case Type::SouthLeft:  return true;
-            default: return false;
-        }
     }
 
     /**
@@ -134,7 +119,7 @@ public:
     static Dir FlipDir(Dir dir)
     {
         constexpr uint8_t shift = 4;
-        const uint8_t dirByte = static_cast<uint8_t>(dir);
+        const auto dirByte = ToBitset(dir);
         const uint8_t result = dirByte << shift | dirByte >> shift;
 
         return static_cast<Dir>(result & 0xFF);
@@ -146,23 +131,23 @@ public:
     static Type FlipType(Type type)
     {
         constexpr uint8_t shift = 4;
-        const uint8_t dirByte = static_cast<uint8_t>(type);
+        const auto dirByte = ToBitset(type);
         const uint8_t result = dirByte << shift | dirByte >> shift;
 
         return static_cast<Type>(result & 0xFF);
     }
 
     /**
-     * Checks if current traveling direction can travel to a specific rail type.
+     * Get next travelling dir.
      */
     static Dir GetNextTravellingDir(Dir direction, Type railType)
     {
         // get the flipped direction byte and rail byte
-        const uint8_t dirByte = static_cast<uint8_t>(FlipDir(direction));
-        const uint8_t railByte = static_cast<uint8_t>(railType);
+        const auto dirByte = ToBitset(FlipDir(direction));
+        const auto railByte = ToBitset(railType);
 
         // remove the incoming direction to get the next gate
-        const uint8_t nextDirection = railByte - dirByte;
+        const auto nextDirection = railByte - dirByte;
 
         // check if the next direction is valid or not None
         if (IsValidDirection(nextDirection))

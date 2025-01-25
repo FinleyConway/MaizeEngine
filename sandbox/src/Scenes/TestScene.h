@@ -39,7 +39,7 @@ public:
         CreateEntity(
             Maize::Position(0, 0),
             Maize::SpriteRenderer(Maize::Sprite(m_Texture, {0, 0, 32, 32}, { 0, 32 })),
-            RailSelector(m_Texture, GetAutoTiles())
+            RailSelector(m_Texture, GetAutoTiles(), GetQuadrantShapes())
         );
 
         CreateEntity(
@@ -146,6 +146,44 @@ private:
         autoTiles.emplace(68, Maize::IntRect(128, 64, 32, 32));
 
         return autoTiles;
+    }
+
+    static std::vector<FuzzyShape> GetQuadrantShapes()
+    {
+        const std::vector shapes =
+        {
+            FuzzyShape(0b00000000, 0b11111111, std::array {
+                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
+                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
+                Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal
+            }), // default
+
+            FuzzyShape(0b11010111, 0b00010000, std::array {
+                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
+                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight,
+                Rail::Type::SouthLeft, Rail::Type::Vertical, Rail::Type::SouthRight
+            }), // north
+
+            FuzzyShape(0b01011111, 0b01000000, std::array {
+                Rail::Type::SouthLeft,  Rail::Type::SouthLeft,  Rail::Type::SouthLeft,
+                Rail::Type::Horizontal, Rail::Type::Horizontal, Rail::Type::Horizontal,
+                Rail::Type::NorthLeft,  Rail::Type::NorthLeft,  Rail::Type::NorthLeft
+            }), // east
+
+            FuzzyShape(0b01111101, 0b00000001, std::array {
+                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight,
+                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight,
+                Rail::Type::NorthLeft, Rail::Type::Vertical, Rail::Type::NorthRight
+            }), // south
+
+            FuzzyShape(0b11110101, 0b00000100, std::array {
+                Rail::Type::SouthRight,  Rail::Type::SouthRight, Rail::Type::SouthRight,
+                Rail::Type::Horizontal,  Rail::Type::Horizontal, Rail::Type::Horizontal,
+                Rail::Type::NorthRight,  Rail::Type::NorthRight, Rail::Type::NorthRight
+            }), // west
+        };
+
+        return shapes;
     }
 
 private:
