@@ -42,19 +42,22 @@ void MineCarMovement::HandleMovement(Maize::SystemState s, Maize::Position& posi
         HandleDirection(chunkManager, controller);
     }
 
-    // move the controller.
-    if (controller.nextRail != Rail::Type::None)
+    // move the controller if the next rail is possible.
+    if (Rail::CanDirToType(controller.travellingDirection, controller.nextRail))
     {
-        controller.isMoving = true;
-        controller.currentTime += controller.speed * s.DeltaTime();
-        controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
+        if (controller.nextRail != Rail::Type::None)
+        {
+            controller.isMoving = true;
+            controller.currentTime += controller.speed * s.DeltaTime();
+            controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
 
-        position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
-    }
-    // keep checking if there is a next rail when there is no rail ahead.
-    else
-    {
-        HandleDirection(chunkManager, controller);
+            position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
+        }
+        // keep checking if there is a next rail when there is no rail ahead.
+        else
+        {
+            HandleDirection(chunkManager, controller);
+        }
     }
 }
 

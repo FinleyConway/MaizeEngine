@@ -23,13 +23,20 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Position& posi
     {
         const uint8_t bitset = EvaluateSurroundingTiles(chunkManager, gridPosition);
 
-        const FuzzyShape* currentShape = &selector.quadrantShapes[1];
-        for (const auto shape : selector.quadrantShapes)
+        if (selector.quadrantShapes.empty()) return;
+
+        const FuzzyShape* currentShape = &selector.quadrantShapes[0];
+
+        // search unless the override button is pressed
+        if (!input->GetButtonHeld(Maize::KeyCode::LShift))
         {
-            if (shape.Match(bitset))
+            for (const auto shape : selector.quadrantShapes)
             {
-                currentShape = &shape;
-                break;
+                if (shape.Match(bitset))
+                {
+                    currentShape = &shape;
+                    break;
+                }
             }
         }
 
