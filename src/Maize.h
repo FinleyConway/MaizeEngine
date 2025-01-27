@@ -10,6 +10,7 @@
 #include "Maize/Math/Rect.h"
 
 #include "Maize/Rendering/Mesh.h"
+#include "Maize/Rendering/MeshGrid.h"
 #include "Maize/Rendering/Sprite.h"
 
 #include "Maize/Scene/Components/Active.h"
@@ -19,6 +20,7 @@
 #include "Maize/Scene/Components/Rendering/Camera.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
 #include "Maize/Scene/Components/Rendering/MeshRenderer.h"
+#include "Maize/Scene/Components/Rendering/GridRenderer.h"
 
 #include "Maize/Scene/Scene.h"
 #include "Maize/Scene/Entity.h"

@@ -4,6 +4,7 @@
 
 #include "Maize/Scene/Components/Position.h"
 #include "Maize/Scene/Components/Rendering/DeferredRenderable.h"
+#include "Maize/Scene/Components/Rendering/GridRenderer.h"
 #include "Maize/Scene/Components/Rendering/MeshRenderer.h"
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
@@ -36,9 +37,22 @@ namespace Maize::Internal
         /**
          * Adds the entity to the spatial index when the entity components were deferred.
          * @param entity The entity.
-         * @param meshRenderer The sprite renderer component,
+         * @param meshRenderer The mesh renderer component,
          */
         static void HandleMeshRendererDefer(flecs::entity entity, const MeshRenderer& meshRenderer);
+
+        /**
+         * Handles the removal of the grid renderer component, removing it from the spatial index.
+         * @param entity The entity.
+         */
+        static void OnGridRendererRemove(flecs::entity entity, const GridRenderer&);
+
+        /**
+         * Adds the entity to the spatial index when the entity components were deferred.
+         * @param entity The entity.
+         * @param gridRenderer The grid renderer component,
+         */
+        static void HandleGridRendererDefer(flecs::entity entity, const GridRenderer& gridRenderer);
 
     private:
         static const RenderingContext* GetRenderingContext(flecs::entity entity);

@@ -35,6 +35,20 @@ namespace Maize::Internal
         HandleRendererChange(entity, meshRenderer);
     }
 
+    void RenderComponentChange::OnGridRendererRemove(flecs::entity entity, const GridRenderer&)
+    {
+        PROFILE_FUNCTION();
+
+        const auto* ctx = GetRenderingContext(entity);
+
+        ctx->spatialIndex->Remove(entity);
+    }
+
+    void RenderComponentChange::HandleGridRendererDefer(flecs::entity entity, const GridRenderer& gridRenderer)
+    {
+        HandleRendererChange(entity, gridRenderer);
+    }
+
     const RenderingContext* RenderComponentChange::GetRenderingContext(flecs::entity entity)
     {
         const auto* ctx = entity.world().get<RenderingContext>();

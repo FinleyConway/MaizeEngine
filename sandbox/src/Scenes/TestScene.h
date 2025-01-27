@@ -24,7 +24,7 @@ public:
     virtual void OnStart() override
     {
         m_Texture = std::make_shared<sf::Texture>();
-        bool created = m_Texture->loadFromFile("/home/finley/CppProjects/MaizeEngine/sandbox/assets/TestRailAutoTile.png");
+        bool created = m_Texture->loadFromFile("TestRailAutoTile.png");
 
         CreateSingleton<ChunkManager>(
             Maize::Vec2i(32, 32),
@@ -57,7 +57,7 @@ public:
             "Rail Select Tile", flecs::OnUpdate, MineRailPlacement::SelectTile
         );
 
-        AddSystem<Maize::MeshRenderer, Grid<RailTile>, const PlaceChunkTile<PlaceRailData>>(
+        AddSystem<Maize::GridRenderer, Grid<RailTile>, const PlaceChunkTile<PlaceRailData>>(
             "Rail Place Tile", flecs::OnUpdate, MineRailPlacement::PlaceTile
         );
 

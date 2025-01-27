@@ -2,7 +2,7 @@
 
 #include "Utils/Rail.h"
 
-struct FuzzyShape
+class FuzzyShape
 {
 public:
     FuzzyShape(uint8_t shape, uint8_t mask, std::array<Rail::Type, 9>&& quadrants)

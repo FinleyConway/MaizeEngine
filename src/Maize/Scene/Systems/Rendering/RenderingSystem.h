@@ -8,6 +8,7 @@
 #include "Maize/Scene/Components/Rendering/RenderingContext.h"
 #include "Maize/Scene/Components/Rendering/SpriteRenderer.h"
 #include "Maize/Scene/Components/Rendering/MeshRenderer.h"
+#include "Maize/Scene/Components/Rendering/GridRenderer.h"
 #include "Maize/Rendering/Renderer.h"
 
 namespace Maize::Internal
@@ -29,6 +30,8 @@ namespace Maize::Internal
         static void RenderSprite(Renderer* renderer, const SpriteRenderer& spriteRenderer, const Position& position);
 
         static void RenderMesh(Renderer* renderer, const MeshRenderer& meshRenderer, const Position& position);
+
+        static void RenderGrid(Renderer* renderer, const GridRenderer& gridRenderer, const Position& position);
     };
 } // Maize::Internal
 

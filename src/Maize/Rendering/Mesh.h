@@ -47,6 +47,8 @@ namespace Maize
         void Clear();
 
     protected:
+        explicit Mesh(size_t size, const FloatRect& bounds);
+
         FloatRect GetMeshBounds();
 
     protected:

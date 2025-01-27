@@ -36,8 +36,15 @@ namespace Maize
         m_Bounds = FloatRect();
     }
 
+    Mesh::Mesh(size_t size, const FloatRect& bounds) :
+        m_Mesh(size), m_Bounds(bounds)
+    {
+    }
+
     FloatRect Mesh::GetMeshBounds()
     {
+        PROFILE_FUNCTION();
+
         auto minX = std::numeric_limits<float>::max();
         auto minY = std::numeric_limits<float>::max();
         auto maxX = std::numeric_limits<float>::min();

@@ -45,6 +45,9 @@ namespace Maize::Internal
 
             if (const auto* mesh = e.get<MeshRenderer>())
                 RenderMesh(renderer, *mesh, p);
+
+            if (const auto* grid = e.get<GridRenderer>())
+                RenderGrid(renderer, *grid, p);
         }
     }
 
@@ -76,6 +79,8 @@ namespace Maize::Internal
 
     sf::Transform RenderingSystem::CreateTransform(const Position& position, Vec2f pivot)
     {
+        PROFILE_FUNCTION();
+
         sf::Transform transform = sf::Transform::Identity;
 
         transform.translate({ position.x - pivot.x, -(position.y + pivot.y) });
@@ -85,6 +90,8 @@ namespace Maize::Internal
 
     sf::RenderStates RenderingSystem::CreateRenderState(const sf::Transform& transform, const std::shared_ptr<sf::Texture>& texture)
     {
+        PROFILE_FUNCTION();
+
         sf::RenderStates state;
 
         state.transform *= transform;
@@ -114,6 +121,19 @@ namespace Maize::Internal
 
         const auto& vertices = meshRenderer.mesh.GetVertices();
         const auto& texture = meshRenderer.texture.lock();
+
+        const sf::Transform transform = CreateTransform(position);
+        const sf::RenderStates state = CreateRenderState(transform, texture);
+
+        renderer->Draw(vertices, state);
+    }
+
+    void RenderingSystem::RenderGrid(Renderer* renderer, const GridRenderer& gridRenderer, const Position& position)
+    {
+        PROFILE_FUNCTION();
+
+        const auto& vertices = gridRenderer.mesh.GetVertices();
+        const auto& texture = gridRenderer.texture.lock();
 
         const sf::Transform transform = CreateTransform(position);
         const sf::RenderStates state = CreateRenderState(transform, texture);

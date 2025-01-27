@@ -81,6 +81,9 @@ add_library(MaizeEngine
         src/Maize/Scene/Components/Rendering/MeshRenderer.h
         src/Maize/Scene/Components/Active.h
         src/Maize/Scene/Components/ChangeScene.h
+        src/Maize/Rendering/MeshGrid.cpp
+        src/Maize/Rendering/MeshGrid.h
+        src/Maize/Scene/Components/Rendering/GridRenderer.h
 )
 
 target_include_directories(MaizeEngine PRIVATE src)
