@@ -6,6 +6,7 @@
 #include "Components/PlaceChunkTile.h"
 #include "Utils/RailTile.h"
 
+struct ChunkManager;
 struct PlaceRailData;
 struct RailSelector;
 struct RailTile;
@@ -19,4 +20,6 @@ public:
                           Grid<RailTile>& grid, const PlaceChunkTile<PlaceRailData>& placeTile);
 
 private:
+    static void CreateChunk(Maize::SystemState s, Maize::Entity entity, ChunkManager* chunkManager,
+        const RailSelector& selector, Maize::Vec2i chunkPosition, Maize::Vec2i chunkSize, Maize::Vec2i cellSize);
 };

@@ -13,27 +13,22 @@ void MineRailPlacement::SelectTile(Maize::SystemState s, const Maize::Position& 
 
     GAME_ASSERT(chunkManager != nullptr, "ChunkManager is nullptr");
 
-    const auto gridPosition = GridConversion::PixelToGrid(p, chunkManager->cellSize);
-    const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkManager->chunkSize);
-    const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
+    const auto chunkSize = chunkManager->chunkSize;
+    const auto cellSize = chunkManager->cellSize;
+    const auto gridPosition = GridConversion::PixelToGrid(p, cellSize);
+    const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkSize);
+    const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkSize);
     auto entity = chunkManager->TryGetChunk(chunkPosition);
 
     if (input->GetMouseButtonHeld(Maize::MouseCode::Left))
     {
-        if (entity.IsNull())
-        {
-            const auto chunkGridPosition = GridConversion::ChunkToGrid(chunkPosition, chunkManager->chunkSize);
-            const auto pixelPosition = GridConversion::GridToPixel(chunkGridPosition, chunkManager->cellSize);
+        CreateChunk(s, entity, chunkManager, selector, chunkPosition, chunkSize, cellSize);
 
-            entity = s.CreateEntity(pixelPosition,
-                Maize::GridRenderer(Maize::MeshGrid(chunkManager->chunkSize, chunkManager->cellSize), selector.texture),
-                Grid<RailTile>(chunkManager->chunkSize)
-            );
-
-            chunkManager->chunks.emplace(chunkPosition, entity);
-        }
-
-        const auto data = PlaceRailData(selector.GetBitRail(Rail::ToBitset(selector.currentType)), selector.gridOffset, selector.currentType);
+        const auto data = PlaceRailData(
+            selector.GetBitRail(Rail::ToBitset(selector.currentType)),
+            selector.gridOffset,
+            selector.currentType
+        );
 
         entity.AddComponent(PlaceChunkTile(chunkPosition, localPosition, data));
     }
@@ -41,7 +36,11 @@ void MineRailPlacement::SelectTile(Maize::SystemState s, const Maize::Position& 
     {
         if (!entity.IsNull())
         {
-            const auto data = PlaceRailData(selector.GetBitRail(Rail::ToBitset(Rail::Type::None)), selector.gridOffset, Rail::Type::None);
+            const auto data = PlaceRailData(
+                selector.GetBitRail(Rail::ToBitset(Rail::Type::None)),
+                selector.gridOffset,
+                Rail::Type::None
+            );
 
             entity.AddComponent(PlaceChunkTile(chunkPosition, localPosition, data));
         }
@@ -63,4 +62,21 @@ void MineRailPlacement::PlaceTile(Maize::SystemState s, Maize::Entity e, Maize::
     gridRenderer.mesh.Set(placeTile.local, cellSize, chunkSize, data.atlas, data.gridOffset);
 
     e.RemoveComponent<PlaceChunkTile<PlaceRailData>>();
+}
+
+void MineRailPlacement::CreateChunk(Maize::SystemState s, Maize::Entity entity, ChunkManager* chunkManager,
+    const RailSelector& selector, Maize::Vec2i chunkPosition, Maize::Vec2i chunkSize, Maize::Vec2i cellSize)
+{
+    if (entity.IsNull())
+    {
+        const auto chunkGridPosition = GridConversion::ChunkToGrid(chunkPosition, chunkSize);
+        const auto pixelPosition = GridConversion::GridToPixel(chunkGridPosition, cellSize);
+
+        entity = s.CreateEntity(pixelPosition,
+            Maize::GridRenderer(Maize::MeshGrid(chunkSize, cellSize), selector.texture),
+            Grid<RailTile>(chunkSize)
+        );
+
+        chunkManager->chunks.emplace(chunkPosition, entity);
+    }
 }
