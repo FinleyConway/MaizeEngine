@@ -23,7 +23,11 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Position& posi
     {
         const uint8_t bitset = EvaluateSurroundingTiles(chunkManager, gridPosition);
 
-        if (selector.quadrantShapes.empty()) return;
+        if (selector.quadrantShapes.empty())
+        {
+            GAME_LOG_WARN("No quadrant shapes found");
+            return;
+        }
 
         const FuzzyShape* currentShape = &selector.quadrantShapes[0];
 
