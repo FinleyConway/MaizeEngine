@@ -150,8 +150,24 @@ private:
 
     static std::vector<FuzzyShape> GetQuadrantShapes()
     {
+        // order matters, lower the index, higher the priority.
         const std::vector shapes =
         {
+            // junctions
+            FuzzyShape(0b01000100, 0b01000100, std::array {
+                Rail::Type::Horizontal,  Rail::Type::TJunctionDown, Rail::Type::Horizontal,
+                Rail::Type::Horizontal,  Rail::Type::CrossJunction, Rail::Type::Horizontal,
+                Rail::Type::Horizontal,  Rail::Type::TJunctionUp,   Rail::Type::Horizontal
+            }), // horizontal down/up/both
+
+            FuzzyShape(0b00010001, 0b00010001, std::array {
+                Rail::Type::Vertical,       Rail::Type::Vertical,       Rail::Type::Vertical,
+                Rail::Type::TJunctionLeft,  Rail::Type::CrossJunction,  Rail::Type::TJunctionRight,
+                Rail::Type::Vertical,       Rail::Type::Vertical,       Rail::Type::Vertical
+            }), // vertical left/right/both
+
+
+            // normal rails
             FuzzyShape(0b00000000, 0b11111111, std::array {
                 Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,
                 Rail::Type::Horizontal, Rail::Type::Vertical, Rail::Type::Horizontal,

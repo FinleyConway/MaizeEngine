@@ -21,8 +21,6 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Position& posi
 
     if (!input->GetMouseButtonHeld(Maize::MouseCode::Left))
     {
-        const uint8_t bitset = EvaluateSurroundingTiles(chunkManager, gridPosition);
-
         if (selector.quadrantShapes.empty())
         {
             GAME_LOG_WARN("No quadrant shapes found");
@@ -31,16 +29,23 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Position& posi
 
         const FuzzyShape* currentShape = &selector.quadrantShapes[0];
 
-        // search unless the override button is pressed
-        if (!input->GetButtonHeld(Maize::KeyCode::LShift))
+        if (input->GetButtonHeld(Maize::KeyCode::LShift))
         {
-            for (const auto shape : selector.quadrantShapes)
+            const auto tileType = GetTileType(chunkManager, gridPosition);
+            const Rail::TypeBits tileBits = Rail::ToBitset(tileType);
+
+            if (const auto* bestMatch = GetBestMatchedShape(tileBits, selector))
             {
-                if (shape.Match(bitset))
-                {
-                    currentShape = &shape;
-                    break;
-                }
+                currentShape = bestMatch;
+            }
+        }
+        else
+        {
+            const uint8_t bitset = EvaluateSurroundingTiles(chunkManager, gridPosition);
+
+            if (const auto* bestMatch = GetBestMatchedShape(bitset, selector))
+            {
+                currentShape = bestMatch;
             }
         }
 
@@ -60,6 +65,21 @@ void RailTileChooser::ChooseRailType(Maize::SystemState s, Maize::Position& posi
     {
         LockPositionAxis(position, selector, tilePosition);
     }
+}
+
+Rail::Type RailTileChooser::GetTileType(const ChunkManager* chunkManager, Maize::Vec2i gridPosition)
+{
+    const auto chunkPosition = GridConversion::GridToChunk(gridPosition, chunkManager->chunkSize);
+    auto entity = chunkManager->TryGetChunk(chunkPosition);
+
+    if (auto* grid = entity.TryGetMutComponent<Grid<RailTile>>())
+    {
+        const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
+
+        return grid->Get(localPosition, chunkManager->chunkSize).railType;
+    }
+
+    return Rail::Type::None;
 }
 
 uint8_t RailTileChooser::EvaluateSurroundingTiles(const ChunkManager* chunkManager, Maize::Vec2i gridPosition)
@@ -88,8 +108,6 @@ uint8_t RailTileChooser::EvaluateSurroundingTiles(const ChunkManager* chunkManag
         const auto localPosition = GridConversion::GridToChunkLocal(tilePosition, chunkManager->chunkSize);
         const auto entity = chunkManager->TryGetChunk(chunkPosition);
 
-        if (entity.IsNull()) continue;
-
         if (const auto* grid = entity.TryGetComponent<Grid<RailTile>>())
         {
             // get the current direction and nearby tile type
@@ -104,8 +122,22 @@ uint8_t RailTileChooser::EvaluateSurroundingTiles(const ChunkManager* chunkManag
     return bitset;
 }
 
+const FuzzyShape* RailTileChooser::GetBestMatchedShape(uint8_t bitset, const RailSelector& selector)
+{
+    // search unless the override button is pressed
+    for (const auto& shape : selector.quadrantShapes)
+    {
+        if (shape.Match(bitset))
+        {
+            return &shape; // this *should* be safe
+        }
+    }
+
+    return nullptr;
+}
+
 Rail::Type RailTileChooser::GetTypeFromPointInSquare(const FuzzyShape& shape, Maize::Vec2f mousePosition,
-    Maize::Vec2f tilePosition, Maize::Vec2i squareSize)
+                                                     Maize::Vec2f tilePosition, Maize::Vec2i squareSize)
 {
     constexpr uint8_t quadrants = 3;  // number of sections per axis (for a 3x3 grid)
     const auto quadrantSize = Maize::Vec2f(squareSize / quadrants);
