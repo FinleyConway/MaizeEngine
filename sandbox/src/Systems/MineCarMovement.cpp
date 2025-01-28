@@ -36,28 +36,30 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Position& position, Rail
 
 void MineCarMovement::HandleMovement(Maize::SystemState s, Maize::Position& position, RailController& controller, const ChunkManager* chunkManager)
 {
+    const bool canTravelTo = Rail::CanDirToType(controller.travellingDirection, controller.nextRail);
+    const bool atDestination = position.ApproxOf(controller.nextPos);
+
     // try to move to the next rail when travelled to the next position.
-    if (position.ApproxOf(controller.nextPos))
+    if (atDestination)
     {
+        controller.isMoving = false;
         HandleDirection(chunkManager, controller);
     }
-
-    // move the controller if the next rail is possible.
-    if (Rail::CanDirToType(controller.travellingDirection, controller.nextRail))
+    // move controller
+    else if (canTravelTo)
     {
-        if (controller.nextRail != Rail::Type::None)
-        {
-            controller.isMoving = true;
-            controller.currentTime += controller.speed * s.DeltaTime();
-            controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
+        controller.isMoving = true;
+        controller.currentTime += controller.speed * s.DeltaTime();
+        controller.currentTime = std::clamp(controller.currentTime, 0.0f, 1.0f);
 
-            position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
-        }
-        // keep checking if there is a next rail when there is no rail ahead.
-        else
-        {
-            HandleDirection(chunkManager, controller);
-        }
+        position = controller.lastPos.LerpTo(controller.nextPos, controller.currentTime);
+
+    }
+    // keep checking if there is a next rail when there is no rail ahead.
+    else
+    {
+        controller.isMoving = false;
+        HandleDirection(chunkManager, controller);
     }
 }
 
@@ -105,10 +107,13 @@ void MineCarMovement::UpdateRailPosition(Maize::Vec2i gridPosition, Rail::Dir ne
         const auto nextLocalPosition = GridConversion::GridToChunkLocal(offset, chunkManager->chunkSize);
         const auto& nextTile = offsetGrid->Get(nextLocalPosition, chunkManager->chunkSize);
 
-        controller.lastPos = controller.nextPos;
-        controller.currentTime = 0.0f;
-        controller.travellingDirection = nextDirection;
-        controller.nextPos = nextPosition;
-        controller.nextRail = nextTile.railType;
+        if (Rail::CanDirToType(nextDirection, nextTile.railType))
+        {
+            controller.lastPos = controller.nextPos;
+            controller.currentTime = 0.0f;
+            controller.travellingDirection = nextDirection;
+            controller.nextRail = nextTile.railType;
+            controller.nextPos = nextPosition;
+        }
     }
 }
