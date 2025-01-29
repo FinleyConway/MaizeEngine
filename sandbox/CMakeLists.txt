@@ -27,6 +27,10 @@ add_executable(sandbox
         src/Utils/RailTurnDirection.h
         src/Systems/MineCarRotate.cpp
         src/Systems/MineCarRotate.h
+        src/Components/RailPathRequest.h
+        src/Components/RailPath.h
+        src/Systems/RailPathfinding.cpp
+        src/Systems/RailPathfinding.h
 )
 
 target_include_directories(sandbox PRIVATE src ${CMAKE_SOURCE_DIR}/src)

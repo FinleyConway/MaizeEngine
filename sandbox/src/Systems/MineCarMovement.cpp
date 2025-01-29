@@ -56,7 +56,6 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Position& position, Rail
 
 void MineCarMovement::HandleMovement(Maize::SystemState s, Maize::Position& position, RailController& controller, const ChunkManager* chunkManager)
 {
-    auto* input = s.GetSingleton<Maize::Input>();
     const bool canTravelTo = Rail::CanDirToType(controller.travellingDirection, controller.nextRail);
     const bool atDestination = position.ApproxOf(controller.nextPos);
 
