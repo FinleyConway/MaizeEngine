@@ -81,14 +81,19 @@ public:
     {
         switch (type)
         {
-            case Type::None:       return "None";
-            case Type::Vertical:   return "Vertical";
-            case Type::Horizontal: return "Horizontal";
-            case Type::NorthRight: return "North Right";
-            case Type::NorthLeft:  return "North Left";
-            case Type::SouthRight: return "South Right";
-            case Type::SouthLeft:  return "South Left";
-            default:               return "Unknown";
+            case Type::None:            return "None";
+            case Type::Vertical:        return "Vertical";
+            case Type::Horizontal:      return "Horizontal";
+            case Type::NorthRight:      return "North Right";
+            case Type::NorthLeft:       return "North Left";
+            case Type::SouthRight:      return "South Right";
+            case Type::SouthLeft:       return "South Left";
+            case Type::TJunctionDown:   return "T-Junction Down";
+            case Type::TJunctionUp:     return "T-Junction Up";
+            case Type::TJunctionLeft:   return "T-Junction Left";
+            case Type::TJunctionRight:  return "T-Junction Right";
+            case Type::CrossJunction:   return "CrossJunction";
+            default:                    return "Unknown";
         }
     }
 
@@ -106,6 +111,8 @@ public:
      */
     static bool CanDirToType(Dir direction, Type type)
     {
+        if (direction == Dir::None || type == Type::None) return false;
+
         const auto railBit = ToBitset(type);
         const auto flippedDirBit = ToBitset(FlipDir(direction));
 
@@ -118,6 +125,8 @@ public:
      */
     static Dir FlipDir(Dir dir)
     {
+        if (dir == Dir::None) return Dir::None;
+
         constexpr uint8_t shift = 4;
         const auto dirByte = ToBitset(dir);
         const uint8_t result = dirByte << shift | dirByte >> shift;
@@ -130,6 +139,8 @@ public:
      */
     static Type FlipType(Type type)
     {
+        if (type == Type::None) return Type::None;
+
         constexpr uint8_t shift = 4;
         const auto dirByte = ToBitset(type);
         const uint8_t result = dirByte << shift | dirByte >> shift;
@@ -137,22 +148,48 @@ public:
         return static_cast<Type>(result & 0xFF);
     }
 
+    static bool IsJunctionType(Type type)
+    {
+        switch (type)
+        {
+            case Type::TJunctionDown:   return true;
+            case Type::TJunctionUp:     return true;
+            case Type::TJunctionLeft:   return true;
+            case Type::TJunctionRight:  return true;
+            case Type::CrossJunction:   return true;
+            default:                    return false;
+        }
+    }
+
     /**
      * Get next travelling dir.
      */
-    static Dir GetNextTravellingDir(Dir direction, Type railType)
+    static Dir GetNextTravellingDir(Dir direction, Dir nextDirection, Type railType)
     {
+        if (direction == Dir::None || nextDirection == Dir::None || railType == Type::None) return Dir::None;
+
         // get the flipped direction byte and rail byte
         const auto dirByte = ToBitset(FlipDir(direction));
         const auto railByte = ToBitset(railType);
 
-        // remove the incoming direction to get the next gate
-        const auto nextDirection = railByte - dirByte;
-
-        // check if the next direction is valid or not None
-        if (IsValidDirection(nextDirection))
+        if (IsJunctionType(railType))
         {
-            return static_cast<Dir>(nextDirection);
+            const auto nextDirBits = ToBitset(nextDirection);
+
+            // if the rail has the direction
+            if (nextDirBits & railByte) return nextDirection;
+
+            // TODO: need to find the extra junction bits if i want to ignore an invalid turn...
+            GAME_LOG_WARN("Cant travel that way!");
+        }
+        else
+        {
+            // remove the incoming direction to get the next gate
+            const uint8_t nextDir = railByte - dirByte;
+
+            GAME_ASSERT(IsValidDirection(nextDir), "Invalid direction")
+
+            return static_cast<Dir>(nextDir);
         }
 
         return Dir::None;
@@ -177,6 +214,7 @@ public:
         }
     }
 
+private:
     static bool IsValidDirection(uint8_t value)
     {
         switch (static_cast<Dir>(value))

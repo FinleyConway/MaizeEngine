@@ -15,7 +15,8 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Position& position, Rail
     ImGui::Begin("Mine Car Stats");
     ImGui::Text("Speed: %f", controller.speed);
     ImGui::Text("Current Dir: %s", Rail::DirToStr(controller.travellingDirection).data());
-    ImGui::Text("Current Dir: %s", controller.isTurning ? "Turning" : "Not Turning");
+    ImGui::Text("Next Dir: %s", Rail::DirToStr(controller.nextDirection).data());
+    ImGui::Text("Is Turning: %s", controller.isTurning ? "Turning" : "Not Turning");
     ImGui::Text("Current Time To Next: %f", controller.currentTime);
     ImGui::Text("Current Position: %s", position.ToString().data());
     ImGui::Text("Last Position: %s", controller.lastPos.ToString().data());
@@ -26,6 +27,25 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Position& position, Rail
 
     if (input->GetButtonHeld(Maize::KeyCode::W))
     {
+        if (controller.travellingDirection == Rail::Dir::N || controller.travellingDirection == Rail::Dir::S)
+        {
+            if (input->GetButtonHeld(Maize::KeyCode::A)) controller.nextDirection = Rail::Dir::W;
+            else if (input->GetButtonHeld(Maize::KeyCode::D)) controller.nextDirection = Rail::Dir::E;
+            else controller.nextDirection = controller.travellingDirection;
+        }
+        else if (controller.travellingDirection == Rail::Dir::W)
+        {
+            if (input->GetButtonHeld(Maize::KeyCode::A)) controller.nextDirection = Rail::Dir::S;
+            else if (input->GetButtonHeld(Maize::KeyCode::D)) controller.nextDirection = Rail::Dir::N;
+            else controller.nextDirection = controller.travellingDirection;
+        }
+        else
+        {
+            if (input->GetButtonHeld(Maize::KeyCode::A)) controller.nextDirection = Rail::Dir::N;
+            else if (input->GetButtonHeld(Maize::KeyCode::D)) controller.nextDirection = Rail::Dir::S;
+            else controller.nextDirection = controller.travellingDirection;
+        }
+
         HandleMovement(s, position, controller, chunkManager);
     }
     else
@@ -36,6 +56,7 @@ void MineCarMovement::Move(Maize::SystemState s, Maize::Position& position, Rail
 
 void MineCarMovement::HandleMovement(Maize::SystemState s, Maize::Position& position, RailController& controller, const ChunkManager* chunkManager)
 {
+    auto* input = s.GetSingleton<Maize::Input>();
     const bool canTravelTo = Rail::CanDirToType(controller.travellingDirection, controller.nextRail);
     const bool atDestination = position.ApproxOf(controller.nextPos);
 
@@ -46,7 +67,7 @@ void MineCarMovement::HandleMovement(Maize::SystemState s, Maize::Position& posi
         HandleDirection(chunkManager, controller);
     }
     // move controller
-    else if (canTravelTo)
+    else if (canTravelTo && Rail::GetNextTravellingDir(controller.travellingDirection, controller.nextDirection, controller.nextRail) != Rail::Dir::None)
     {
         controller.isMoving = true;
         controller.currentTime += controller.speed * s.DeltaTime();
@@ -80,7 +101,7 @@ void MineCarMovement::HandleNextRail(const Grid<RailTile>* grid, Maize::Vec2i gr
 {
     const auto localPosition = GridConversion::GridToChunkLocal(gridPosition, chunkManager->chunkSize);
     const auto& tile = grid->Get(localPosition, chunkManager->chunkSize);
-    const auto nextDirection = Rail::GetNextTravellingDir(controller.travellingDirection, tile.railType);
+    const auto nextDirection = Rail::GetNextTravellingDir(controller.travellingDirection, controller.nextDirection, tile.railType);
 
     // assign a next rail if there is no rail ahead assigned.
     if (controller.nextRail == Rail::Type::None)
@@ -88,7 +109,7 @@ void MineCarMovement::HandleNextRail(const Grid<RailTile>* grid, Maize::Vec2i gr
         controller.nextRail = tile.railType;
     }
     // update controller next positions
-    else if (nextDirection != Rail::Dir::None)
+    else
     {
         UpdateRailPosition(gridPosition, nextDirection, chunkManager, controller);
     }

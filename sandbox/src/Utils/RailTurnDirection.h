@@ -12,14 +12,14 @@ public:
     {
     }
 
-    bool DoesMatchDirection(Rail::Dir currentDirection, Rail::Type nextRail) const
+    bool DoesMatchDirection(Rail::Dir currentDirection, Rail::Dir nextDirection, Rail::Type nextRail) const
     {
         const auto currentDirectionBits = Rail::ToBitset(currentDirection);
 
         // check if current direction matches any valid direction or reverse direction
         if (currentDirectionBits & (m_Directions | m_ReverseDirections))
         {
-            const Rail::DirBits railBits = Rail::ToBitset(Rail::GetNextTravellingDir(currentDirection, nextRail));
+            const Rail::DirBits railBits = Rail::ToBitset(Rail::GetNextTravellingDir(currentDirection, nextDirection, nextRail));
 
             // check if the next rail will lead to these rotations.
             return (m_Directions & railBits) || (m_ReverseDirections & railBits);

@@ -20,7 +20,7 @@ void MineCarRotate::OnTurnStart(RailController& controller, const RailRotations&
 {
     constexpr float turningPoint = 0.5f;
     const bool isTurningPoint = controller.currentTime >= turningPoint;
-    const auto nextDir = Rail::GetNextTravellingDir(controller.travellingDirection, controller.nextRail);
+    const auto nextDir = Rail::GetNextTravellingDir(controller.travellingDirection, controller.nextDirection, controller.nextRail);
     const bool isTurn = nextDir != controller.travellingDirection;
 
     // if the controller is about to turn
@@ -67,7 +67,7 @@ const RailTurnDirection* MineCarRotate::GetTurnDirection(const RailController& c
 {
     for (const auto& rotation : rotations.rotations)
     {
-        if (rotation.DoesMatchDirection(controller.travellingDirection, controller.nextRail))
+        if (rotation.DoesMatchDirection(controller.travellingDirection, controller.nextDirection, controller.nextRail))
         {
             return &rotation; // this should be safe as im not expecting to resize the vector during runtime.
         }
